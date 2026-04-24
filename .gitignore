@@ -1,0 +1,15 @@
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# Environment
+.env
+
+# Mac / Windows
+.DS_Store
