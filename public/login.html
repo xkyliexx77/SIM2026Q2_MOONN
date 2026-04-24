@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>Login</h2>
+      <p id="flashMessage" class="flash"></p>
+
+      <form id="loginForm">
+        <label>Email:</label>
+        <input type="email" id="email" required>
+
+        <label>Password:</label>
+        <input type="password" id="password" required>
+
+        <button type="submit" class="btn-primary">Login</button>
+      </form>
+
+      <br>
+      <a href="/register.html">Create an account</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+
+    function showMessage(text, type = 'success') {
+      const msg = document.getElementById('flashMessage');
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 3000);
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const loginData = {
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      };
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(loginData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showMessage('Login successful.', 'success');
+
+          setTimeout(() => {
+            window.location.href = '/dashboard.html';
+          }, 800);
+        } else {
+          showMessage(data.error || 'Login failed.', 'error');
+        }
+      } catch (error) {
+        showMessage('Something went wrong.', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

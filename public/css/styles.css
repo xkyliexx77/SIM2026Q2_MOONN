@@ -1,0 +1,219 @@
+/* =========================
+   RESET
+========================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================
+   BODY
+========================= */
+body {
+  font-family: Arial, sans-serif;
+  background: #eef2f7;   /* soft grey background */
+  color: #2f3640;
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================
+   CONTAINER (CENTERED BOX)
+========================= */
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 10px;
+}
+
+/* =========================
+   HEADER (OPTIONAL NAVBAR)
+========================= */
+.header {
+  background: #2f3640;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.header a {
+  color: #dcdde1;
+  margin-right: 15px;
+  text-decoration: none;
+}
+
+.header a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   CARD (MAIN BOX)
+========================= */
+.card {
+  background: #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================
+   TEXT
+========================= */
+h1, h2, h3 {
+  margin-bottom: 12px;
+}
+
+p {
+  margin-bottom: 8px;
+}
+
+.small-text {
+  font-size: 14px;
+  color: #636e72;
+}
+
+/* =========================
+   LINKS
+========================= */
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   FORM ELEMENTS
+========================= */
+label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 6px;
+  margin-top: 5px;
+}
+
+.btn-primary {
+  background: #3498db;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2980b9;
+}
+
+.btn-success {
+  background: #2ecc71;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #27ae60;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+.btn-secondary {
+  background: #7f8c8d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #636e72;
+}
+
+/* =========================
+   FLASH MESSAGES
+========================= */
+.flash {
+  display: none;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+.flash.success {
+  display: block;
+  background: #d4edda;
+  color: #155724;
+}
+
+.flash.error {
+  display: block;
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* =========================
+   FILTER GRID
+========================= */
+.inline-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 700px) {
+  .inline-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   ACTION BUTTON AREA
+========================= */
+.list-actions {
+  margin-top: 10px;
+}
+
+/* =========================
+   DIVIDER
+========================= */
+hr {
+  margin: 15px 0;
+  border: none;
+  border-top: 1px solid #eee;
+}

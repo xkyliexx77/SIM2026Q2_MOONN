@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manager Reports</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>Manager Report Dashboard</h2>
+    </div>
+
+    <div class="card">
+      <h3>Overall Summary</h3>
+      <div id="summaryBox"></div>
+    </div>
+
+    <div class="card">
+      <h3>Daily Report</h3>
+      <div id="dailyBox"></div>
+    </div>
+
+    <div class="card">
+      <h3>Weekly Report</h3>
+      <div id="weeklyBox"></div>
+    </div>
+
+    <div class="card">
+      <h3>Monthly Report</h3>
+      <div id="monthlyBox"></div>
+    </div>
+
+    <div class="card">
+      <h3>Donation Amount Comparison</h3>
+      <canvas id="reportChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    async function fetchReport(url) {
+      const token = localStorage.getItem('token');
+
+      const res = await fetch(url, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      return await res.json();
+    }
+
+    async function loadReports() {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      const summary = await fetchReport('/api/reports/summary');
+      const daily = await fetchReport('/api/reports/daily');
+      const weekly = await fetchReport('/api/reports/weekly');
+      const monthly = await fetchReport('/api/reports/monthly');
+
+      document.getElementById('summaryBox').innerHTML = `
+        <p><strong>Total Users:</strong> ${summary.total_users}</p>
+        <p><strong>Total Categories:</strong> ${summary.total_categories}</p>
+        <p><strong>Total Fundraisers:</strong> ${summary.total_fundraisers}</p>
+        <p><strong>Total Favourites:</strong> ${summary.total_favourites}</p>
+        <p><strong>Total Donations:</strong> ${summary.total_donations}</p>
+        <p><strong>Total Donation Amount:</strong> $${summary.total_donation_amount}</p>
+      `;
+
+      document.getElementById('dailyBox').innerHTML = `
+        <p><strong>Donation Count Today:</strong> ${daily.donation_count}</p>
+        <p><strong>Donation Amount Today:</strong> $${daily.donation_amount}</p>
+      `;
+
+      document.getElementById('weeklyBox').innerHTML = `
+        <p><strong>Donation Count This Week:</strong> ${weekly.donation_count}</p>
+        <p><strong>Donation Amount This Week:</strong> $${weekly.donation_amount}</p>
+      `;
+
+      document.getElementById('monthlyBox').innerHTML = `
+        <p><strong>Donation Count This Month:</strong> ${monthly.donation_count}</p>
+        <p><strong>Donation Amount This Month:</strong> $${monthly.donation_amount}</p>
+      `;
+
+      const ctx = document.getElementById('reportChart');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Daily', 'Weekly', 'Monthly'],
+          datasets: [{
+            label: 'Donation Amount',
+            data: [
+              Number(daily.donation_amount || 0),
+              Number(weekly.donation_amount || 0),
+              Number(monthly.donation_amount || 0)
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true
+            }
+          }
+        }
+      });
+    }
+
+    loadReports();
+  </script>
+</body>
+</html>

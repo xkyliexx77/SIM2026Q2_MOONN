@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Fundraiser</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>Edit Fundraiser</h2>
+      <p id="flashMessage" class="flash"></p>
+
+      <form id="editForm">
+        <label>Title:</label>
+        <input type="text" id="title" required>
+
+        <label>Description:</label>
+        <textarea id="description" required></textarea>
+
+        <label>Target Amount:</label>
+        <input type="number" id="target_amount" required>
+
+        <label>Category:</label>
+        <select id="category_id" required></select>
+
+        <button type="submit" class="btn-primary">Update Fundraiser</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const fundraiserId = params.get('id');
+
+    const form = document.getElementById('editForm');
+    const categorySelect = document.getElementById('category_id');
+
+    function showMessage(text, type = 'success') {
+      const msg = document.getElementById('flashMessage');
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 3000);
+    }
+
+    async function loadCategories() {
+      const res = await fetch('/api/categories');
+      const categories = await res.json();
+
+      categorySelect.innerHTML = '<option value="">Select Category</option>';
+
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    async function loadFundraiserDetails() {
+      const token = localStorage.getItem('token');
+
+      const res = await fetch('/api/fundraisers/mine/list', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+      const fundraiser = data.find(item => item.id == fundraiserId);
+
+      if (!fundraiser) {
+        showMessage('Fundraiser not found.', 'error');
+        return;
+      }
+
+      document.getElementById('title').value = fundraiser.title;
+      document.getElementById('description').value = fundraiser.description;
+      document.getElementById('target_amount').value = fundraiser.target_amount;
+      document.getElementById('category_id').value = fundraiser.category_id;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const token = localStorage.getItem('token');
+
+      const body = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        target_amount: document.getElementById('target_amount').value,
+        category_id: document.getElementById('category_id').value
+      };
+
+      const res = await fetch(`/api/fundraisers/${fundraiserId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showMessage('Fundraiser updated successfully.', 'success');
+        setTimeout(() => {
+          window.location.href = '/my-fundraisers.html';
+        }, 1000);
+      } else {
+        showMessage(data.error || 'Failed to update fundraiser.', 'error');
+      }
+    });
+
+    async function init() {
+      await loadCategories();
+      await loadFundraiserDetails();
+    }
+
+    init();
+  </script>
+</body>
+</html>

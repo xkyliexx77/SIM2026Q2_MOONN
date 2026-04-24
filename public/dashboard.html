@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>Dashboard</h2>
+      <p id="welcome"></p>
+
+      <div id="menu" class="nav-links"></div>
+
+      <br>
+      <button class="btn-danger" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user) {
+      window.location.href = '/login.html';
+    } else {
+      document.getElementById('welcome').textContent =
+        `Welcome ${user.name} (${user.role})`;
+
+      const menu = document.getElementById('menu');
+
+      if (user.role === 'manager') {
+        menu.innerHTML = `
+          <a href="/categories.html">Manage Categories</a><br>
+          <a href="/fundraisers.html">View All Fundraisers</a><br>
+          <a href="/reports.html">View Reports</a>
+        `;
+      } else if (user.role === 'fundraiser') {
+        menu.innerHTML = `
+          <a href="/create-fundraiser.html">Create Fundraiser</a><br>
+          <a href="/fundraisers.html">View All Fundraisers</a><br>
+          <a href="/my-fundraisers.html">My Fundraiser Analytics</a>
+        `;
+      } else if (user.role === 'donee') {
+        menu.innerHTML = `
+          <a href="/fundraisers.html">View Fundraisers</a><br>
+          <a href="/favourites.html">My Favourites</a><br>
+          <a href="/donations.html">My Donations</a>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login.html';
+    }
+  </script>
+</body>
+</html>
