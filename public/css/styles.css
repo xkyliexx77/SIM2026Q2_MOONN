@@ -494,6 +494,518 @@ hr {
   }
 }
 
+/* =========================
+   COMPLETED FUNDRAISERS PAGE
+========================= */
+.completed-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
+  padding: 40px 20px;
+}
+
+.completed-container {
+  max-width: 1000px;
+  margin: auto;
+}
+
+.completed-header {
+  background: linear-gradient(135deg, #2d3436, #6c5ce7);
+  color: white;
+  padding: 28px 32px;
+  border-radius: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(45, 52, 54, 0.15);
+}
+
+.completed-header h1 {
+  margin-bottom: 6px;
+}
+
+.completed-header p {
+  color: #f0efff;
+  margin-bottom: 0;
+}
+
+.completed-back-btn {
+  background: white;
+  color: #6c5ce7;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.completed-back-btn:hover {
+  text-decoration: none;
+  background: #f4f1ff;
+}
+
+.completed-filter-card,
+.completed-item-card,
+.completed-empty-card {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 22px rgba(45, 52, 54, 0.08);
+  border: 1px solid #eeeeff;
+  margin-bottom: 20px;
+}
+
+.completed-filter-card h2 {
+  margin-bottom: 18px;
+}
+
+.completed-filters {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.completed-filters label {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.completed-filters input,
+.completed-filters select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #dcdde1;
+}
+
+.completed-filters input:focus,
+.completed-filters select:focus {
+  outline: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+}
+
+.completed-filter-btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: white;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.completed-filter-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(108, 92, 231, 0.25);
+}
+
+.completed-list {
+  display: grid;
+  gap: 18px;
+}
+
+.completed-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.completed-item-header h3 {
+  margin-bottom: 0;
+  color: #2d3436;
+}
+
+.completed-item-header span {
+  background: #f1edff;
+  color: #6c5ce7;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.completed-description {
+  color: #636e72;
+  margin-bottom: 16px;
+}
+
+.completed-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 18px;
+}
+
+.completed-info-grid p {
+  margin-bottom: 0;
+}
+
+.completed-empty-card {
+  text-align: center;
+  color: #636e72;
+}
+
+@media (max-width: 768px) {
+  .completed-header {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .completed-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .completed-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   CREATE FUNDRAISER PAGE
+========================= */
+.create-fundraiser-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
+  padding: 40px 20px;
+}
+
+.create-fundraiser-container {
+  max-width: 950px;
+  margin: auto;
+}
+
+.create-fundraiser-header {
+  background: linear-gradient(135deg, #2d3436, #6c5ce7);
+  color: white;
+  padding: 28px 32px;
+  border-radius: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(45, 52, 54, 0.15);
+}
+
+.create-fundraiser-header h1 {
+  margin-bottom: 6px;
+}
+
+.create-fundraiser-header p {
+  color: #f0efff;
+  margin-bottom: 0;
+}
+
+.create-fundraiser-back-btn {
+  background: white;
+  color: #6c5ce7;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.create-fundraiser-back-btn:hover {
+  text-decoration: none;
+  background: #f4f1ff;
+}
+
+.create-fundraiser-card {
+  background: white;
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 8px 22px rgba(45, 52, 54, 0.08);
+  border: 1px solid #eeeeff;
+}
+
+.create-fundraiser-card h2 {
+  color: #2d3436;
+  margin-bottom: 6px;
+}
+
+.create-fundraiser-subtext {
+  color: #636e72;
+  margin-bottom: 24px;
+}
+
+.create-fundraiser-card label {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.create-fundraiser-card input,
+.create-fundraiser-card textarea,
+.create-fundraiser-card select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #dcdde1;
+  margin-bottom: 16px;
+  background: white;
+}
+
+.create-fundraiser-card textarea {
+  min-height: 130px;
+}
+
+.create-fundraiser-card input:focus,
+.create-fundraiser-card textarea:focus,
+.create-fundraiser-card select:focus {
+  outline: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+}
+
+.create-fundraiser-submit-btn {
+  width: 100%;
+  padding: 13px;
+  margin-top: 8px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: white;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.create-fundraiser-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(108, 92, 231, 0.25);
+}
+
+@media (max-width: 768px) {
+  .create-fundraiser-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+  }
+}
+
+/* =========================
+   ALL FUNDRAISERS PAGE
+========================= */
+.fundraisers-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
+  padding: 40px 20px;
+}
+
+.fundraisers-container {
+  max-width: 1050px;
+  margin: auto;
+}
+
+.fundraisers-header {
+  background: linear-gradient(135deg, #2d3436, #6c5ce7);
+  color: white;
+  padding: 28px 32px;
+  border-radius: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(45, 52, 54, 0.15);
+}
+
+.fundraisers-header h1 {
+  margin-bottom: 6px;
+}
+
+.fundraisers-header p {
+  color: #f0efff;
+  margin-bottom: 0;
+}
+
+.fundraisers-back-btn {
+  background: white;
+  color: #6c5ce7;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.fundraisers-back-btn:hover {
+  text-decoration: none;
+  background: #f4f1ff;
+}
+
+.fundraisers-filter-card,
+.fundraisers-item-card,
+.fundraisers-empty-card {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 22px rgba(45, 52, 54, 0.08);
+  border: 1px solid #eeeeff;
+  margin-bottom: 20px;
+}
+
+.fundraisers-filter-card h2 {
+  margin-bottom: 18px;
+}
+
+.fundraisers-filters {
+  display: grid;
+  grid-template-columns: 1.5fr 1.2fr auto auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.fundraisers-filters label {
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.fundraisers-filters input,
+.fundraisers-filters select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #dcdde1;
+}
+
+.fundraisers-filters input:focus,
+.fundraisers-filters select:focus {
+  outline: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+}
+
+.fundraisers-search-btn,
+.fundraisers-clear-btn,
+.fundraisers-view-btn,
+.fundraisers-fav-btn,
+.fundraisers-donate-btn {
+  padding: 11px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.fundraisers-search-btn {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: white;
+}
+
+.fundraisers-clear-btn {
+  background: #f1f2f6;
+  color: #2d3436;
+}
+
+.fundraisers-search-btn:hover,
+.fundraisers-view-btn:hover,
+.fundraisers-fav-btn:hover,
+.fundraisers-donate-btn:hover {
+  transform: translateY(-2px);
+}
+
+.fundraisers-list {
+  display: grid;
+  gap: 18px;
+}
+
+.fundraisers-item-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.fundraisers-item-top h3 {
+  color: #2d3436;
+  margin-bottom: 8px;
+}
+
+.fundraisers-item-top p {
+  color: #636e72;
+}
+
+.fundraisers-category-badge {
+  background: #f1edff;
+  color: #6c5ce7;
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  height: fit-content;
+  white-space: nowrap;
+}
+
+.fundraisers-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.fundraisers-info-grid div {
+  background: #faf9ff;
+  border: 1px solid #eeeaff;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.fundraisers-info-grid span {
+  display: block;
+  font-size: 13px;
+  color: #636e72;
+  margin-bottom: 6px;
+}
+
+.fundraisers-info-grid strong {
+  color: #2d3436;
+  font-size: 18px;
+}
+
+.fundraisers-created-by {
+  color: #636e72;
+  margin-bottom: 16px;
+}
+
+.fundraisers-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fundraisers-view-btn {
+  background: #f1f2f6;
+  color: #2d3436;
+}
+
+.fundraisers-fav-btn {
+  background: #6c5ce7;
+  color: white;
+}
+
+.fundraisers-donate-btn {
+  background: #00b894;
+  color: white;
+}
+
+.fundraisers-empty-card {
+  text-align: center;
+  color: #636e72;
+}
+
+@media (max-width: 768px) {
+  .fundraisers-header {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .fundraisers-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .fundraisers-item-top {
+    flex-direction: column;
+  }
+
+  .fundraisers-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* REMOVE ALL UNDERLINES */
 a:hover {
   text-decoration: none;

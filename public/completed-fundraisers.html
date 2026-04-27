@@ -1,15 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Completed Fundraisers</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>Completed Fundraisers</h2>
 
-      <div class="inline-filters">
+<body class="completed-body">
+  <div class="completed-container">
+
+    <div class="completed-header">
+      <div>
+        <h1>Completed Fundraisers</h1>
+        <p>View and filter your completed fundraising campaigns.</p>
+      </div>
+
+      <a href="dashboard.html" class="completed-back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="completed-filter-card">
+      <h2>Filter Fundraisers</h2>
+
+      <div class="completed-filters">
         <div>
           <label>Category</label>
           <select id="categoryFilter"></select>
@@ -25,17 +38,16 @@
           <input type="date" id="dateTo">
         </div>
 
-        <div>
-          <button class="btn-primary" onclick="loadCompleted()">Filter</button>
-        </div>
+        <button class="completed-filter-btn" onclick="loadCompleted()">Filter</button>
       </div>
     </div>
 
-    <div id="list"></div>
+    <div id="completed-list" class="completed-list"></div>
+
   </div>
 
   <script>
-    const list = document.getElementById('list');
+    const list = document.getElementById('completed-list');
 
     async function loadCategories() {
       const res = await fetch('/api/categories');
@@ -56,7 +68,7 @@
       const token = localStorage.getItem('token');
 
       if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
         return;
       }
 
@@ -77,26 +89,35 @@
       });
 
       const data = await res.json();
-
       list.innerHTML = '';
 
       if (!data.length) {
-        list.innerHTML = '<div class="card"><p>No completed fundraisers found.</p></div>';
+        list.innerHTML = `
+          <div class="completed-empty-card">
+            <p>No completed fundraisers found.</p>
+          </div>
+        `;
         return;
       }
 
       data.forEach(item => {
         const div = document.createElement('div');
-        div.className = 'card';
+        div.className = 'completed-item-card';
 
         div.innerHTML = `
-          <h3>${item.title}</h3>
-          <p>${item.description || ''}</p>
-          <p><strong>Category:</strong> ${item.category_name || 'No Category'}</p>
-          <p><strong>Target:</strong> $${item.target_amount}</p>
-          <p><strong>Raised:</strong> $${item.current_amount}</p>
-          <p><strong>Status:</strong> ${item.status}</p>
-          <p><strong>Created At:</strong> ${item.created_at}</p>
+          <div class="completed-item-header">
+            <h3>${item.title}</h3>
+            <span>${item.status}</span>
+          </div>
+
+          <p class="completed-description">${item.description || 'No description provided.'}</p>
+
+          <div class="completed-info-grid">
+            <p><strong>Category:</strong> ${item.category_name || 'No Category'}</p>
+            <p><strong>Target:</strong> $${item.target_amount}</p>
+            <p><strong>Raised:</strong> $${item.current_amount}</p>
+            <p><strong>Created At:</strong> ${item.created_at}</p>
+          </div>
         `;
 
         list.appendChild(div);

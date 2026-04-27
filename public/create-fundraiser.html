@@ -6,36 +6,50 @@
   <title>Create Fundraiser</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>Create Fundraiser</h2>
-      <p id="flashMessage" class="flash"></p>
 
-      <form id="fundraiserForm">
-        <label>Title:</label>
-        <input type="text" id="title" required>
+<body class="create-fundraiser-body">
+  <div class="create-fundraiser-container">
 
-        <label>Description:</label>
-        <textarea id="description" required></textarea>
+    <div class="create-fundraiser-header">
+      <div>
+        <h1>Create Fundraiser</h1>
+        <p>Start a new fundraising campaign and assign it to a category.</p>
+      </div>
 
-        <label>Target Amount:</label>
-        <input type="number" id="target_amount" required>
+      <a href="dashboard.html" class="create-fundraiser-back-btn">Back to Dashboard</a>
+    </div>
 
-        <label>Category:</label>
-        <select id="category_id" required></select>
+    <div class="create-fundraiser-card">
+      <h2>Fundraiser Details</h2>
+      <p class="create-fundraiser-subtext">Fill in the details below to create a new fundraiser.</p>
 
-        <button type="submit" class="btn-primary">Create Fundraiser</button>
+      <p id="create-fundraiser-flash" class="flash"></p>
+
+      <form id="create-fundraiser-form">
+        <label>Title</label>
+        <input type="text" id="create-fundraiser-title" placeholder="Enter fundraiser title" required>
+
+        <label>Description</label>
+        <textarea id="create-fundraiser-description" placeholder="Enter fundraiser description" required></textarea>
+
+        <label>Target Amount</label>
+        <input type="number" id="create-fundraiser-target-amount" placeholder="Enter target amount" required>
+
+        <label>Category</label>
+        <select id="create-fundraiser-category-id" required></select>
+
+        <button type="submit" class="create-fundraiser-submit-btn">Create Fundraiser</button>
       </form>
     </div>
+
   </div>
 
   <script>
-    const form = document.getElementById('fundraiserForm');
-    const categorySelect = document.getElementById('category_id');
+    const form = document.getElementById('create-fundraiser-form');
+    const categorySelect = document.getElementById('create-fundraiser-category-id');
 
     function showMessage(text, type = 'success') {
-      const msg = document.getElementById('flashMessage');
+      const msg = document.getElementById('create-fundraiser-flash');
       msg.textContent = text;
       msg.className = `flash ${type}`;
       msg.style.display = 'block';
@@ -64,11 +78,16 @@
 
       const token = localStorage.getItem('token');
 
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
       const fundraiserData = {
-        title: document.getElementById('title').value,
-        description: document.getElementById('description').value,
-        target_amount: document.getElementById('target_amount').value,
-        category_id: document.getElementById('category_id').value
+        title: document.getElementById('create-fundraiser-title').value.trim(),
+        description: document.getElementById('create-fundraiser-description').value.trim(),
+        target_amount: document.getElementById('create-fundraiser-target-amount').value,
+        category_id: document.getElementById('create-fundraiser-category-id').value
       };
 
       try {
@@ -86,11 +105,12 @@
         if (response.ok) {
           showMessage('Fundraiser created successfully.', 'success');
           form.reset();
+          await loadCategories();
         } else {
           showMessage(data.error || 'Failed to create fundraiser.', 'error');
         }
       } catch (error) {
-        showMessage('Something went wrong.', 'error');
+        showMessage('Something went wrong. Please try again.', 'error');
       }
     });
 

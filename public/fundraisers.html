@@ -1,42 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>All Fundraisers</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>All Fundraisers</h2>
-      <p id="flashMessage" class="flash"></p>
 
-      <div class="inline-filters">
+<body class="fundraisers-body">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>All Fundraisers</h1>
+        <p>Browse, search and support fundraising campaigns.</p>
+      </div>
+
+      <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="fundraisers-filter-card">
+      <h2>Search Fundraisers</h2>
+      <p id="fundraisers-flash" class="flash"></p>
+
+      <div class="fundraisers-filters">
         <div>
-          <label>Search title</label>
-          <input type="text" id="searchInput" placeholder="Search title">
+          <label>Search Title</label>
+          <input type="text" id="fundraisers-search-input" placeholder="Enter fundraiser title">
         </div>
 
         <div>
           <label>Category</label>
-          <select id="categoryFilter"></select>
+          <select id="fundraisers-category-filter"></select>
         </div>
 
-        <div></div>
-
-        <div>
-          <button class="btn-primary" onclick="loadFundraisers()">Search</button>
-        </div>
+        <button class="fundraisers-search-btn" onclick="loadFundraisers()">Search</button>
+        <button class="fundraisers-clear-btn" onclick="clearFilters()">Clear</button>
       </div>
     </div>
 
-    <div id="list"></div>
+    <div id="fundraisers-list" class="fundraisers-list"></div>
+
   </div>
 
   <script>
-    const list = document.getElementById('list');
+    const list = document.getElementById('fundraisers-list');
 
     function showMessage(text, type = 'success') {
-      const msg = document.getElementById('flashMessage');
+      const msg = document.getElementById('fundraisers-flash');
       msg.textContent = text;
       msg.className = `flash ${type}`;
       msg.style.display = 'block';
@@ -50,7 +61,7 @@
       const res = await fetch('/api/categories');
       const categories = await res.json();
 
-      const select = document.getElementById('categoryFilter');
+      const select = document.getElementById('fundraisers-category-filter');
       select.innerHTML = '<option value="">All Categories</option>';
 
       categories.forEach(c => {
@@ -59,6 +70,12 @@
         option.textContent = c.name;
         select.appendChild(option);
       });
+    }
+
+    function clearFilters() {
+      document.getElementById('fundraisers-search-input').value = '';
+      document.getElementById('fundraisers-category-filter').value = '';
+      loadFundraisers();
     }
 
     async function recordView(id) {
@@ -71,7 +88,7 @@
       const token = localStorage.getItem('token');
 
       if (!token) {
-        showMessage('Please login first', 'error');
+        showMessage('Please login first.', 'error');
         return;
       }
 
@@ -85,7 +102,7 @@
       });
 
       const data = await res.json();
-      showMessage(data.error || data.message || 'Added to favourites', data.error ? 'error' : 'success');
+      showMessage(data.error || data.message || 'Added to favourites.', data.error ? 'error' : 'success');
       loadFundraisers();
     }
 
@@ -93,12 +110,17 @@
       const token = localStorage.getItem('token');
 
       if (!token) {
-        showMessage('Please login first', 'error');
+        showMessage('Please login first.', 'error');
         return;
       }
 
       const amount = prompt('Enter donation amount:');
       if (amount === null) return;
+
+      if (Number(amount) <= 0) {
+        showMessage('Donation amount must be more than 0.', 'error');
+        return;
+      }
 
       const res = await fetch('/api/donations', {
         method: 'POST',
@@ -110,48 +132,87 @@
       });
 
       const data = await res.json();
-      showMessage(data.error || data.message || 'Donation successful', data.error ? 'error' : 'success');
+      showMessage(data.error || data.message || 'Donation successful.', data.error ? 'error' : 'success');
       loadFundraisers();
     }
 
     async function viewDetails(id) {
       await recordView(id);
-      showMessage('View recorded', 'success');
+      showMessage('View recorded.', 'success');
       loadFundraisers();
     }
 
     async function loadFundraisers() {
-      const search = document.getElementById('searchInput').value;
-      const category = document.getElementById('categoryFilter').value;
+      const search = document.getElementById('fundraisers-search-input').value.trim();
+      const category = document.getElementById('fundraisers-category-filter').value;
 
-      const res = await fetch(`/api/fundraisers?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`);
-      const data = await res.json();
+      const query = new URLSearchParams();
+
+      if (search) query.append('search', search);
+      if (category) query.append('category', category);
+
+      const res = await fetch(`/api/fundraisers?${query.toString()}`);
+      const result = await res.json();
+
+      const data = result.items || [];
 
       list.innerHTML = '';
 
       if (!data.length) {
-        list.innerHTML = `<div class="card"><p>No fundraisers found.</p></div>`;
+        list.innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>No fundraisers found.</p>
+          </div>
+        `;
         return;
       }
 
       data.forEach(item => {
         const div = document.createElement('div');
-        div.className = 'card';
+        div.className = 'fundraisers-item-card';
 
         div.innerHTML = `
-          <h3>${item.title}</h3>
-          <p>${item.description}</p>
-          <p><strong>Target:</strong> $${item.target_amount}</p>
-          <p><strong>Raised:</strong> $${item.current_amount}</p>
-          <p><strong>Category:</strong> ${item.category_name || 'No Category'}</p>
-          <p><strong>Views:</strong> ${item.views}</p>
-          <p><strong>Favourites:</strong> ${item.favourite_count}</p>
-          <p><strong>Created By:</strong> ${item.fundraiser_name || 'Unknown'}</p>
+          <div class="fundraisers-item-top">
+            <div>
+              <h3>${item.title}</h3>
+              <p>${item.description || 'No description provided.'}</p>
+            </div>
 
-          <div class="list-actions">
-            <button class="btn-secondary" onclick="viewDetails(${item.id})">View</button>
-            <button class="btn-primary" onclick="favourite(${item.id})">Favourite</button>
-            <button class="btn-success" onclick="donate(${item.id})">Donate</button>
+            <span class="fundraisers-category-badge">
+              ${item.category_name || 'No Category'}
+            </span>
+          </div>
+
+          <div class="fundraisers-info-grid">
+            <div>
+              <span>Target Amount</span>
+              <strong>$${item.target_amount || 0}</strong>
+            </div>
+
+            <div>
+              <span>Raised Amount</span>
+              <strong>$${item.current_amount || 0}</strong>
+            </div>
+
+            <div>
+              <span>Views</span>
+              <strong>${item.views || 0}</strong>
+            </div>
+
+            <div>
+              <span>Favourites</span>
+              <strong>${item.favourite_count || 0}</strong>
+            </div>
+          </div>
+
+          <p class="fundraisers-created-by">
+            Created By: <strong>${item.fundraiser_name || 'Unknown'}</strong>
+          </p>
+
+          <div class="fundraisers-actions">
+            <button class="fundraisers-view-btn" onclick="viewDetails(${item.id})">View</button>
+            <button class="fundraisers-fav-btn" onclick="favourite(${item.id})">Favourite</button>
+            <button class="fundraisers-donate-btn" onclick="donate(${item.id})">Donate</button>
           </div>
         `;
 
