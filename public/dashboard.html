@@ -4,58 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>Dashboard</h2>
-      <p id="welcome"></p>
 
-      <div id="menu" class="nav-links"></div>
+<body class="dashboard-body">
 
-      <br>
-      <button class="btn-danger" onclick="logout()">Logout</button>
+  <div class="dashboard-container">
+
+    <!-- HEADER -->
+    <div class="dashboard-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p id="dashboard-welcome"></p>
+      </div>
+
+      <button class="dashboard-logout-btn" onclick="logout()">Logout</button>
     </div>
+
+    <!-- MAIN GRID -->
+    <div class="dashboard-grid">
+
+      <!-- PROFILE -->
+      <div class="dashboard-profile-card">
+        <h2>My Profile</h2>
+
+        <div class="dashboard-avatar" id="dashboard-initial">U</div>
+
+        <p><strong>Name:</strong> <span id="dashboard-name"></span></p>
+        <p><strong>Email:</strong> <span id="dashboard-email"></span></p>
+        <p><strong>Role:</strong> <span id="dashboard-role"></span></p>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="dashboard-menu-card">
+        <h2>Quick Actions</h2>
+        <p class="dashboard-subtext">Select an action to continue</p>
+
+        <div id="dashboard-menu" class="dashboard-menu"></div>
+      </div>
+
+    </div>
+
   </div>
 
   <script>
     const user = JSON.parse(localStorage.getItem('user'));
 
     if (!user) {
-      window.location.href = '/login.html';
+      window.location.href = 'login.html';
     } else {
-      document.getElementById('welcome').textContent =
-        `Welcome ${user.name} (${user.role})`;
+      document.getElementById('dashboard-welcome').textContent =
+        `Welcome back, ${user.name}`;
 
-      const menu = document.getElementById('menu');
+      document.getElementById('dashboard-name').textContent = user.name;
+      document.getElementById('dashboard-email').textContent = user.email;
+      document.getElementById('dashboard-role').textContent = user.role;
+      document.getElementById('dashboard-initial').textContent =
+        user.name.charAt(0).toUpperCase();
+
+      const menu = document.getElementById('dashboard-menu');
 
       if (user.role === 'manager') {
         menu.innerHTML = `
-          <a href="/categories.html">Manage Categories</a><br>
-          <a href="/fundraisers.html">View All Fundraisers</a><br>
-          <a href="/reports.html">View Reports</a>
+          <a class="dashboard-action" href="categories.html">Manage Categories</a>
+          <a class="dashboard-action" href="fundraisers.html">View Fundraisers</a>
+          <a class="dashboard-action" href="reports.html">View Reports</a>
         `;
       } else if (user.role === 'fundraiser') {
         menu.innerHTML = `
-          <a href="/create-fundraiser.html">Create Fundraiser</a><br>
-          <a href="/fundraisers.html">View All Fundraisers</a><br>
-          <a href="/my-fundraisers.html">My Fundraiser Analytics</a>
+          <a class="dashboard-action" href="create-fundraiser.html">Create Fundraiser</a>
+          <a class="dashboard-action" href="fundraisers.html">View Fundraisers</a>
+          <a class="dashboard-action" href="my-fundraisers.html">My Analytics</a>
         `;
-      } else if (user.role === 'donee') {
+      } else {
         menu.innerHTML = `
-          <a href="/fundraisers.html">View Fundraisers</a><br>
-          <a href="/favourites.html">My Favourites</a><br>
-          <a href="/donations.html">My Donations</a>
+          <a class="dashboard-action" href="fundraisers.html">View Fundraisers</a>
+          <a class="dashboard-action" href="favourites.html">My Favourites</a>
+          <a class="dashboard-action" href="donations.html">My Donations</a>
         `;
       }
     }
 
     function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login.html';
+      localStorage.clear();
+      window.location.href = 'login.html';
     }
   </script>
+
 </body>
 </html>

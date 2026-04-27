@@ -3,28 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <title>Login | Fundraising System</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>Login</h2>
+
+<body class="auth-body">
+  <div class="auth-wrapper">
+
+    <div class="auth-left">
+      <h1>Fundraising Management System</h1>
+      <p>
+        Login to manage fundraisers, donations, categories and reports in one platform.
+      </p>
+    </div>
+
+    <div class="auth-card">
+      <h2>Welcome Back</h2>
+      <p class="auth-subtitle">Please login to continue</p>
+
       <p id="flashMessage" class="flash"></p>
 
       <form id="loginForm">
-        <label>Email:</label>
-        <input type="email" id="email" required>
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
 
-        <label>Password:</label>
-        <input type="password" id="password" required>
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
 
-        <button type="submit" class="btn-primary">Login</button>
+        <button type="submit" class="btn-primary auth-btn">Login</button>
       </form>
 
-      <br>
-      <a href="/register.html">Create an account</a>
+      <p class="auth-link-text">
+        Don’t have an account?
+        <a href="register.html">Create an account</a>
+      </p>
     </div>
+
   </div>
 
   <script>
@@ -63,16 +77,17 @@
         if (response.ok) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
-          showMessage('Login successful.', 'success');
+
+          showMessage('Login successful. Redirecting...', 'success');
 
           setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            window.location.href = 'dashboard.html';
           }, 800);
         } else {
           showMessage(data.error || 'Login failed.', 'error');
         }
       } catch (error) {
-        showMessage('Something went wrong.', 'error');
+        showMessage('Something went wrong. Please try again.', 'error');
       }
     });
   </script>
