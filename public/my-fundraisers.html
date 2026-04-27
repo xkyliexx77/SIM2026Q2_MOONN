@@ -1,25 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Fundraisers</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>My Fundraiser Analytics</h2>
-      <a href="/completed-fundraisers.html">View Completed Fundraisers</a>
-      <p id="flashMessage" class="flash"></p>
+
+<body class="myfund-body">
+  <div class="myfund-container">
+
+    <div class="myfund-header">
+      <div>
+        <h1>My Fundraiser Analytics</h1>
+        <p>Track your fundraiser progress, donations, views and favourites.</p>
+      </div>
+
+      <div class="myfund-header-actions">
+        <a href="completed-fundraisers.html" class="myfund-light-btn">Completed</a>
+        <a href="dashboard.html" class="myfund-light-btn">Dashboard</a>
+      </div>
     </div>
 
-    <div id="list"></div>
+    <div class="myfund-message-card">
+      <p id="myfund-flash" class="flash"></p>
+      <p class="myfund-subtext">Manage your created fundraisers below.</p>
+    </div>
+
+    <div id="myfund-list" class="myfund-list"></div>
+
   </div>
 
   <script>
-    const list = document.getElementById('list');
+    const list = document.getElementById('myfund-list');
 
     function showMessage(text, type = 'success') {
-      const msg = document.getElementById('flashMessage');
+      const msg = document.getElementById('myfund-flash');
       msg.textContent = text;
       msg.className = `flash ${type}`;
       msg.style.display = 'block';
@@ -50,6 +66,9 @@
     async function completeFundraiser(id) {
       const token = localStorage.getItem('token');
 
+      const confirmComplete = confirm('Mark this fundraiser as completed?');
+      if (!confirmComplete) return;
+
       const res = await fetch(`/api/fundraisers/${id}/complete`, {
         method: 'PATCH',
         headers: {
@@ -66,7 +85,7 @@
       const token = localStorage.getItem('token');
 
       if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
         return;
       }
 
@@ -77,31 +96,73 @@
       });
 
       const data = await res.json();
-
       list.innerHTML = '';
 
       if (!data.length) {
-        list.innerHTML = '<div class="card"><p>No fundraisers created yet.</p></div>';
+        list.innerHTML = `
+          <div class="myfund-empty-card">
+            <p>No fundraisers created yet.</p>
+            <a href="create-fundraiser.html" class="myfund-create-btn">Create Fundraiser</a>
+          </div>
+        `;
         return;
       }
 
       data.forEach(item => {
+        const raised = Number(item.current_amount || 0);
+        const target = Number(item.target_amount || 0);
+        const progress = target > 0 ? Math.min((raised / target) * 100, 100).toFixed(0) : 0;
+
         const div = document.createElement('div');
-        div.className = 'card';
+        div.className = 'myfund-card';
 
         div.innerHTML = `
-          <h3>${item.title}</h3>
-          <p><strong>Status:</strong> ${item.status}</p>
-          <p><strong>Target:</strong> $${item.target_amount}</p>
-          <p><strong>Raised:</strong> $${item.current_amount}</p>
-          <p><strong>Views:</strong> ${item.views}</p>
-          <p><strong>Favourites:</strong> ${item.favourite_count}</p>
-          <p><strong>Donation Count:</strong> ${item.donation_count}</p>
-          <p><strong>Total Donated:</strong> $${item.total_donated}</p>
-          <div class="list-actions">
-            <button class="btn-secondary" onclick="window.location.href='/edit-fundraiser.html?id=${item.id}'">Edit</button>
-            <button class="btn-success" onclick="completeFundraiser(${item.id})">Mark Completed</button>
-            <button class="btn-danger" onclick="deleteFundraiser(${item.id})">Delete</button>
+          <div class="myfund-card-top">
+            <div>
+              <h2>${item.title}</h2>
+              <span class="myfund-status">${item.status}</span>
+            </div>
+          </div>
+
+          <div class="myfund-progress-section">
+            <div class="myfund-progress-text">
+              <span>$${raised} raised</span>
+              <span>$${target} target</span>
+            </div>
+
+            <div class="myfund-progress-bar">
+              <div class="myfund-progress-fill" style="width: ${progress}%"></div>
+            </div>
+
+            <p class="myfund-progress-percent">${progress}% completed</p>
+          </div>
+
+          <div class="myfund-stats-grid">
+            <div>
+              <span>Views</span>
+              <strong>${item.views || 0}</strong>
+            </div>
+
+            <div>
+              <span>Favourites</span>
+              <strong>${item.favourite_count || 0}</strong>
+            </div>
+
+            <div>
+              <span>Donation Count</span>
+              <strong>${item.donation_count || 0}</strong>
+            </div>
+
+            <div>
+              <span>Total Donated</span>
+              <strong>$${item.total_donated || 0}</strong>
+            </div>
+          </div>
+
+          <div class="myfund-actions">
+            <button class="myfund-edit-btn" onclick="window.location.href='edit-fundraiser.html?id=${item.id}'">Edit</button>
+            <button class="myfund-complete-btn" onclick="completeFundraiser(${item.id})">Mark Completed</button>
+            <button class="myfund-delete-btn" onclick="deleteFundraiser(${item.id})">Delete</button>
           </div>
         `;
 
