@@ -43,8 +43,31 @@
 
   </div>
 
+  <!-- DONATION MODAL -->
+  <div id="donate-modal-overlay" class="donate-modal-overlay">
+    <div class="donate-modal">
+      <h2>Make a Donation</h2>
+      <p>Enter the amount you would like to donate.</p>
+
+      <input type="hidden" id="donate-fundraiser-id">
+
+      <label>Donation Amount</label>
+      <input type="number" id="donate-amount" placeholder="Enter amount" min="1">
+
+      <div class="donate-modal-actions">
+        <button class="donate-cancel-btn" onclick="closeDonateModal()">Cancel</button>
+        <button class="donate-confirm-btn" onclick="submitDonation()">Donate</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const list = document.getElementById('fundraisers-list');
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.role) {
+      document.body.classList.add(`fundraisers-${user.role}`);
+    }
 
     function showMessage(text, type = 'success') {
       const msg = document.getElementById('fundraisers-flash');
@@ -106,7 +129,7 @@
       loadFundraisers();
     }
 
-    async function donate(id) {
+    function donate(id) {
       const token = localStorage.getItem('token');
 
       if (!token) {
@@ -114,10 +137,21 @@
         return;
       }
 
-      const amount = prompt('Enter donation amount:');
-      if (amount === null) return;
+      document.getElementById('donate-fundraiser-id').value = id;
+      document.getElementById('donate-amount').value = '';
+      document.getElementById('donate-modal-overlay').style.display = 'flex';
+    }
 
-      if (Number(amount) <= 0) {
+    function closeDonateModal() {
+      document.getElementById('donate-modal-overlay').style.display = 'none';
+    }
+
+    async function submitDonation() {
+      const token = localStorage.getItem('token');
+      const id = document.getElementById('donate-fundraiser-id').value;
+      const amount = document.getElementById('donate-amount').value;
+
+      if (!amount || Number(amount) <= 0) {
         showMessage('Donation amount must be more than 0.', 'error');
         return;
       }
@@ -132,7 +166,13 @@
       });
 
       const data = await res.json();
-      showMessage(data.error || data.message || 'Donation successful.', data.error ? 'error' : 'success');
+
+      showMessage(
+        data.error || data.message || 'Donation successful.',
+        data.error ? 'error' : 'success'
+      );
+
+      closeDonateModal();
       loadFundraisers();
     }
 
@@ -154,7 +194,7 @@
       const res = await fetch(`/api/fundraisers?${query.toString()}`);
       const result = await res.json();
 
-      const data = result.items || [];
+      const data = result.items || result || [];
 
       list.innerHTML = '';
 
@@ -185,12 +225,12 @@
 
           <div class="fundraisers-info-grid">
             <div>
-              <span>Target Amount</span>
+              <span>Target</span>
               <strong>$${item.target_amount || 0}</strong>
             </div>
 
             <div>
-              <span>Raised Amount</span>
+              <span>Raised</span>
               <strong>$${item.current_amount || 0}</strong>
             </div>
 

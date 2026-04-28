@@ -1,24 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Favourites</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>My Favourite Fundraisers</h2>
-      <p id="flashMessage" class="flash"></p>
+
+<body class="favourite-body">
+  <div class="favourite-container">
+
+    <div class="favourite-header">
+      <div>
+        <h1>My Favourite Fundraisers</h1>
+        <p>View and manage the fundraisers you saved.</p>
+      </div>
+
+      <a href="dashboard.html" class="favourite-back-btn">Back to Dashboard</a>
     </div>
 
-    <div id="list"></div>
+    <p id="favourite-flash" class="flash"></p>
+
+    <div id="favourite-list" class="favourite-list"></div>
+
   </div>
 
   <script>
-    const list = document.getElementById('list');
+    const list = document.getElementById('favourite-list');
 
     function showMessage(text, type = 'success') {
-      const msg = document.getElementById('flashMessage');
+      const msg = document.getElementById('favourite-flash');
       msg.textContent = text;
       msg.className = `flash ${type}`;
       msg.style.display = 'block';
@@ -31,6 +42,14 @@
     async function removeFavourite(id) {
       const token = localStorage.getItem('token');
 
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const confirmRemove = confirm('Remove this fundraiser from favourites?');
+      if (!confirmRemove) return;
+
       const res = await fetch(`/api/favourites/${id}`, {
         method: 'DELETE',
         headers: {
@@ -39,7 +58,7 @@
       });
 
       const data = await res.json();
-      showMessage(data.error || data.message || 'Removed from favourites', data.error ? 'error' : 'success');
+      showMessage(data.error || data.message || 'Removed from favourites.', data.error ? 'error' : 'success');
       loadFavourites();
     }
 
@@ -47,7 +66,7 @@
       const token = localStorage.getItem('token');
 
       if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
         return;
       }
 
@@ -58,24 +77,54 @@
       });
 
       const data = await res.json();
-
       list.innerHTML = '';
 
       if (!data.length) {
-        list.innerHTML = '<div class="card"><p>No favourites yet.</p></div>';
+        list.innerHTML = `
+          <div class="favourite-empty-card">
+            <h3>No favourites yet</h3>
+            <p>You have not saved any fundraisers yet.</p>
+            <a href="fundraisers.html" class="favourite-browse-btn">Browse Fundraisers</a>
+          </div>
+        `;
         return;
       }
 
       data.forEach(item => {
+        const raised = Number(item.current_amount || 0);
+        const target = Number(item.target_amount || 0);
+        const progress = target > 0 ? Math.min((raised / target) * 100, 100).toFixed(0) : 0;
+
         const div = document.createElement('div');
-        div.className = 'card';
+        div.className = 'favourite-item-card';
 
         div.innerHTML = `
-          <h3>${item.title}</h3>
-          <p>${item.description}</p>
-          <p><strong>Target:</strong> $${item.target_amount}</p>
-          <p><strong>Raised:</strong> $${item.current_amount}</p>
-          <button class="btn-danger" onclick="removeFavourite(${item.id})">Remove Favourite</button>
+          <div class="favourite-item-top">
+            <div>
+              <h3>${item.title}</h3>
+              <p>${item.description || 'No description provided.'}</p>
+            </div>
+
+            <span class="favourite-badge">Saved</span>
+          </div>
+
+          <div class="favourite-progress-section">
+            <div class="favourite-progress-text">
+              <span>$${raised} raised</span>
+              <span>$${target} target</span>
+            </div>
+
+            <div class="favourite-progress-bar">
+              <div class="favourite-progress-fill" style="width: ${progress}%"></div>
+            </div>
+
+            <p>${progress}% completed</p>
+          </div>
+
+          <div class="favourite-actions">
+            <a href="fundraisers.html" class="favourite-view-btn">View Fundraisers</a>
+            <button class="favourite-remove-btn" onclick="removeFavourite(${item.id})">Remove Favourite</button>
+          </div>
         `;
 
         list.appendChild(div);

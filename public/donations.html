@@ -1,47 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Donations</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>My Donation History</h2>
 
-      <div class="inline-filters">
+<body class="donation-body">
+  <div class="donation-container">
+
+    <div class="donation-header">
+      <div>
+        <h1>My Donation History</h1>
+        <p>View and filter your past donations.</p>
+      </div>
+
+      <a href="dashboard.html" class="donation-back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="donation-filter-card">
+      <h2>Filter Donations</h2>
+
+      <div class="donation-filters">
         <div>
           <label>Category</label>
-          <select id="categoryFilter"></select>
+          <select id="donation-category-filter"></select>
         </div>
 
         <div>
           <label>From</label>
-          <input type="date" id="dateFrom">
+          <input type="date" id="donation-date-from">
         </div>
 
         <div>
           <label>To</label>
-          <input type="date" id="dateTo">
+          <input type="date" id="donation-date-to">
         </div>
 
-        <div>
-          <button class="btn-primary" onclick="loadDonations()">Filter</button>
-        </div>
+        <button class="donation-filter-btn" onclick="loadDonations()">Filter</button>
+        <button class="donation-clear-btn" onclick="clearDonationFilters()">Clear</button>
       </div>
     </div>
 
-    <div id="list"></div>
+    <div id="donation-list" class="donation-list"></div>
+
   </div>
 
   <script>
-    const list = document.getElementById('list');
+    const list = document.getElementById('donation-list');
 
     async function loadCategories() {
       const res = await fetch('/api/categories');
       const categories = await res.json();
 
-      const select = document.getElementById('categoryFilter');
+      const select = document.getElementById('donation-category-filter');
       select.innerHTML = '<option value="">All Categories</option>';
 
       categories.forEach(c => {
@@ -52,23 +65,30 @@
       });
     }
 
+    function clearDonationFilters() {
+      document.getElementById('donation-category-filter').value = '';
+      document.getElementById('donation-date-from').value = '';
+      document.getElementById('donation-date-to').value = '';
+      loadDonations();
+    }
+
     async function loadDonations() {
       const token = localStorage.getItem('token');
 
       if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
         return;
       }
 
-      const category = document.getElementById('categoryFilter').value;
-      const dateFrom = document.getElementById('dateFrom').value;
-      const dateTo = document.getElementById('dateTo').value;
+      const category = document.getElementById('donation-category-filter').value;
+      const dateFrom = document.getElementById('donation-date-from').value;
+      const dateTo = document.getElementById('donation-date-to').value;
 
-      const query = new URLSearchParams({
-        category,
-        dateFrom,
-        dateTo
-      });
+      const query = new URLSearchParams();
+
+      if (category) query.append('category', category);
+      if (dateFrom) query.append('dateFrom', dateFrom);
+      if (dateTo) query.append('dateTo', dateTo);
 
       const res = await fetch(`/api/donations/mine?${query.toString()}`, {
         headers: {
@@ -81,19 +101,34 @@
       list.innerHTML = '';
 
       if (!data.length) {
-        list.innerHTML = '<div class="card"><p>No donations found.</p></div>';
+        list.innerHTML = `
+          <div class="donation-empty-card">
+            <h3>No donations found</h3>
+            <p>You have not made any donations for the selected filter.</p>
+            <a href="fundraisers.html" class="donation-browse-btn">Browse Fundraisers</a>
+          </div>
+        `;
         return;
       }
 
       data.forEach(item => {
         const div = document.createElement('div');
-        div.className = 'card';
+        div.className = 'donation-item-card';
 
         div.innerHTML = `
-          <h3>${item.title}</h3>
-          <p><strong>Category:</strong> ${item.category_name || 'No Category'}</p>
-          <p><strong>Amount:</strong> $${item.amount}</p>
-          <p><strong>Date:</strong> ${item.donated_at}</p>
+          <div class="donation-item-top">
+            <div>
+              <h3>${item.title}</h3>
+              <p>${item.category_name || 'No Category'}</p>
+            </div>
+
+            <span class="donation-amount">$${item.amount}</span>
+          </div>
+
+          <div class="donation-info-row">
+            <span>Donation Date</span>
+            <strong>${item.donated_at}</strong>
+          </div>
         `;
 
         list.appendChild(div);

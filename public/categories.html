@@ -1,34 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Category Management</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>Category Management</h2>
-      <p id="flashMessage" class="flash"></p>
 
-      <form id="categoryForm">
+<body class="category-body">
+  <div class="category-container">
+
+    <div class="category-header">
+      <div>
+        <h1>Category Management</h1>
+        <p>Create, edit and manage fundraiser categories.</p>
+      </div>
+
+      <a href="dashboard.html" class="category-back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="category-form-card">
+      <h2>Add New Category</h2>
+      <p id="category-flash" class="flash"></p>
+
+      <form id="category-form">
         <label>Category Name</label>
-        <input type="text" id="categoryName" placeholder="Enter category name" required>
-        <button type="submit" class="btn-primary">Add Category</button>
+        <input type="text" id="category-name" placeholder="Enter category name" required>
+
+        <button type="submit" class="category-add-btn">Add Category</button>
       </form>
     </div>
 
-    <div class="card">
-      <h3>Category List</h3>
-      <ul id="categoryList"></ul>
+    <div class="category-list-card">
+      <h2>Category List</h2>
+      <div id="category-list" class="category-list"></div>
+    </div>
+
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div id="category-modal-overlay" class="category-modal-overlay">
+    <div class="category-modal">
+      <h2>Edit Category</h2>
+      <p class="category-modal-text">Update the category name below.</p>
+
+      <input type="hidden" id="edit-category-id">
+
+      <label>Category Name</label>
+      <input type="text" id="edit-category-name">
+
+      <div class="category-modal-actions">
+        <button class="category-cancel-btn" onclick="closeEditModal()">Cancel</button>
+        <button class="category-save-btn" onclick="saveEditCategory()">Save Changes</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const form = document.getElementById('categoryForm');
-    const categoryList = document.getElementById('categoryList');
+    const form = document.getElementById('category-form');
+    const categoryList = document.getElementById('category-list');
 
     function showMessage(text, type = 'success') {
-      const msg = document.getElementById('flashMessage');
+      const msg = document.getElementById('category-flash');
       msg.textContent = text;
       msg.className = `flash ${type}`;
       msg.style.display = 'block';
@@ -38,66 +71,64 @@
       }, 3000);
     }
 
+    function getToken() {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return null;
+      }
+
+      return token;
+    }
+
     async function loadCategories() {
       const response = await fetch('/api/categories');
       const categories = await response.json();
 
       categoryList.innerHTML = '';
 
-      categories.forEach(category => {
-        const li = document.createElement('li');
-        li.style.marginBottom = '10px';
-        li.innerHTML = `
-          ${category.id} - ${category.name}
-          <button class="btn-secondary" onclick="editCategory(${category.id}, '${category.name.replace(/'/g, "\\'")}')">Edit</button>
-          <button class="btn-danger" onclick="deleteCategory(${category.id})">Delete</button>
+      if (!categories.length) {
+        categoryList.innerHTML = `
+          <div class="category-empty">
+            No categories found.
+          </div>
         `;
-        categoryList.appendChild(li);
+        return;
+      }
+
+      categories.forEach(category => {
+        const div = document.createElement('div');
+        div.className = 'category-item';
+
+        div.innerHTML = `
+          <div>
+            <h3>${category.name}</h3>
+            <p>Category ID: ${category.id}</p>
+          </div>
+
+          <div class="category-actions">
+            <button class="category-edit-btn" onclick="openEditModal(${category.id}, '${category.name.replace(/'/g, "\\'")}')">Edit</button>
+            <button class="category-delete-btn" onclick="deleteCategory(${category.id})">Delete</button>
+          </div>
+        `;
+
+        categoryList.appendChild(div);
       });
-    }
-
-    async function editCategory(id, oldName) {
-      const token = localStorage.getItem('token');
-      const newName = prompt('Enter new category name:', oldName);
-
-      if (newName === null) return;
-
-      const response = await fetch(`/api/categories/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ name: newName })
-      });
-
-      const data = await response.json();
-      showMessage(data.message || data.error, data.error ? 'error' : 'success');
-      loadCategories();
-    }
-
-    async function deleteCategory(id) {
-      const token = localStorage.getItem('token');
-
-      if (!confirm('Are you sure you want to delete this category?')) return;
-
-      const response = await fetch(`/api/categories/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
-
-      const data = await response.json();
-      showMessage(data.message || data.error, data.error ? 'error' : 'success');
-      loadCategories();
     }
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const token = localStorage.getItem('token');
-      const name = document.getElementById('categoryName').value;
+      const token = getToken();
+      if (!token) return;
+
+      const name = document.getElementById('category-name').value.trim();
+
+      if (!name) {
+        showMessage('Category name is required.', 'error');
+        return;
+      }
 
       try {
         const response = await fetch('/api/categories', {
@@ -122,6 +153,80 @@
         showMessage('Something went wrong.', 'error');
       }
     });
+
+    function openEditModal(id, name) {
+      document.getElementById('edit-category-id').value = id;
+      document.getElementById('edit-category-name').value = name;
+      document.getElementById('category-modal-overlay').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('category-modal-overlay').style.display = 'none';
+    }
+
+    async function saveEditCategory() {
+      const token = getToken();
+      if (!token) return;
+
+      const id = document.getElementById('edit-category-id').value;
+      const name = document.getElementById('edit-category-name').value.trim();
+
+      if (!name) {
+        showMessage('Category name cannot be empty.', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/categories/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ name })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('Category updated successfully.', 'success');
+          closeEditModal();
+          loadCategories();
+        } else {
+          showMessage(data.error || 'Failed to update category.', 'error');
+        }
+      } catch (error) {
+        showMessage('Something went wrong.', 'error');
+      }
+    }
+
+    async function deleteCategory(id) {
+      const token = getToken();
+      if (!token) return;
+
+      const confirmDelete = confirm('Are you sure you want to delete this category?');
+      if (!confirmDelete) return;
+
+      try {
+        const response = await fetch(`/api/categories/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('Category deleted successfully.', 'success');
+          loadCategories();
+        } else {
+          showMessage(data.error || 'Failed to delete category.', 'error');
+        }
+      } catch (error) {
+        showMessage('Something went wrong.', 'error');
+      }
+    }
 
     loadCategories();
   </script>

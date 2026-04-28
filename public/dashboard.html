@@ -7,25 +7,23 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body class="dashboard-body">
+<body id="dashboard-page-body" class="dashboard-page-body">
 
-  <div class="dashboard-container">
+  <div class="dashboard-main-container">
 
-    <!-- HEADER -->
-    <div class="dashboard-header">
+    <div id="dashboard-role-banner" class="dashboard-role-banner">
       <div>
-        <h1>Dashboard</h1>
+        <p id="dashboard-role-label" class="dashboard-role-label"></p>
+        <h1 id="dashboard-title">Dashboard</h1>
         <p id="dashboard-welcome"></p>
       </div>
 
       <button class="dashboard-logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <!-- MAIN GRID -->
-    <div class="dashboard-grid">
+    <div class="dashboard-content-grid">
 
-      <!-- PROFILE -->
-      <div class="dashboard-profile-card">
+      <div class="dashboard-profile-panel">
         <h2>My Profile</h2>
 
         <div class="dashboard-avatar" id="dashboard-initial">U</div>
@@ -35,10 +33,9 @@
         <p><strong>Role:</strong> <span id="dashboard-role"></span></p>
       </div>
 
-      <!-- ACTIONS -->
-      <div class="dashboard-menu-card">
-        <h2>Quick Actions</h2>
-        <p class="dashboard-subtext">Select an action to continue</p>
+      <div class="dashboard-action-panel">
+        <h2 id="dashboard-action-title">Quick Actions</h2>
+        <p id="dashboard-action-subtitle" class="dashboard-subtext"></p>
 
         <div id="dashboard-menu" class="dashboard-menu"></div>
       </div>
@@ -53,40 +50,97 @@
     if (!user) {
       window.location.href = 'login.html';
     } else {
+      const role = user.role;
+
+      document.body.classList.add(`dashboard-${role}`);
+
       document.getElementById('dashboard-welcome').textContent =
         `Welcome back, ${user.name}`;
 
-      document.getElementById('dashboard-name').textContent = user.name;
-      document.getElementById('dashboard-email').textContent = user.email;
-      document.getElementById('dashboard-role').textContent = user.role;
+      document.getElementById('dashboard-name').textContent = user.name || '-';
+      document.getElementById('dashboard-email').textContent = user.email || '-';
+      document.getElementById('dashboard-role').textContent = role || '-';
       document.getElementById('dashboard-initial').textContent =
-        user.name.charAt(0).toUpperCase();
+        user.name ? user.name.charAt(0).toUpperCase() : 'U';
 
       const menu = document.getElementById('dashboard-menu');
 
-      if (user.role === 'manager') {
+      if (role === 'manager') {
+        document.getElementById('dashboard-role-label').textContent = 'Manager Workspace';
+        document.getElementById('dashboard-title').textContent = 'Management Dashboard';
+        document.getElementById('dashboard-action-subtitle').textContent =
+          'Manage platform categories, fundraisers and reports.';
+
         menu.innerHTML = `
-          <a class="dashboard-action" href="categories.html">Manage Categories</a>
-          <a class="dashboard-action" href="fundraisers.html">View Fundraisers</a>
-          <a class="dashboard-action" href="reports.html">View Reports</a>
+          <a class="dashboard-action-card" href="categories.html">
+            <span>Category Control</span>
+            <small>Create, edit and delete categories</small>
+          </a>
+
+          <a class="dashboard-action-card" href="fundraisers.html">
+            <span>Fundraiser Overview</span>
+            <small>View all fundraising campaigns</small>
+          </a>
+
+          <a class="dashboard-action-card" href="reports.html">
+            <span>Reports & Analytics</span>
+            <small>View donation and platform summary</small>
+          </a>
         `;
-      } else if (user.role === 'fundraiser') {
+      }
+
+      else if (role === 'fundraiser') {
+        document.getElementById('dashboard-role-label').textContent = 'Fundraiser Workspace';
+        document.getElementById('dashboard-title').textContent = 'Fundraiser Dashboard';
+        document.getElementById('dashboard-action-subtitle').textContent =
+          'Create campaigns and monitor your fundraiser performance.';
+
         menu.innerHTML = `
-          <a class="dashboard-action" href="create-fundraiser.html">Create Fundraiser</a>
-          <a class="dashboard-action" href="fundraisers.html">View Fundraisers</a>
-          <a class="dashboard-action" href="my-fundraisers.html">My Analytics</a>
+          <a class="dashboard-action-card" href="create-fundraiser.html">
+            <span>Create Fundraiser</span>
+            <small>Start a new fundraising campaign</small>
+          </a>
+
+          <a class="dashboard-action-card" href="fundraisers.html">
+            <span>Explore Fundraisers</span>
+            <small>View all available fundraising campaigns</small>
+          </a>
+
+          <a class="dashboard-action-card" href="my-fundraisers.html">
+            <span>My Analytics</span>
+            <small>Track views, donations and favourites</small>
+          </a>
         `;
-      } else {
+      }
+
+      else if (role === 'donee') {
+        document.getElementById('dashboard-role-label').textContent = 'Donee Workspace';
+        document.getElementById('dashboard-title').textContent = 'Donation Dashboard';
+        document.getElementById('dashboard-action-subtitle').textContent =
+          'Browse fundraisers, save favourites and manage your donations.';
+
         menu.innerHTML = `
-          <a class="dashboard-action" href="fundraisers.html">View Fundraisers</a>
-          <a class="dashboard-action" href="favourites.html">My Favourites</a>
-          <a class="dashboard-action" href="donations.html">My Donations</a>
+          <a class="dashboard-action-card" href="fundraisers.html">
+            <span>Browse Fundraisers</span>
+            <small>Find campaigns you want to support</small>
+          </a>
+
+          <a class="dashboard-action-card" href="favourites.html">
+            <span>My Favourites</span>
+            <small>View your saved fundraising campaigns</small>
+          </a>
+
+          <a class="dashboard-action-card" href="donations.html">
+            <span>My Donations</span>
+            <small>Track your donation history</small>
+          </a>
         `;
       }
     }
 
     function logout() {
-      localStorage.clear();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
   </script>

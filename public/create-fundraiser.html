@@ -13,7 +13,7 @@
     <div class="create-fundraiser-header">
       <div>
         <h1>Create Fundraiser</h1>
-        <p>Start a new fundraising campaign and assign it to a category.</p>
+        <p>Start a new campaign and track its progress under your account.</p>
       </div>
 
       <a href="dashboard.html" class="create-fundraiser-back-btn">Back to Dashboard</a>
@@ -21,24 +21,28 @@
 
     <div class="create-fundraiser-card">
       <h2>Fundraiser Details</h2>
-      <p class="create-fundraiser-subtext">Fill in the details below to create a new fundraiser.</p>
+      <p class="create-fundraiser-subtext">
+        Please enter clear details so donors understand your campaign.
+      </p>
 
       <p id="create-fundraiser-flash" class="flash"></p>
 
       <form id="create-fundraiser-form">
-        <label>Title</label>
-        <input type="text" id="create-fundraiser-title" placeholder="Enter fundraiser title" required>
+        <label>Fundraiser Title</label>
+        <input type="text" id="create-fundraiser-title" placeholder="Example: Help Families in Need" required>
 
         <label>Description</label>
-        <textarea id="create-fundraiser-description" placeholder="Enter fundraiser description" required></textarea>
+        <textarea id="create-fundraiser-description" placeholder="Explain the purpose of this fundraiser..." required></textarea>
 
         <label>Target Amount</label>
-        <input type="number" id="create-fundraiser-target-amount" placeholder="Enter target amount" required>
+        <input type="number" id="create-fundraiser-target-amount" placeholder="Example: 1000" min="1" required>
 
         <label>Category</label>
         <select id="create-fundraiser-category-id" required></select>
 
-        <button type="submit" class="create-fundraiser-submit-btn">Create Fundraiser</button>
+        <button type="submit" id="create-fundraiser-submit-btn" class="create-fundraiser-submit-btn">
+          Create Fundraiser
+        </button>
       </form>
     </div>
 
@@ -47,6 +51,7 @@
   <script>
     const form = document.getElementById('create-fundraiser-form');
     const categorySelect = document.getElementById('create-fundraiser-category-id');
+    const submitBtn = document.getElementById('create-fundraiser-submit-btn');
 
     function showMessage(text, type = 'success') {
       const msg = document.getElementById('create-fundraiser-flash');
@@ -56,21 +61,25 @@
 
       setTimeout(() => {
         msg.style.display = 'none';
-      }, 3000);
+      }, 3500);
     }
 
     async function loadCategories() {
-      const response = await fetch('/api/categories');
-      const categories = await response.json();
+      try {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
 
-      categorySelect.innerHTML = '<option value="">Select Category</option>';
+        categorySelect.innerHTML = '<option value="">Select Category</option>';
 
-      categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.id;
-        option.textContent = category.name;
-        categorySelect.appendChild(option);
-      });
+        categories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category.id;
+          option.textContent = category.name;
+          categorySelect.appendChild(option);
+        });
+      } catch (error) {
+        showMessage('Unable to load categories.', 'error');
+      }
     }
 
     form.addEventListener('submit', async function (e) {
@@ -83,14 +92,32 @@
         return;
       }
 
+      const title = document.getElementById('create-fundraiser-title').value.trim();
+      const description = document.getElementById('create-fundraiser-description').value.trim();
+      const targetAmount = Number(document.getElementById('create-fundraiser-target-amount').value);
+      const categoryId = document.getElementById('create-fundraiser-category-id').value;
+
+      if (!title || !description || !categoryId) {
+        showMessage('Please fill in all fields.', 'error');
+        return;
+      }
+
+      if (targetAmount <= 0) {
+        showMessage('Target amount must be more than 0.', 'error');
+        return;
+      }
+
       const fundraiserData = {
-        title: document.getElementById('create-fundraiser-title').value.trim(),
-        description: document.getElementById('create-fundraiser-description').value.trim(),
-        target_amount: document.getElementById('create-fundraiser-target-amount').value,
-        category_id: document.getElementById('create-fundraiser-category-id').value
+        title,
+        description,
+        target_amount: targetAmount,
+        category_id: categoryId
       };
 
       try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+
         const response = await fetch('/api/fundraisers', {
           method: 'POST',
           headers: {
@@ -103,14 +130,20 @@
         const data = await response.json();
 
         if (response.ok) {
-          showMessage('Fundraiser created successfully.', 'success');
+          showMessage('Fundraiser created successfully. Redirecting...', 'success');
           form.reset();
-          await loadCategories();
+
+          setTimeout(() => {
+            window.location.href = 'my-fundraisers.html';
+          }, 1000);
         } else {
           showMessage(data.error || 'Failed to create fundraiser.', 'error');
         }
       } catch (error) {
         showMessage('Something went wrong. Please try again.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Fundraiser';
       }
     });
 

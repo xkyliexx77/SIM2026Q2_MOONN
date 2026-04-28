@@ -1,45 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manager Reports</title>
   <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h2>Manager Report Dashboard</h2>
+
+<body class="report-body">
+  <div class="report-container">
+
+    <div class="report-header">
+      <div>
+        <h1>Manager Report Dashboard</h1>
+        <p>View platform performance, donations, fundraisers and user activity.</p>
+      </div>
+
+      <a href="dashboard.html" class="report-back-btn">Back to Dashboard</a>
     </div>
 
-    <div class="card">
-      <h3>Overall Summary</h3>
-      <div id="summaryBox"></div>
+    <p id="report-flash" class="flash"></p>
+
+    <div class="report-summary-card">
+      <h2>Overall Summary</h2>
+      <div id="report-summary-box" class="report-summary-grid"></div>
     </div>
 
-    <div class="card">
-      <h3>Daily Report</h3>
-      <div id="dailyBox"></div>
+    <div class="report-mini-grid">
+      <div class="report-card">
+        <h2>Daily Report</h2>
+        <div id="report-daily-box"></div>
+      </div>
+
+      <div class="report-card">
+        <h2>Weekly Report</h2>
+        <div id="report-weekly-box"></div>
+      </div>
+
+      <div class="report-card">
+        <h2>Monthly Report</h2>
+        <div id="report-monthly-box"></div>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Weekly Report</h3>
-      <div id="weeklyBox"></div>
-    </div>
-
-    <div class="card">
-      <h3>Monthly Report</h3>
-      <div id="monthlyBox"></div>
-    </div>
-
-    <div class="card">
-      <h3>Donation Amount Comparison</h3>
+    <div class="report-chart-card">
+      <h2>Donation Amount Comparison</h2>
       <canvas id="reportChart"></canvas>
     </div>
+
   </div>
 
   <script>
+    let reportChart = null;
+
+    function showMessage(text, type = 'error') {
+      const msg = document.getElementById('report-flash');
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+    }
+
     async function fetchReport(url) {
       const token = localStorage.getItem('token');
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return null;
+      }
 
       const res = await fetch(url, {
         headers: {
@@ -47,70 +75,100 @@
         }
       });
 
-      return await res.json();
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to load report data.');
+      }
+
+      return data;
+    }
+
+    function money(value) {
+      return `$${Number(value || 0).toFixed(2)}`;
     }
 
     async function loadReports() {
-      const token = localStorage.getItem('token');
+      try {
+        const summary = await fetchReport('/api/reports/summary');
+        const daily = await fetchReport('/api/reports/daily');
+        const weekly = await fetchReport('/api/reports/weekly');
+        const monthly = await fetchReport('/api/reports/monthly');
 
-      if (!token) {
-        window.location.href = '/login.html';
-        return;
-      }
+        document.getElementById('report-summary-box').innerHTML = `
+          <div><span>Total Users</span><strong>${summary.total_users || 0}</strong></div>
+          <div><span>Total Categories</span><strong>${summary.total_categories || 0}</strong></div>
+          <div><span>Total Fundraisers</span><strong>${summary.total_fundraisers || 0}</strong></div>
+          <div><span>Total Favourites</span><strong>${summary.total_favourites || 0}</strong></div>
+          <div><span>Total Donations</span><strong>${summary.total_donations || 0}</strong></div>
+          <div><span>Total Donation Amount</span><strong>${money(summary.total_donation_amount)}</strong></div>
+        `;
 
-      const summary = await fetchReport('/api/reports/summary');
-      const daily = await fetchReport('/api/reports/daily');
-      const weekly = await fetchReport('/api/reports/weekly');
-      const monthly = await fetchReport('/api/reports/monthly');
+        document.getElementById('report-daily-box').innerHTML = `
+          <p><span>Donation Count</span><strong>${daily.donation_count || 0}</strong></p>
+          <p><span>Donation Amount</span><strong>${money(daily.donation_amount)}</strong></p>
+        `;
 
-      document.getElementById('summaryBox').innerHTML = `
-        <p><strong>Total Users:</strong> ${summary.total_users}</p>
-        <p><strong>Total Categories:</strong> ${summary.total_categories}</p>
-        <p><strong>Total Fundraisers:</strong> ${summary.total_fundraisers}</p>
-        <p><strong>Total Favourites:</strong> ${summary.total_favourites}</p>
-        <p><strong>Total Donations:</strong> ${summary.total_donations}</p>
-        <p><strong>Total Donation Amount:</strong> $${summary.total_donation_amount}</p>
-      `;
+        document.getElementById('report-weekly-box').innerHTML = `
+          <p><span>Donation Count</span><strong>${weekly.donation_count || 0}</strong></p>
+          <p><span>Donation Amount</span><strong>${money(weekly.donation_amount)}</strong></p>
+        `;
 
-      document.getElementById('dailyBox').innerHTML = `
-        <p><strong>Donation Count Today:</strong> ${daily.donation_count}</p>
-        <p><strong>Donation Amount Today:</strong> $${daily.donation_amount}</p>
-      `;
+        document.getElementById('report-monthly-box').innerHTML = `
+          <p><span>Donation Count</span><strong>${monthly.donation_count || 0}</strong></p>
+          <p><span>Donation Amount</span><strong>${money(monthly.donation_amount)}</strong></p>
+        `;
 
-      document.getElementById('weeklyBox').innerHTML = `
-        <p><strong>Donation Count This Week:</strong> ${weekly.donation_count}</p>
-        <p><strong>Donation Amount This Week:</strong> $${weekly.donation_amount}</p>
-      `;
+        const ctx = document.getElementById('reportChart');
 
-      document.getElementById('monthlyBox').innerHTML = `
-        <p><strong>Donation Count This Month:</strong> ${monthly.donation_count}</p>
-        <p><strong>Donation Amount This Month:</strong> $${monthly.donation_amount}</p>
-      `;
+        if (reportChart) {
+          reportChart.destroy();
+        }
 
-      const ctx = document.getElementById('reportChart');
-
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Daily', 'Weekly', 'Monthly'],
-          datasets: [{
-            label: 'Donation Amount',
-            data: [
-              Number(daily.donation_amount || 0),
-              Number(weekly.donation_amount || 0),
-              Number(monthly.donation_amount || 0)
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: true
+        reportChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Daily', 'Weekly', 'Monthly'],
+            datasets: [{
+              label: 'Donation Amount',
+              data: [
+                Number(daily.donation_amount || 0),
+                Number(weekly.donation_amount || 0),
+                Number(monthly.donation_amount || 0)
+              ],
+              backgroundColor: [
+                'rgba(108, 92, 231, 0.65)',
+                'rgba(162, 155, 254, 0.65)',
+                'rgba(0, 184, 148, 0.65)'
+              ],
+              borderColor: [
+                'rgba(108, 92, 231, 1)',
+                'rgba(162, 155, 254, 1)',
+                'rgba(0, 184, 148, 1)'
+              ],
+              borderWidth: 1,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
             }
           }
-        }
-      });
+        });
+
+      } catch (error) {
+        showMessage(error.message || 'Something went wrong.');
+      }
     }
 
     loadReports();
