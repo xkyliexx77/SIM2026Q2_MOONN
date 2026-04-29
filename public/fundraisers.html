@@ -43,7 +43,6 @@
 
   </div>
 
-  <!-- DONATION MODAL -->
   <div id="donate-modal-overlay" class="donate-modal-overlay">
     <div class="donate-modal">
       <h2>Make a Donation</h2>
@@ -63,8 +62,16 @@
 
   <script>
     const list = document.getElementById('fundraisers-list');
-
     const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!user) {
+      window.location.href = 'login.html';
+    }
+
+    if (user && user.role === 'fundraiser') {
+      window.location.href = 'my-fundraisers.html';
+    }
+
     if (user && user.role) {
       document.body.classList.add(`fundraisers-${user.role}`);
     }
@@ -181,12 +188,6 @@
       loadFundraisers();
     }
 
-    async function viewDetails(id) {
-      await recordView(id);
-      showMessage('View recorded.', 'success');
-      loadFundraisers();
-    }
-
     async function loadFundraisers() {
       const search = document.getElementById('fundraisers-search-input').value.trim();
       const category = document.getElementById('fundraisers-category-filter').value;
@@ -243,16 +244,6 @@
               <span>Raised</span>
               <strong>$${item.current_amount || 0}</strong>
             </div>
-
-            <div>
-              <span>Views</span>
-              <strong>${item.views || 0}</strong>
-            </div>
-
-            <div>
-              <span>Favourites</span>
-              <strong>${item.favourite_count || 0}</strong>
-            </div>
           </div>
 
           <p class="fundraisers-created-by">
@@ -260,7 +251,14 @@
           </p>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-fav-btn" onclick="event.stopPropagation(); favourite(${item.id})">♡ Favourite</button>
+            <button class="fundraisers-donate-btn" onclick="event.stopPropagation(); donate(${item.id})">
+              Donate
+            </button>
+
+            <button class="fundraisers-fav-btn" onclick="event.stopPropagation(); favourite(${item.id})">
+              ♡ Favourite
+            </button>
+          </div>
         `;
 
         list.appendChild(div);

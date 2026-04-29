@@ -180,21 +180,9 @@
           <p><strong>Created By:</strong> ${item.fundraiser_name || 'You'}</p>
 
           <div class="fundraisers-actions">
-            <button onclick="event.stopPropagation(); window.location.href='edit-fundraiser.html?id=${item.id}'">
-              Edit
+            <button onclick="event.stopPropagation(); window.location.href='fundraiser-detail.html?id=${item.id}'">
+              View Details
             </button>
-
-            <button onclick="event.stopPropagation(); deleteFundraiser(${item.id})">
-              Delete
-            </button>
-
-            ${
-              item.status === 'active'
-              ? `<button onclick="event.stopPropagation(); completeFundraiser(${item.id})">
-                   Complete
-                 </button>`
-              : ''
-            }
           </div>
         `;
 

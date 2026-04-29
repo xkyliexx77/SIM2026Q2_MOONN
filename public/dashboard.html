@@ -65,7 +65,6 @@
 
       const menu = document.getElementById('dashboard-menu');
 
-      // ✅ USER ADMIN (ONLY MANAGE USERS)
       if (role === 'admin') {
         document.getElementById('dashboard-role-label').textContent = 'User Admin Workspace';
         document.getElementById('dashboard-title').textContent = 'User Admin Dashboard';
@@ -80,7 +79,6 @@
         `;
       }
 
-      // ✅ PLATFORM MANAGER
       else if (role === 'manager') {
         document.getElementById('dashboard-role-label').textContent = 'Manager Workspace';
         document.getElementById('dashboard-title').textContent = 'Management Dashboard';
@@ -100,32 +98,25 @@
         `;
       }
 
-      // ✅ FUNDRAISER
       else if (role === 'fundraiser') {
         document.getElementById('dashboard-role-label').textContent = 'Fundraiser Workspace';
         document.getElementById('dashboard-title').textContent = 'Fundraiser Dashboard';
         document.getElementById('dashboard-action-subtitle').textContent =
-          'Create and manage your own fundraising activities.';
+          'Create, update, delete and manage only your own fundraising activities.';
 
         menu.innerHTML = `
           <a class="dashboard-action-card" href="create-fundraiser.html">
             <span>Create Fundraiser</span>
-            <small>Start a new campaign</small>
+            <small>Start a new fundraising activity</small>
           </a>
 
           <a class="dashboard-action-card" href="my-fundraisers.html">
             <span>My Fundraisers</span>
-            <small>Edit, delete and track your campaigns</small>
-          </a>
-
-          <a class="dashboard-action-card" href="fundraisers.html">
-            <span>Explore Campaigns</span>
-            <small>View all fundraising activities</small>
+            <small>CRUD and track only your own activities</small>
           </a>
         `;
       }
 
-      // ✅ DONEE
       else if (role === 'donee') {
         document.getElementById('dashboard-role-label').textContent = 'Donee Workspace';
         document.getElementById('dashboard-title').textContent = 'Donation Dashboard';

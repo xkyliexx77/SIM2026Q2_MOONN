@@ -15,7 +15,7 @@
         <p>View full campaign details and performance.</p>
       </div>
 
-      <a href="fundraisers.html" class="fundraisers-back-btn">Back</a>
+      <a href="dashboard.html" class="fundraisers-back-btn">Back</a>
     </div>
 
     <div id="detailBox" class="fundraisers-item-card"></div>
@@ -26,18 +26,32 @@
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
 
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+
+    const isDonee = user && user.role === 'donee';
+
     function calcProgress(raised, target) {
-      const r = Number(raised || 0);
-      const t = Number(target || 0);
-      if (t === 0) return 0;
-      const p = Math.round((r / t) * 100);
-      return p > 100 ? 100 : p;
+    const r = Number(raised || 0);
+    const t = Number(target || 0);
+    if (t === 0) return 0;
+    const percentage = (r / t) * 100;
+    if (percentage > 100) return 100;
+    return percentage.toFixed(2);
     }
 
     async function loadDetails() {
-      const res = await fetch('/api/fundraisers');
-      const result = await res.json();
+      let res;
 
+      if (user && user.role === 'fundraiser') {
+        res = await fetch('/api/fundraisers/mine/list', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+      } else {
+        res = await fetch('/api/fundraisers');
+      }
+
+      const result = await res.json();
       const data = result.items || result || [];
       const item = data.find(f => String(f.id) === String(id));
 
@@ -51,12 +65,13 @@
       }
 
       const progress = calcProgress(item.current_amount, item.target_amount);
+      const isCompleted = item.status && item.status.toLowerCase() === 'completed';
 
       document.getElementById('detailBox').innerHTML = `
         <div class="fundraisers-item-top">
           <div>
             <h3>${item.title}</h3>
-            <p>${item.description || 'No description provided.'}</p>
+            <p>${item.description || ''}</p>
           </div>
 
           <span class="fundraisers-category-badge">
@@ -65,9 +80,6 @@
         </div>
 
         <hr>
-
-        <p><strong>Long Description:</strong></p>
-        <p>${item.long_description || item.description || 'No additional details provided.'}</p>
 
         <div class="fundraisers-info-grid">
           <div>
@@ -80,20 +92,55 @@
             <strong>$${item.current_amount || 0}</strong>
           </div>
 
-          <div>
-            <span>Views</span>
-            <strong>${item.views || 0}</strong>
-          </div>
+          ${!isDonee ? `
+            <div>
+              <span>Views</span>
+              <strong>${item.views || 0}</strong>
+            </div>
 
-          <div>
-            <span>Favourites</span>
-            <strong>${item.favourite_count || 0}</strong>
-          </div>
+            <div>
+              <span>Favourites</span>
+              <strong>${item.favourite_count || 0}</strong>
+            </div>
+
+            <div>
+              <span>Donations</span>
+              <strong>${item.donation_count || 0}</strong>
+            </div>
+
+            <div>
+              <span>Status</span>
+              <strong>${item.status || 'active'}</strong>
+            </div>
+          ` : ''}
         </div>
 
         <p class="fundraisers-created-by">
           Created By: <strong>${item.fundraiser_name || 'Unknown'}</strong>
         </p>
+
+        ${user && user.role === 'fundraiser' ? `
+          <div class="fundraisers-actions" style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+
+            <button class="fundraisers-view-btn"
+              onclick="window.location.href='edit-fundraiser.html?id=${item.id}'">
+              Edit
+            </button>
+
+            ${!isCompleted ? `
+              <button class="fundraisers-complete-btn"
+                onclick="markCompleted(${item.id})">
+                Complete
+              </button>
+            ` : ''}
+
+            <button class="fundraisers-delete-btn"
+              onclick="deleteFundraiser(${item.id})">
+              Delete
+            </button>
+
+          </div>
+        ` : ''}
 
         <div style="margin-top:20px;">
           <p><strong>Progress:</strong> ${progress}%</p>
@@ -111,6 +158,40 @@
           </div>
         </div>
       `;
+    }
+
+    async function markCompleted(id) {
+      if (!confirm('Mark this fundraiser as completed?')) return;
+
+      const res = await fetch(`/api/fundraisers/${id}/complete`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      alert(data.message || data.error || 'Fundraiser updated');
+
+      loadDetails();
+    }
+
+    async function deleteFundraiser(id) {
+      if (!confirm('Delete this fundraiser? This cannot be undone.')) return;
+
+      const res = await fetch(`/api/fundraisers/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      alert(data.message || data.error || 'Fundraiser deleted');
+
+      window.location.href = 'my-fundraisers.html';
     }
 
     loadDetails();

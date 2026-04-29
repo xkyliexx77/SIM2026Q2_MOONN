@@ -5,50 +5,36 @@ class FundraisingService {
     return new Promise((resolve, reject) => {
       const { title, description, target_amount, category_id } = data;
 
-      if (!title || !title.trim()) {
-        return reject(new Error('Title is required'));
-      }
-
-      if (!description || !description.trim()) {
-        return reject(new Error('Description is required'));
-      }
+      if (!title || !title.trim()) return reject(new Error('Title is required'));
+      if (!description || !description.trim()) return reject(new Error('Description is required'));
 
       const numericTarget = Number(target_amount);
       if (!numericTarget || numericTarget <= 0) {
         return reject(new Error('Target amount must be greater than 0'));
       }
 
-      if (!category_id) {
-        return reject(new Error('Category is required'));
-      }
+      if (!category_id) return reject(new Error('Category is required'));
 
-      db.get(`SELECT id FROM categories WHERE id = ?`, [category_id], (catErr, category) => {
-        if (catErr) return reject(catErr);
-        if (!category) return reject(new Error('Selected category does not exist'));
+      db.run(
+        `INSERT INTO fundraisers 
+         (title, description, target_amount, category_id, fundraiser_id)
+         VALUES (?, ?, ?, ?, ?)`,
+        [title.trim(), description.trim(), numericTarget, category_id, fundraiserId],
+        function (err) {
+          if (err) return reject(err);
 
-        db.run(
-          `INSERT INTO fundraisers (title, description, target_amount, category_id, fundraiser_id)
-           VALUES (?, ?, ?, ?, ?)`,
-          [title.trim(), description.trim(), numericTarget, category_id, fundraiserId],
-          function (err) {
-            if (err) return reject(err);
-            resolve({
-              id: this.lastID,
-              title: title.trim(),
-              description: description.trim(),
-              target_amount: numericTarget,
-              category_id,
-              fundraiser_id: fundraiserId
-            });
-          }
-        );
-      });
+          resolve({
+            id: this.lastID,
+            message: 'Fundraiser created successfully'
+          });
+        }
+      );
     });
   }
 
-  static getAll(search, category, page = 1, limit = 5) {
+  static getAll(search, category, page = 1, limit = 100) {
     return new Promise((resolve, reject) => {
-      let whereQuery = ` WHERE LOWER(f.status) = 'active' `;
+      let whereQuery = `WHERE LOWER(f.status) = 'active'`;
       const params = [];
 
       if (search) {
@@ -61,43 +47,29 @@ class FundraisingService {
         params.push(category);
       }
 
-      const safePage = Number(page) > 0 ? Number(page) : 1;
-      const safeLimit = Number(limit) > 0 ? Number(limit) : 5;
-      const offset = (safePage - 1) * safeLimit;
-
-      const countQuery = `
-        SELECT COUNT(*) AS total
+      const query = `
+        SELECT 
+          f.*,
+          c.name AS category_name,
+          u.name AS fundraiser_name,
+          COUNT(d.id) AS donation_count
         FROM fundraisers f
+        LEFT JOIN categories c ON f.category_id = c.id
+        LEFT JOIN users u ON f.fundraiser_id = u.id
+        LEFT JOIN donations d ON f.id = d.fundraiser_id
         ${whereQuery}
+        GROUP BY f.id
+        ORDER BY f.id DESC
+        LIMIT ?
       `;
 
-      db.get(countQuery, params, (countErr, countRow) => {
-        if (countErr) return reject(countErr);
-
-        const dataQuery = `
-          SELECT f.*, c.name AS category_name, u.name AS fundraiser_name
-          FROM fundraisers f
-          LEFT JOIN categories c ON f.category_id = c.id
-          LEFT JOIN users u ON f.fundraiser_id = u.id
-          ${whereQuery}
-          ORDER BY f.id DESC
-          LIMIT ? OFFSET ?
-        `;
-
-        db.all(dataQuery, [...params, safeLimit, offset], (err, rows) => {
-          if (err) return reject(err);
-
-          resolve({
-            items: rows,
-            total: countRow.total,
-            page: safePage,
-            limit: safeLimit,
-            totalPages: Math.ceil(countRow.total / safeLimit) || 1
-          });
-        });
+      db.all(query, [...params, limit], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
       });
     });
   }
+
   static incrementView(id) {
     return new Promise((resolve, reject) => {
       db.run(
@@ -115,20 +87,14 @@ class FundraisingService {
     return new Promise((resolve, reject) => {
       db.all(
         `SELECT 
-            f.id, 
-            f.title, 
-            f.description, 
-            f.target_amount, 
-            f.category_id,
-            c.name AS category_name,
-            f.status,
-            f.current_amount, 
-            f.views, 
-            f.favourite_count,
-            COUNT(d.id) AS donation_count,
-            IFNULL(SUM(d.amount), 0) AS total_donated
+          f.*,
+          c.name AS category_name,
+          u.name AS fundraiser_name,
+          COUNT(d.id) AS donation_count,
+          IFNULL(SUM(d.amount), 0) AS total_donated
         FROM fundraisers f
         LEFT JOIN categories c ON f.category_id = c.id
+        LEFT JOIN users u ON f.fundraiser_id = u.id
         LEFT JOIN donations d ON f.id = d.fundraiser_id
         WHERE f.fundraiser_id = ?
         GROUP BY f.id
@@ -145,12 +111,16 @@ class FundraisingService {
   static getCompleted(ownerId, category, dateFrom, dateTo) {
     return new Promise((resolve, reject) => {
       let query = `
-        SELECT f.id, f.title, f.description, f.target_amount, f.current_amount, f.status,
-               f.created_at, c.name AS category_name
+        SELECT 
+          f.*,
+          c.name AS category_name,
+          u.name AS fundraiser_name
         FROM fundraisers f
         LEFT JOIN categories c ON f.category_id = c.id
+        LEFT JOIN users u ON f.fundraiser_id = u.id
         WHERE f.fundraiser_id = ? AND f.status = 'completed'
       `;
+
       const params = [ownerId];
 
       if (category) {
@@ -181,46 +151,34 @@ class FundraisingService {
     return new Promise((resolve, reject) => {
       const { title, description, target_amount, category_id } = data;
 
-      if (!title || !title.trim()) {
-        return reject(new Error('Title is required'));
-      }
-
-      if (!description || !description.trim()) {
-        return reject(new Error('Description is required'));
-      }
+      if (!title || !title.trim()) return reject(new Error('Title is required'));
+      if (!description || !description.trim()) return reject(new Error('Description is required'));
 
       const numericTarget = Number(target_amount);
       if (!numericTarget || numericTarget <= 0) {
         return reject(new Error('Target amount must be greater than 0'));
       }
 
-      if (!category_id) {
-        return reject(new Error('Category is required'));
-      }
+      if (!category_id) return reject(new Error('Category is required'));
 
-      db.get(`SELECT id FROM categories WHERE id = ?`, [category_id], (catErr, category) => {
-        if (catErr) return reject(catErr);
-        if (!category) return reject(new Error('Selected category does not exist'));
+      db.run(
+        `UPDATE fundraisers
+         SET title = ?, description = ?, target_amount = ?, category_id = ?
+         WHERE id = ? AND fundraiser_id = ?`,
+        [title.trim(), description.trim(), numericTarget, category_id, id, ownerId],
+        function (err) {
+          if (err) return reject(err);
 
-        db.run(
-          `UPDATE fundraisers
-           SET title = ?, description = ?, target_amount = ?, category_id = ?
-           WHERE id = ? AND fundraiser_id = ?`,
-          [title.trim(), description.trim(), numericTarget, category_id, id, ownerId],
-          function (err) {
-            if (err) return reject(err);
-
-            if (this.changes === 0) {
-              return reject(new Error('Fundraiser not found or no permission to edit'));
-            }
-
-            resolve({
-              success: true,
-              message: 'Fundraiser updated successfully'
-            });
+          if (this.changes === 0) {
+            return reject(new Error('Fundraiser not found or no permission to edit'));
           }
-        );
-      });
+
+          resolve({
+            success: true,
+            message: 'Fundraiser updated successfully'
+          });
+        }
+      );
     });
   }
 
@@ -238,7 +196,10 @@ class FundraisingService {
             return reject(new Error('Fundraiser not found or no permission to update'));
           }
 
-          resolve({ success: true, message: 'Fundraiser marked as completed' });
+          resolve({
+            success: true,
+            message: 'Fundraiser marked as completed'
+          });
         }
       );
     });
