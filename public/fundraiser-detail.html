@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fundraiser Details</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>Fundraiser Details</h1>
+        <p>View full details of this fundraising activity.</p>
+      </div>
+
+      <a href="fundraisers.html" class="fundraisers-back-btn">Back to Fundraisers</a>
+    </div>
+
+    <div id="detail-box"></div>
+
+  </div>
+
+  <script>
+    const detailBox = document.getElementById('detail-box');
+    const params = new URLSearchParams(window.location.search);
+    const fundraiserId = params.get('id');
+
+    async function loadFundraiserDetail() {
+      const res = await fetch('/api/fundraisers');
+      const result = await res.json();
+
+      const fundraisers = result.items || result || [];
+      const item = fundraisers.find(f => String(f.id) === String(fundraiserId));
+
+      if (!item) {
+        detailBox.innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>Fundraiser not found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      detailBox.innerHTML = `
+        <div class="fundraisers-item-card">
+          <div class="fundraisers-item-top">
+            <div>
+              <h2>${item.title}</h2>
+              <p>${item.description || 'No description provided.'}</p>
+            </div>
+
+            <span class="fundraisers-category-badge">
+              ${item.category_name || 'No Category'}
+            </span>
+          </div>
+
+          <div class="fundraisers-info-grid">
+            <div>
+              <span>Target</span>
+              <strong>$${item.target_amount || 0}</strong>
+            </div>
+
+            <div>
+              <span>Raised</span>
+              <strong>$${item.current_amount || 0}</strong>
+            </div>
+
+            <div>
+              <span>Views</span>
+              <strong>${item.views || 0}</strong>
+            </div>
+
+            <div>
+              <span>Favourites</span>
+              <strong>${item.favourite_count || 0}</strong>
+            </div>
+          </div>
+
+          <p class="fundraisers-created-by">
+            Created By: <strong>${item.fundraiser_name || 'Unknown'}</strong>
+          </p>
+
+          <p class="fundraisers-created-by">
+            Status: <strong>${item.status || 'active'}</strong>
+          </p>
+        </div>
+      `;
+    }
+
+    loadFundraiserDetail();
+  </script>
+</body>
+</html>

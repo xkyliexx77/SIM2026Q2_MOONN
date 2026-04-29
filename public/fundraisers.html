@@ -107,6 +107,11 @@
       });
     }
 
+    async function openFundraiser(id) {
+      await recordView(id);
+      window.location.href = `fundraiser-detail.html?id=${id}`;
+    }
+
     async function favourite(id) {
       const token = localStorage.getItem('token');
 
@@ -210,6 +215,11 @@
       data.forEach(item => {
         const div = document.createElement('div');
         div.className = 'fundraisers-item-card';
+        div.style.cursor = 'pointer';
+
+        div.onclick = function () {
+          openFundraiser(item.id);
+        };
 
         div.innerHTML = `
           <div class="fundraisers-item-top">
@@ -250,10 +260,8 @@
           </p>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-view-btn" onclick="viewDetails(${item.id})">View</button>
-            <button class="fundraisers-fav-btn" onclick="favourite(${item.id})">Favourite</button>
-            <button class="fundraisers-donate-btn" onclick="donate(${item.id})">Donate</button>
-          </div>
+            <button class="fundraisers-fav-btn" onclick="event.stopPropagation(); favourite(${item.id})">♡ Favourite</button>
+            <button class="fundraisers-donate-btn" onclick="event.stopPropagation(); donate(${item.id})">Donate</button>          </div>
         `;
 
         list.appendChild(div);

@@ -48,7 +48,7 @@ class FundraisingService {
 
   static getAll(search, category, page = 1, limit = 5) {
     return new Promise((resolve, reject) => {
-      let whereQuery = ` WHERE 1=1 `;
+      let whereQuery = ` WHERE LOWER(f.status) = 'active' `;
       const params = [];
 
       if (search) {
@@ -98,7 +98,6 @@ class FundraisingService {
       });
     });
   }
-
   static incrementView(id) {
     return new Promise((resolve, reject) => {
       db.run(
