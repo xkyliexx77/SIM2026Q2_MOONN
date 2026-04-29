@@ -186,8 +186,7 @@
           </div>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-view-btn" onclick="editUser(${user.id}, '${escapeText(user.name)}', '${escapeText(user.email)}', '${user.role}')">Edit</button>
-            ${
+            <button class="fundraisers-view-btn" onclick="window.location.href='edit-user.html?id=${user.id}'">Edit</button>                    ${
               user.status === 'suspended'
                 ? `<button class="fundraisers-donate-btn" onclick="activateUser(${user.id})">Activate</button>`
                 : `<button class="fundraisers-fav-btn" onclick="suspendUser(${user.id})">Suspend</button>`
