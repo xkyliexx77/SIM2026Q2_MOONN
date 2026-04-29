@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT NOT NULL CHECK(role IN ('admin', 'fundraiser', 'donee', 'manager'))
+    role TEXT NOT NULL CHECK(role IN ('admin', 'fundraiser', 'donee', 'manager')),
+    status TEXT DEFAULT 'active' CHECK(status IN ('active', 'suspended'))
 );
 
 CREATE TABLE IF NOT EXISTS categories (

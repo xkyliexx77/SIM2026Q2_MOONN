@@ -65,6 +65,9 @@ class AuthService {
       db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
         if (err) return reject(err);
         if (!user) return reject(new Error('User not found'));
+        if (user.status === 'suspended') {
+          return reject(new Error('This account has been suspended'));
+        };
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return reject(new Error('Invalid password'));

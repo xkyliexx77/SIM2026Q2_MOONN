@@ -65,11 +65,27 @@
 
       const menu = document.getElementById('dashboard-menu');
 
-      if (role === 'manager') {
+      // ✅ USER ADMIN (ONLY MANAGE USERS)
+      if (role === 'admin') {
+        document.getElementById('dashboard-role-label').textContent = 'User Admin Workspace';
+        document.getElementById('dashboard-title').textContent = 'User Admin Dashboard';
+        document.getElementById('dashboard-action-subtitle').textContent =
+          'Manage all user accounts, roles and access control.';
+
+        menu.innerHTML = `
+          <a class="dashboard-action-card" href="admin-users.html">
+            <span>Manage Users</span>
+            <small>Create, search, update, suspend and activate users</small>
+          </a>
+        `;
+      }
+
+      // ✅ PLATFORM MANAGER
+      else if (role === 'manager') {
         document.getElementById('dashboard-role-label').textContent = 'Manager Workspace';
         document.getElementById('dashboard-title').textContent = 'Management Dashboard';
         document.getElementById('dashboard-action-subtitle').textContent =
-          'Manage platform categories, fundraisers and reports.';
+          'Manage platform categories and generate reports.';
 
         menu.innerHTML = `
           <a class="dashboard-action-card" href="categories.html">
@@ -77,57 +93,54 @@
             <small>Create, edit and delete categories</small>
           </a>
 
-          <a class="dashboard-action-card" href="fundraisers.html">
-            <span>Fundraiser Overview</span>
-            <small>View all fundraising campaigns</small>
-          </a>
-
           <a class="dashboard-action-card" href="reports.html">
             <span>Reports & Analytics</span>
-            <small>View donation and platform summary</small>
+            <small>View daily, weekly and monthly reports</small>
           </a>
         `;
       }
 
+      // ✅ FUNDRAISER
       else if (role === 'fundraiser') {
         document.getElementById('dashboard-role-label').textContent = 'Fundraiser Workspace';
         document.getElementById('dashboard-title').textContent = 'Fundraiser Dashboard';
         document.getElementById('dashboard-action-subtitle').textContent =
-          'Create campaigns and monitor your fundraiser performance.';
+          'Create and manage your own fundraising activities.';
 
         menu.innerHTML = `
           <a class="dashboard-action-card" href="create-fundraiser.html">
             <span>Create Fundraiser</span>
-            <small>Start a new fundraising campaign</small>
-          </a>
-
-          <a class="dashboard-action-card" href="fundraisers.html">
-            <span>Explore Fundraisers</span>
-            <small>View all available fundraising campaigns</small>
+            <small>Start a new campaign</small>
           </a>
 
           <a class="dashboard-action-card" href="my-fundraisers.html">
-            <span>My Analytics</span>
-            <small>Track views, donations and favourites</small>
+            <span>My Fundraisers</span>
+            <small>Edit, delete and track your campaigns</small>
+          </a>
+
+          <a class="dashboard-action-card" href="fundraisers.html">
+            <span>Explore Campaigns</span>
+            <small>View all fundraising activities</small>
           </a>
         `;
       }
 
+      // ✅ DONEE
       else if (role === 'donee') {
         document.getElementById('dashboard-role-label').textContent = 'Donee Workspace';
         document.getElementById('dashboard-title').textContent = 'Donation Dashboard';
         document.getElementById('dashboard-action-subtitle').textContent =
-          'Browse fundraisers, save favourites and manage your donations.';
+          'Browse, favourite and donate to campaigns.';
 
         menu.innerHTML = `
           <a class="dashboard-action-card" href="fundraisers.html">
             <span>Browse Fundraisers</span>
-            <small>Find campaigns you want to support</small>
+            <small>Find campaigns to support</small>
           </a>
 
           <a class="dashboard-action-card" href="favourites.html">
             <span>My Favourites</span>
-            <small>View your saved fundraising campaigns</small>
+            <small>View saved campaigns</small>
           </a>
 
           <a class="dashboard-action-card" href="donations.html">

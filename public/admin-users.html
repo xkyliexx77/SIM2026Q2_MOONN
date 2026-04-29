@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Admin - Manage Accounts</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>User Account Management</h1>
+        <p>Create, search, update, suspend and activate user accounts.</p>
+      </div>
+
+      <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="fundraisers-filter-card">
+      <h2>Create User Account</h2>
+      <p id="admin-users-flash" class="flash"></p>
+
+      <div class="fundraisers-filters">
+        <div>
+          <label>Name</label>
+          <input type="text" id="create-name" placeholder="Enter name">
+        </div>
+
+        <div>
+          <label>Email</label>
+          <input type="email" id="create-email" placeholder="Enter email">
+        </div>
+
+        <div>
+          <label>Password</label>
+          <input type="password" id="create-password" placeholder="Enter password">
+        </div>
+
+        <div>
+          <label>Role</label>
+          <select id="create-role">
+            <option value="admin">User Admin</option>
+            <option value="fundraiser">Fundraiser</option>
+            <option value="donee">Donee</option>
+            <option value="manager">Platform Manager</option>
+          </select>
+        </div>
+
+        <button class="fundraisers-search-btn" onclick="createUser()">Create</button>
+      </div>
+    </div>
+
+    <div class="fundraisers-filter-card">
+      <h2>Search Users</h2>
+
+      <div class="fundraisers-filters">
+        <div>
+          <label>Search</label>
+          <input type="text" id="search-input" placeholder="Search name, email or role">
+        </div>
+
+        <button class="fundraisers-search-btn" onclick="loadUsers()">Search</button>
+        <button class="fundraisers-clear-btn" onclick="clearSearch()">Clear</button>
+      </div>
+    </div>
+
+    <div id="users-list" class="fundraisers-list"></div>
+
+  </div>
+
+  <script>
+    const list = document.getElementById('users-list');
+
+    function showMessage(text, type = 'success') {
+      const msg = document.getElementById('admin-users-flash');
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 3000);
+    }
+
+    function getToken() {
+      return localStorage.getItem('token');
+    }
+
+    async function createUser() {
+      const token = getToken();
+
+      const body = {
+        name: document.getElementById('create-name').value,
+        email: document.getElementById('create-email').value,
+        password: document.getElementById('create-password').value,
+        role: document.getElementById('create-role').value
+      };
+
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showMessage('User created successfully.', 'success');
+        document.getElementById('create-name').value = '';
+        document.getElementById('create-email').value = '';
+        document.getElementById('create-password').value = '';
+        loadUsers();
+      } else {
+        showMessage(data.error || 'Failed to create user.', 'error');
+      }
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      loadUsers();
+    }
+
+    async function loadUsers() {
+      const token = getToken();
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const search = document.getElementById('search-input').value.trim();
+      const query = new URLSearchParams();
+
+      if (search) query.append('search', search);
+
+      const res = await fetch(`/api/users?${query.toString()}`, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      list.innerHTML = '';
+
+      if (!Array.isArray(data) || data.length === 0) {
+        list.innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>No users found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      data.forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'fundraisers-item-card';
+
+        div.innerHTML = `
+          <div class="fundraisers-item-top">
+            <div>
+              <h3>${user.name}</h3>
+              <p>${user.email}</p>
+            </div>
+
+            <span class="fundraisers-category-badge">
+              ${user.role}
+            </span>
+          </div>
+
+          <div class="fundraisers-info-grid">
+            <div>
+              <span>User ID</span>
+              <strong>${user.id}</strong>
+            </div>
+
+            <div>
+              <span>Status</span>
+              <strong>${user.status || 'active'}</strong>
+            </div>
+          </div>
+
+          <div class="fundraisers-actions">
+            <button class="fundraisers-view-btn" onclick="editUser(${user.id}, '${escapeText(user.name)}', '${escapeText(user.email)}', '${user.role}')">Edit</button>
+            ${
+              user.status === 'suspended'
+                ? `<button class="fundraisers-donate-btn" onclick="activateUser(${user.id})">Activate</button>`
+                : `<button class="fundraisers-fav-btn" onclick="suspendUser(${user.id})">Suspend</button>`
+            }
+          </div>
+        `;
+
+        list.appendChild(div);
+      });
+    }
+
+    function escapeText(text) {
+      return String(text || '').replace(/'/g, "\\'");
+    }
+
+    async function editUser(id, oldName, oldEmail, oldRole) {
+      const token = getToken();
+
+      const name = prompt('Enter new name:', oldName);
+      if (name === null) return;
+
+      const email = prompt('Enter new email:', oldEmail);
+      if (email === null) return;
+
+      const role = prompt('Enter role: admin, fundraiser, donee, manager', oldRole);
+      if (role === null) return;
+
+      const res = await fetch(`/api/users/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ name, email, role })
+      });
+
+      const data = await res.json();
+
+      showMessage(data.message || data.error, data.error ? 'error' : 'success');
+      loadUsers();
+    }
+
+    async function suspendUser(id) {
+      const token = getToken();
+
+      if (!confirm('Suspend this user account?')) return;
+
+      const res = await fetch(`/api/users/${id}/suspend`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      showMessage(data.message || data.error, data.error ? 'error' : 'success');
+      loadUsers();
+    }
+
+    async function activateUser(id) {
+      const token = getToken();
+
+      const res = await fetch(`/api/users/${id}/activate`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      showMessage(data.message || data.error, data.error ? 'error' : 'success');
+      loadUsers();
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>

@@ -10,6 +10,7 @@ const fundraisingRoutes = require('./routes/fundraisingRoutes');
 const favouriteRoutes = require('./routes/favouriteRoutes');
 const donationRoutes = require('./routes/donationRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use('/api/fundraisers', fundraisingRoutes);
 app.use('/api/favourites', favouriteRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
