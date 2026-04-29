@@ -13,7 +13,7 @@
 body {
   font-family: Arial, sans-serif;
   background: #eef2f7;   /* soft grey background */
-  color: #2f3640;
+  color: white;
   margin: 0;
   padding: 0;
 }
@@ -408,7 +408,7 @@ hr {
 
 /* HEADER / BANNER */
 .dashboard-role-banner {
-  color: white;
+  background: linear-gradient(135deg, #2d3436, #6c5ce7);
   padding: 32px;
   border-radius: 22px;
   display: flex;
