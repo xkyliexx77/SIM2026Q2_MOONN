@@ -1,55 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>My Fundraisers</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body class="myfund-body">
-  <div class="myfund-container">
+<body class="fundraisers-body">
+  <div class="fundraisers-container">
 
-    <div class="myfund-header">
+    <div class="fundraisers-header">
       <div>
-        <h1>My Fundraiser Analytics</h1>
-        <p>Track your fundraiser progress, donations, views and favourites.</p>
+        <h1>My Fundraisers</h1>
+        <p>Manage and track your fundraising activities.</p>
       </div>
 
-      <div class="myfund-header-actions">
-        <a href="completed-fundraisers.html" class="myfund-light-btn">Completed</a>
-        <a href="dashboard.html" class="myfund-light-btn">Dashboard</a>
+      <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
+    </div>
+
+    <!-- 🔍 SEARCH + FILTER -->
+    <div class="fundraisers-filter-card">
+      <h2>Search & Filter</h2>
+
+      <div class="fundraisers-filters">
+        <div>
+          <label>Search</label>
+          <input type="text" id="searchInput" placeholder="Search title">
+        </div>
+
+        <div>
+          <label>Status</label>
+          <select id="statusFilter">
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <button class="fundraisers-search-btn" onclick="loadMyFundraisers()">Search</button>
       </div>
     </div>
 
-    <div class="myfund-message-card">
-      <p id="myfund-flash" class="flash"></p>
-      <p class="myfund-subtext">Manage your created fundraisers below.</p>
-    </div>
-
-    <div id="myfund-list" class="myfund-list"></div>
+    <div id="list" class="fundraisers-list"></div>
 
   </div>
 
   <script>
-    const list = document.getElementById('myfund-list');
+    const list = document.getElementById('list');
 
-    function showMessage(text, type = 'success') {
-      const msg = document.getElementById('myfund-flash');
-      msg.textContent = text;
-      msg.className = `flash ${type}`;
-      msg.style.display = 'block';
+    function getToken() {
+      return localStorage.getItem('token');
+    }
 
-      setTimeout(() => {
-        msg.style.display = 'none';
-      }, 3000);
+    async function loadMyFundraisers() {
+      const token = getToken();
+
+      const search = document.getElementById('searchInput').value;
+      const status = document.getElementById('statusFilter').value;
+
+      const res = await fetch('/api/fundraisers/mine/list', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      let data = await res.json();
+
+      // 🔍 SEARCH
+      if (search) {
+        data = data.filter(f =>
+          f.title.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
+      // 🔍 FILTER STATUS
+      if (status) {
+        data = data.filter(f => f.status === status);
+      }
+
+      list.innerHTML = '';
+
+      if (!data.length) {
+        list.innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>No fundraisers found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'fundraisers-item-card';
+
+        div.innerHTML = `
+          <div class="fundraisers-item-top">
+            <div>
+              <h3>${item.title}</h3>
+              <p>${item.description}</p>
+            </div>
+
+            <span class="fundraisers-category-badge">
+              ${item.status}
+            </span>
+          </div>
+
+          <div class="fundraisers-info-grid">
+            <div>
+              <span>Target</span>
+              <strong>$${item.target_amount}</strong>
+            </div>
+
+            <div>
+              <span>Raised</span>
+              <strong>$${item.current_amount}</strong>
+            </div>
+
+            <div>
+              <span>Views</span>
+              <strong>${item.views}</strong>
+            </div>
+
+            <div>
+              <span>Favourites</span>
+              <strong>${item.favourite_count}</strong>
+            </div>
+          </div>
+
+          <div class="fundraisers-actions">
+
+            <button class="fundraisers-view-btn"
+              onclick="window.location.href='edit-fundraiser.html?id=${item.id}'">
+              Edit
+            </button>
+
+            <button class="fundraisers-fav-btn"
+              onclick="deleteFundraiser(${item.id})">
+              Delete
+            </button>
+
+            ${
+              item.status === 'active'
+              ? `<button class="fundraisers-donate-btn"
+                   onclick="completeFundraiser(${item.id})">
+                   Mark Completed
+                 </button>`
+              : ''
+            }
+
+          </div>
+        `;
+
+        list.appendChild(div);
+      });
     }
 
     async function deleteFundraiser(id) {
-      const token = localStorage.getItem('token');
+      const token = getToken();
 
-      const confirmDelete = confirm('Are you sure you want to delete this fundraiser?');
-      if (!confirmDelete) return;
+      if (!confirm('Delete this fundraiser?')) return;
 
       const res = await fetch(`/api/fundraisers/${id}`, {
         method: 'DELETE',
@@ -59,15 +168,13 @@
       });
 
       const data = await res.json();
-      showMessage(data.message || data.error, data.error ? 'error' : 'success');
+      alert(data.message || data.error);
+
       loadMyFundraisers();
     }
 
     async function completeFundraiser(id) {
-      const token = localStorage.getItem('token');
-
-      const confirmComplete = confirm('Mark this fundraiser as completed?');
-      if (!confirmComplete) return;
+      const token = getToken();
 
       const res = await fetch(`/api/fundraisers/${id}/complete`, {
         method: 'PATCH',
@@ -77,97 +184,9 @@
       });
 
       const data = await res.json();
-      showMessage(data.message || data.error, data.error ? 'error' : 'success');
+      alert(data.message || data.error);
+
       loadMyFundraisers();
-    }
-
-    async function loadMyFundraisers() {
-      const token = localStorage.getItem('token');
-
-      if (!token) {
-        window.location.href = 'login.html';
-        return;
-      }
-
-      const res = await fetch('/api/fundraisers/mine/list', {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
-
-      const data = await res.json();
-      list.innerHTML = '';
-
-      if (!data.length) {
-        list.innerHTML = `
-          <div class="myfund-empty-card">
-            <p>No fundraisers created yet.</p>
-            <a href="create-fundraiser.html" class="myfund-create-btn">Create Fundraiser</a>
-          </div>
-        `;
-        return;
-      }
-
-      data.forEach(item => {
-        const raised = Number(item.current_amount || 0);
-        const target = Number(item.target_amount || 0);
-        const progress = target > 0 ? Math.min((raised / target) * 100, 100).toFixed(0) : 0;
-
-        const div = document.createElement('div');
-        div.className = 'myfund-card';
-
-        div.innerHTML = `
-          <div class="myfund-card-top">
-            <div>
-              <h2>${item.title}</h2>
-              <span class="myfund-status">${item.status}</span>
-            </div>
-          </div>
-
-          <div class="myfund-progress-section">
-            <div class="myfund-progress-text">
-              <span>$${raised} raised</span>
-              <span>$${target} target</span>
-            </div>
-
-            <div class="myfund-progress-bar">
-              <div class="myfund-progress-fill" style="width: ${progress}%"></div>
-            </div>
-
-            <p class="myfund-progress-percent">${progress}% completed</p>
-          </div>
-
-          <div class="myfund-stats-grid">
-            <div>
-              <span>Views</span>
-              <strong>${item.views || 0}</strong>
-            </div>
-
-            <div>
-              <span>Favourites</span>
-              <strong>${item.favourite_count || 0}</strong>
-            </div>
-
-            <div>
-              <span>Donation Count</span>
-              <strong>${item.donation_count || 0}</strong>
-            </div>
-
-            <div>
-              <span>Total Donated</span>
-              <strong>$${item.total_donated || 0}</strong>
-            </div>
-          </div>
-
-          <div class="myfund-actions">
-            <button class="myfund-edit-btn" onclick="window.location.href='edit-fundraiser.html?id=${item.id}'">Edit</button>
-            <button class="myfund-complete-btn" onclick="completeFundraiser(${item.id})">Mark Completed</button>
-            <button class="myfund-delete-btn" onclick="deleteFundraiser(${item.id})">Delete</button>
-          </div>
-        `;
-
-        list.appendChild(div);
-      });
     }
 
     loadMyFundraisers();
