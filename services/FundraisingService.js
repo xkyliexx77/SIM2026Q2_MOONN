@@ -114,15 +114,25 @@ class FundraisingService {
   static getMine(ownerId) {
     return new Promise((resolve, reject) => {
       db.all(
-        `SELECT f.id, f.title, f.description, f.target_amount, f.category_id, f.status,
-                f.current_amount, f.views, f.favourite_count,
-                COUNT(d.id) AS donation_count,
-                IFNULL(SUM(d.amount), 0) AS total_donated
-         FROM fundraisers f
-         LEFT JOIN donations d ON f.id = d.fundraiser_id
-         WHERE f.fundraiser_id = ?
-         GROUP BY f.id
-         ORDER BY f.id DESC`,
+        `SELECT 
+            f.id, 
+            f.title, 
+            f.description, 
+            f.target_amount, 
+            f.category_id,
+            c.name AS category_name,
+            f.status,
+            f.current_amount, 
+            f.views, 
+            f.favourite_count,
+            COUNT(d.id) AS donation_count,
+            IFNULL(SUM(d.amount), 0) AS total_donated
+        FROM fundraisers f
+        LEFT JOIN categories c ON f.category_id = c.id
+        LEFT JOIN donations d ON f.id = d.fundraiser_id
+        WHERE f.fundraiser_id = ?
+        GROUP BY f.id
+        ORDER BY f.id DESC`,
         [ownerId],
         (err, rows) => {
           if (err) return reject(err);

@@ -61,6 +61,36 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* 🔥 GRID: 3 cards per row */
+.fundraisers-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .fundraisers-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .fundraisers-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* card click effect */
+.fundraisers-item-card {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.fundraisers-item-card:hover {
+  transform: translateY(-3px);
+}
+
 /* =========================
    TEXT
 ========================= */

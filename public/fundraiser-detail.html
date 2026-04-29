@@ -9,87 +9,109 @@
 <body class="fundraisers-body">
   <div class="fundraisers-container">
 
+    <!-- HEADER -->
     <div class="fundraisers-header">
       <div>
         <h1>Fundraiser Details</h1>
-        <p>View full details of this fundraising activity.</p>
+        <p>View full campaign details and performance.</p>
       </div>
 
-      <a href="fundraisers.html" class="fundraisers-back-btn">Back to Fundraisers</a>
+      <a href="my-fundraisers.html" class="fundraisers-back-btn">Back</a>
     </div>
 
-    <div id="detail-box"></div>
+    <!-- MAIN CARD -->
+    <div id="detailBox" class="fundraisers-item-card"></div>
 
   </div>
 
   <script>
-    const detailBox = document.getElementById('detail-box');
     const params = new URLSearchParams(window.location.search);
-    const fundraiserId = params.get('id');
+    const id = params.get('id');
 
-    async function loadFundraiserDetail() {
-      const res = await fetch('/api/fundraisers');
-      const result = await res.json();
+    function calcProgress(raised, target) {
+      const r = Number(raised || 0);
+      const t = Number(target || 0);
+      if (t === 0) return 0;
+      const p = Math.round((r / t) * 100);
+      return p > 100 ? 100 : p;
+    }
 
-      const fundraisers = result.items || result || [];
-      const item = fundraisers.find(f => String(f.id) === String(fundraiserId));
+    async function loadDetails() {
+      const token = localStorage.getItem('token');
+
+      const res = await fetch('/api/fundraisers/mine/list', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      const data = await res.json();
+      const item = data.find(f => String(f.id) === String(id));
 
       if (!item) {
-        detailBox.innerHTML = `
-          <div class="fundraisers-empty-card">
-            <p>Fundraiser not found.</p>
-          </div>
-        `;
+        document.getElementById('detailBox').innerHTML =
+          `<div class="fundraisers-empty-card"><p>Fundraiser not found.</p></div>`;
         return;
       }
 
-      detailBox.innerHTML = `
-        <div class="fundraisers-item-card">
-          <div class="fundraisers-item-top">
-            <div>
-              <h2>${item.title}</h2>
-              <p>${item.description || 'No description provided.'}</p>
-            </div>
+      const progress = calcProgress(item.current_amount, item.target_amount);
 
-            <span class="fundraisers-category-badge">
-              ${item.category_name || 'No Category'}
-            </span>
+      document.getElementById('detailBox').innerHTML = `
+        <div class="fundraisers-item-top">
+          <div>
+            <h2>${item.title}</h2>
+            <p>${item.description}</p>
           </div>
 
-          <div class="fundraisers-info-grid">
-            <div>
-              <span>Target</span>
-              <strong>$${item.target_amount || 0}</strong>
-            </div>
+          <span class="fundraisers-category-badge">
+            ${item.status}
+          </span>
+        </div>
 
-            <div>
-              <span>Raised</span>
-              <strong>$${item.current_amount || 0}</strong>
-            </div>
+        <hr>
 
-            <div>
-              <span>Views</span>
-              <strong>${item.views || 0}</strong>
-            </div>
+        <p><strong>Long Description:</strong></p>
+        <p>${item.long_description || 'No additional details provided.'}</p>
 
-            <div>
-              <span>Favourites</span>
-              <strong>${item.favourite_count || 0}</strong>
-            </div>
+        <div class="fundraisers-info-grid">
+          <div>
+            <span>Target</span>
+            <strong>$${item.target_amount || 0}</strong>
           </div>
 
-          <p class="fundraisers-created-by">
-            Created By: <strong>${item.fundraiser_name || 'Unknown'}</strong>
-          </p>
+          <div>
+            <span>Raised</span>
+            <strong>$${item.current_amount || 0}</strong>
+          </div>
 
-          <p class="fundraisers-created-by">
-            Status: <strong>${item.status || 'active'}</strong>
-          </p>
+          <div>
+            <span>Views</span>
+            <strong>${item.views || 0}</strong>
+          </div>
+
+          <div>
+            <span>Favourites</span>
+            <strong>${item.favourite_count || 0}</strong>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <p><strong>Progress:</strong> ${progress}%</p>
+
+          <div style="width:100%;background:#e5e7eb;border-radius:20px;">
+            <div style="
+              width:${progress}%;
+              background:linear-gradient(90deg,#2ecc71,#27ae60);
+              color:white;
+              text-align:center;
+              padding:6px 0;
+              font-weight:bold;">
+              ${progress}%
+            </div>
+          </div>
         </div>
       `;
     }
 
-    loadFundraiserDetail();
+    loadDetails();
   </script>
 </body>
 </html>

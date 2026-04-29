@@ -4,6 +4,31 @@
   <meta charset="UTF-8">
   <title>My Fundraisers</title>
   <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    .fundraisers-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .fundraisers-list { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .fundraisers-list { grid-template-columns: 1fr; }
+    }
+
+    .fundraisers-item-card {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .fundraisers-item-card:hover {
+      transform: translateY(-3px);
+    }
+  </style>
 </head>
 
 <body class="fundraisers-body">
@@ -15,10 +40,31 @@
         <p>Manage and track your fundraising activities.</p>
       </div>
 
-      <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
+      <a href="dashboard.html" class="fundraisers-back-btn">Back</a>
     </div>
 
-    <!-- 🔍 SEARCH + FILTER -->
+    <!-- ANALYTICS -->
+    <div class="fundraisers-filter-card">
+      <h2>My Analytics Summary</h2>
+      <div class="fundraisers-info-grid">
+        <div><span>Total Campaigns</span><strong id="totalCampaigns">0</strong></div>
+        <div><span>Total Views</span><strong id="totalViews">0</strong></div>
+        <div><span>Total Favourites</span><strong id="totalFavourites">0</strong></div>
+        <div><span>Total Raised</span><strong id="totalRaised">$0</strong></div>
+      </div>
+    </div>
+
+    <!-- TOP -->
+    <div class="fundraisers-filter-card">
+      <h2>Top Performing Campaigns</h2>
+      <div class="fundraisers-info-grid">
+        <div><span>Most Viewed</span><strong id="topViews">-</strong></div>
+        <div><span>Most Favourited</span><strong id="topFavourites">-</strong></div>
+        <div><span>Highest Raised</span><strong id="topRaised">-</strong></div>
+      </div>
+    </div>
+
+    <!-- FILTER -->
     <div class="fundraisers-filter-card">
       <h2>Search & Filter</h2>
 
@@ -37,6 +83,16 @@
           </select>
         </div>
 
+        <div>
+          <label>Sort</label>
+          <select id="sortFilter">
+            <option value="latest">Latest</option>
+            <option value="mostViews">Most Views</option>
+            <option value="mostFavourites">Most Favourites</option>
+            <option value="mostRaised">Most Raised</option>
+          </select>
+        </div>
+
         <button class="fundraisers-search-btn" onclick="loadMyFundraisers()">Search</button>
       </div>
     </div>
@@ -52,102 +108,93 @@
       return localStorage.getItem('token');
     }
 
+    function updateSummary(data) {
+      document.getElementById('totalCampaigns').textContent = data.length;
+      document.getElementById('totalViews').textContent =
+        data.reduce((s, i) => s + (i.views || 0), 0);
+      document.getElementById('totalFavourites').textContent =
+        data.reduce((s, i) => s + (i.favourite_count || 0), 0);
+      document.getElementById('totalRaised').textContent =
+        '$' + data.reduce((s, i) => s + (i.current_amount || 0), 0);
+    }
+
+    function updateTop(data) {
+      if (!data.length) return;
+
+      const v = [...data].sort((a,b)=>b.views-a.views)[0];
+      const f = [...data].sort((a,b)=>b.favourite_count-a.favourite_count)[0];
+      const r = [...data].sort((a,b)=>b.current_amount-a.current_amount)[0];
+
+      document.getElementById('topViews').textContent = `${v.title} (${v.views})`;
+      document.getElementById('topFavourites').textContent = `${f.title} (${f.favourite_count})`;
+      document.getElementById('topRaised').textContent = `${r.title} ($${r.current_amount})`;
+    }
+
     async function loadMyFundraisers() {
       const token = getToken();
 
-      const search = document.getElementById('searchInput').value;
-      const status = document.getElementById('statusFilter').value;
-
       const res = await fetch('/api/fundraisers/mine/list', {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
+        headers: { 'Authorization': 'Bearer ' + token }
       });
 
       let data = await res.json();
 
-      // 🔍 SEARCH
+      updateSummary(data);
+      updateTop(data);
+
+      const search = document.getElementById('searchInput').value;
+      const status = document.getElementById('statusFilter').value;
+      const sort = document.getElementById('sortFilter').value;
+
       if (search) {
         data = data.filter(f =>
           f.title.toLowerCase().includes(search.toLowerCase())
         );
       }
 
-      // 🔍 FILTER STATUS
       if (status) {
         data = data.filter(f => f.status === status);
       }
 
-      list.innerHTML = '';
+      if (sort === 'mostViews') data.sort((a,b)=>b.views-a.views);
+      else if (sort === 'mostFavourites') data.sort((a,b)=>b.favourite_count-a.favourite_count);
+      else if (sort === 'mostRaised') data.sort((a,b)=>b.current_amount-a.current_amount);
+      else data.sort((a,b)=>b.id-a.id);
 
-      if (!data.length) {
-        list.innerHTML = `
-          <div class="fundraisers-empty-card">
-            <p>No fundraisers found.</p>
-          </div>
-        `;
-        return;
-      }
+      list.innerHTML = '';
 
       data.forEach(item => {
         const div = document.createElement('div');
         div.className = 'fundraisers-item-card';
 
+        div.onclick = () => {
+          window.location.href = `fundraiser-detail.html?id=${item.id}`;
+        };
+
         div.innerHTML = `
-          <div class="fundraisers-item-top">
-            <div>
-              <h3>${item.title}</h3>
-              <p>${item.description}</p>
-            </div>
+          <h3>${item.title}</h3>
+          <p>${(item.description || '').substring(0,80)}...</p>
 
-            <span class="fundraisers-category-badge">
-              ${item.status}
-            </span>
-          </div>
-
-          <div class="fundraisers-info-grid">
-            <div>
-              <span>Target</span>
-              <strong>$${item.target_amount}</strong>
-            </div>
-
-            <div>
-              <span>Raised</span>
-              <strong>$${item.current_amount}</strong>
-            </div>
-
-            <div>
-              <span>Views</span>
-              <strong>${item.views}</strong>
-            </div>
-
-            <div>
-              <span>Favourites</span>
-              <strong>${item.favourite_count}</strong>
-            </div>
-          </div>
+          <p><strong>Category:</strong> ${item.category_name || 'No Category'}</p>
+          <p><strong>Target:</strong> $${item.target_amount}</p>
+          <p><strong>Created By:</strong> ${item.fundraiser_name || 'You'}</p>
 
           <div class="fundraisers-actions">
-
-            <button class="fundraisers-view-btn"
-              onclick="window.location.href='edit-fundraiser.html?id=${item.id}'">
+            <button onclick="event.stopPropagation(); window.location.href='edit-fundraiser.html?id=${item.id}'">
               Edit
             </button>
 
-            <button class="fundraisers-fav-btn"
-              onclick="deleteFundraiser(${item.id})">
+            <button onclick="event.stopPropagation(); deleteFundraiser(${item.id})">
               Delete
             </button>
 
             ${
               item.status === 'active'
-              ? `<button class="fundraisers-donate-btn"
-                   onclick="completeFundraiser(${item.id})">
-                   Mark Completed
+              ? `<button onclick="event.stopPropagation(); completeFundraiser(${item.id})">
+                   Complete
                  </button>`
               : ''
             }
-
           </div>
         `;
 
@@ -157,18 +204,12 @@
 
     async function deleteFundraiser(id) {
       const token = getToken();
+      if (!confirm('Delete?')) return;
 
-      if (!confirm('Delete this fundraiser?')) return;
-
-      const res = await fetch(`/api/fundraisers/${id}`, {
+      await fetch(`/api/fundraisers/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
+        headers: { 'Authorization': 'Bearer ' + token }
       });
-
-      const data = await res.json();
-      alert(data.message || data.error);
 
       loadMyFundraisers();
     }
@@ -176,15 +217,10 @@
     async function completeFundraiser(id) {
       const token = getToken();
 
-      const res = await fetch(`/api/fundraisers/${id}/complete`, {
+      await fetch(`/api/fundraisers/${id}/complete`, {
         method: 'PATCH',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
+        headers: { 'Authorization': 'Bearer ' + token }
       });
-
-      const data = await res.json();
-      alert(data.message || data.error);
 
       loadMyFundraisers();
     }
