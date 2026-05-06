@@ -186,12 +186,12 @@
               View Details
             </button>
 
+            ${item.status !== 'completed' ? `
             <button class="fundraisers-edit-btn"
               onclick="event.stopPropagation(); window.location.href='edit-fundraiser.html?id=${item.id}'">
               Edit
             </button>
 
-            ${item.status !== 'completed' ? `
               <button class="fundraisers-complete-btn"
                 onclick="event.stopPropagation(); completeFundraiser(${item.id})">
                 Complete
