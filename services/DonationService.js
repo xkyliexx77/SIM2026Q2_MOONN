@@ -50,6 +50,7 @@ class DonationService {
                   if (updateErr) {
                     db.run('ROLLBACK');
                     return reject(updateErr);
+                    
                   }
 
                   db.get(

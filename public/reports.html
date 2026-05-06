@@ -3,9 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Manager Reports</title>
   <link rel="stylesheet" href="css/styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    .comparison-bars {
+      display: grid;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 110px;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .comparison-label {
+      color: #2d3436;
+      font-weight: 700;
+    }
+
+    .comparison-track {
+      background: #eeeaff;
+      border-radius: 999px;
+      overflow: hidden;
+      height: 28px;
+    }
+
+    .comparison-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+      border-radius: 999px;
+      min-width: 2%;
+    }
+
+    .comparison-amount {
+      color: #2d3436;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .report-card p {
+      color: #2d3436;
+    }
+
+    .report-card span,
+    .report-summary-grid span {
+      color: #636e72;
+    }
+
+    .report-card strong,
+    .report-summary-grid strong {
+      color: #2d3436;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-row {
+        grid-template-columns: 1fr;
+      }
+
+      .comparison-amount {
+        text-align: left;
+      }
+    }
+  </style>
 </head>
 
 <body class="report-body">
@@ -14,7 +78,7 @@
     <div class="report-header">
       <div>
         <h1>Manager Report Dashboard</h1>
-        <p>View platform performance, donations, fundraisers and user activity.</p>
+        <p>View daily, weekly and monthly donation reports.</p>
       </div>
 
       <a href="dashboard.html" class="report-back-btn">Back to Dashboard</a>
@@ -46,13 +110,49 @@
 
     <div class="report-chart-card">
       <h2>Donation Amount Comparison</h2>
-      <canvas id="reportChart"></canvas>
+      <p style="color:#636e72;">Compares total donation amount for today, this week and this month.</p>
+
+      <div class="comparison-bars">
+        <div class="comparison-row">
+          <div class="comparison-label">Daily</div>
+          <div class="comparison-track">
+            <div id="dailyBar" class="comparison-fill"></div>
+          </div>
+          <div id="dailyAmount" class="comparison-amount">$0.00</div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-label">Weekly</div>
+          <div class="comparison-track">
+            <div id="weeklyBar" class="comparison-fill"></div>
+          </div>
+          <div id="weeklyAmount" class="comparison-amount">$0.00</div>
+        </div>
+
+        <div class="comparison-row">
+          <div class="comparison-label">Monthly</div>
+          <div class="comparison-track">
+            <div id="monthlyBar" class="comparison-fill"></div>
+          </div>
+          <div id="monthlyAmount" class="comparison-amount">$0.00</div>
+        </div>
+      </div>
     </div>
 
   </div>
 
   <script>
-    let reportChart = null;
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+
+    if (!user || !token) {
+      window.location.href = 'login.html';
+    }
+
+    if (user && user.role !== 'manager') {
+      alert('Only platform managers can access reports.');
+      window.location.href = 'dashboard.html';
+    }
 
     function showMessage(text, type = 'error') {
       const msg = document.getElementById('report-flash');
@@ -62,13 +162,6 @@
     }
 
     async function fetchReport(url) {
-      const token = localStorage.getItem('token');
-
-      if (!token) {
-        window.location.href = 'login.html';
-        return null;
-      }
-
       const res = await fetch(url, {
         headers: {
           'Authorization': 'Bearer ' + token
@@ -88,12 +181,21 @@
       return `$${Number(value || 0).toFixed(2)}`;
     }
 
+    function setBar(barId, amountId, value, max) {
+      const amount = Number(value || 0);
+      const percent = max > 0 ? Math.max((amount / max) * 100, 2) : 2;
+
+      document.getElementById(barId).style.width = percent + '%';
+      document.getElementById(amountId).textContent = money(amount);
+    }
+
     async function loadReports() {
       try {
         const summary = await fetchReport('/api/reports/summary');
         const daily = await fetchReport('/api/reports/daily');
         const weekly = await fetchReport('/api/reports/weekly');
         const monthly = await fetchReport('/api/reports/monthly');
+        const comparison = await fetchReport('/api/reports/comparison');
 
         document.getElementById('report-summary-box').innerHTML = `
           <div><span>Total Users</span><strong>${summary.total_users || 0}</strong></div>
@@ -119,52 +221,14 @@
           <p><span>Donation Amount</span><strong>${money(monthly.donation_amount)}</strong></p>
         `;
 
-        const ctx = document.getElementById('reportChart');
+        const dailyAmount = Number(comparison.daily_amount || 0);
+        const weeklyAmount = Number(comparison.weekly_amount || 0);
+        const monthlyAmount = Number(comparison.monthly_amount || 0);
+        const maxAmount = Math.max(dailyAmount, weeklyAmount, monthlyAmount);
 
-        if (reportChart) {
-          reportChart.destroy();
-        }
-
-        reportChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: ['Daily', 'Weekly', 'Monthly'],
-            datasets: [{
-              label: 'Donation Amount',
-              data: [
-                Number(daily.donation_amount || 0),
-                Number(weekly.donation_amount || 0),
-                Number(monthly.donation_amount || 0)
-              ],
-              backgroundColor: [
-                'rgba(108, 92, 231, 0.65)',
-                'rgba(162, 155, 254, 0.65)',
-                'rgba(0, 184, 148, 0.65)'
-              ],
-              borderColor: [
-                'rgba(108, 92, 231, 1)',
-                'rgba(162, 155, 254, 1)',
-                'rgba(0, 184, 148, 1)'
-              ],
-              borderWidth: 1,
-              borderRadius: 8
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                display: true
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true
-              }
-            }
-          }
-        });
+        setBar('dailyBar', 'dailyAmount', dailyAmount, maxAmount);
+        setBar('weeklyBar', 'weeklyAmount', weeklyAmount, maxAmount);
+        setBar('monthlyBar', 'monthlyAmount', monthlyAmount, maxAmount);
 
       } catch (error) {
         showMessage(error.message || 'Something went wrong.');

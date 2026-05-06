@@ -36,6 +36,15 @@ class ReportController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async comparison(req, res) {
+    try {
+      const result = await ReportService.getDonationComparison();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = ReportController;

@@ -7,5 +7,6 @@ router.get('/summary', authMiddleware, roleMiddleware(['manager']), ReportContro
 router.get('/daily', authMiddleware, roleMiddleware(['manager']), ReportController.daily);
 router.get('/weekly', authMiddleware, roleMiddleware(['manager']), ReportController.weekly);
 router.get('/monthly', authMiddleware, roleMiddleware(['manager']), ReportController.monthly);
+router.get('/comparison', authMiddleware, roleMiddleware(['manager']), ReportController.comparison);
 
 module.exports = router;

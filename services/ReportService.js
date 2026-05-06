@@ -10,7 +10,8 @@ class ReportService {
           (SELECT COUNT(*) FROM fundraisers) AS total_fundraisers,
           (SELECT COUNT(*) FROM favourites) AS total_favourites,
           (SELECT COUNT(*) FROM donations) AS total_donations,
-          (SELECT IFNULL(SUM(amount), 0) FROM donations) AS total_donation_amount`,
+          (SELECT IFNULL(SUM(amount), 0) FROM donations) AS total_donation_amount
+        `,
         [],
         (err, row) => {
           if (err) return reject(err);
@@ -26,8 +27,8 @@ class ReportService {
         `SELECT
           COUNT(*) AS donation_count,
           IFNULL(SUM(amount), 0) AS donation_amount
-         FROM donations
-         WHERE date(donated_at) = date('now', 'localtime')`,
+        FROM donations
+        WHERE date(donated_at) = date('now', 'localtime')`,
         [],
         (err, row) => {
           if (err) return reject(err);
@@ -43,9 +44,9 @@ class ReportService {
         `SELECT
           COUNT(*) AS donation_count,
           IFNULL(SUM(amount), 0) AS donation_amount
-         FROM donations
-         WHERE date(donated_at) >= date('now', '-6 days', 'localtime')
-           AND date(donated_at) <= date('now', 'localtime')`,
+        FROM donations
+        WHERE date(donated_at) >= date('now', '-6 days', 'localtime')
+          AND date(donated_at) <= date('now', 'localtime')`,
         [],
         (err, row) => {
           if (err) return reject(err);
@@ -61,8 +62,34 @@ class ReportService {
         `SELECT
           COUNT(*) AS donation_count,
           IFNULL(SUM(amount), 0) AS donation_amount
-         FROM donations
-         WHERE strftime('%Y-%m', donated_at) = strftime('%Y-%m', 'now', 'localtime')`,
+        FROM donations
+        WHERE strftime('%Y-%m', donated_at) = strftime('%Y-%m', 'now', 'localtime')`,
+        [],
+        (err, row) => {
+          if (err) return reject(err);
+          resolve(row);
+        }
+      );
+    });
+  }
+
+  static getDonationComparison() {
+    return new Promise((resolve, reject) => {
+      db.get(
+        `SELECT
+          (SELECT IFNULL(SUM(amount), 0)
+           FROM donations
+           WHERE date(donated_at) = date('now', 'localtime')) AS daily_amount,
+
+          (SELECT IFNULL(SUM(amount), 0)
+           FROM donations
+           WHERE date(donated_at) >= date('now', '-6 days', 'localtime')
+             AND date(donated_at) <= date('now', 'localtime')) AS weekly_amount,
+
+          (SELECT IFNULL(SUM(amount), 0)
+           FROM donations
+           WHERE strftime('%Y-%m', donated_at) = strftime('%Y-%m', 'now', 'localtime')) AS monthly_amount
+        `,
         [],
         (err, row) => {
           if (err) return reject(err);
