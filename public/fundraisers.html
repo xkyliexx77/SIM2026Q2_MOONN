@@ -225,12 +225,12 @@
         div.innerHTML = `
           <div class="fundraisers-item-top">
             <div>
-              <h3>${item.title}</h3>
+              <h3>${item.title || 'No Title'}</h3>
               <p>${item.description || 'No description provided.'}</p>
             </div>
 
             <span class="fundraisers-category-badge">
-              ${item.category_name || 'No Category'}
+              ${item.category_name || item.category || 'No Category'}
             </span>
           </div>
 
@@ -251,12 +251,8 @@
           </p>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-donate-btn" onclick="event.stopPropagation(); donate(${item.id})">
-              Donate
-            </button>
-
-            <button class="fundraisers-fav-btn" onclick="event.stopPropagation(); favourite(${item.id})">
-              ♡ Favourite
+            <button class="fundraisers-view-btn" onclick="event.stopPropagation(); openFundraiser(${item.id})">
+              View Details
             </button>
           </div>
         `;
