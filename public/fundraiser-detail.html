@@ -22,6 +22,24 @@
 
   </div>
 
+  <!-- DONATION MODAL -->
+  <div id="donate-modal-overlay" class="donate-modal-overlay">
+    <div class="donate-modal">
+      <h2>Make a Donation</h2>
+      <p>Enter the amount you would like to donate.</p>
+
+      <input type="hidden" id="donate-fundraiser-id">
+
+      <label>Donation Amount</label>
+      <input type="number" id="donate-amount" placeholder="Enter amount" min="1">
+
+      <div class="donate-modal-actions">
+        <button class="donate-cancel-btn" onclick="closeDonateModal()">Cancel</button>
+        <button class="donate-confirm-btn" onclick="submitDonation()">Donate</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
@@ -29,15 +47,23 @@
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
 
+    if (!user) {
+      window.location.href = 'login.html';
+    }
+
     const isDonee = user && user.role === 'donee';
 
     function calcProgress(raised, target) {
-    const r = Number(raised || 0);
-    const t = Number(target || 0);
-    if (t === 0) return 0;
-    const percentage = (r / t) * 100;
-    if (percentage > 100) return 100;
-    return percentage.toFixed(2);
+      const r = Number(raised || 0);
+      const t = Number(target || 0);
+      if (t === 0) return 0;
+      const percentage = (r / t) * 100;
+      if (percentage > 100) return 100;
+      return percentage.toFixed(2);
+    }
+
+    function showAlert(message) {
+      alert(message);
     }
 
     async function loadDetails() {
@@ -65,13 +91,12 @@
       }
 
       const progress = calcProgress(item.current_amount, item.target_amount);
-      const isCompleted = item.status && item.status.toLowerCase() === 'completed';
 
       document.getElementById('detailBox').innerHTML = `
         <div class="fundraisers-item-top">
           <div>
-            <h3>${item.title}</h3>
-            <p>${item.description || ''}</p>
+            <h3>${item.title || 'No Title'}</h3>
+            <p>${item.description || 'No description provided.'}</p>
           </div>
 
           <span class="fundraisers-category-badge">
@@ -119,26 +144,15 @@
           Created By: <strong>${item.fundraiser_name || 'Unknown'}</strong>
         </p>
 
-        ${user && user.role === 'fundraiser' ? `
-          <div class="fundraisers-actions" style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
-
-            <button class="fundraisers-view-btn"
-              onclick="window.location.href='edit-fundraiser.html?id=${item.id}'">
-              Edit
+        ${isDonee ? `
+          <div class="fundraisers-actions" style="margin-top:20px;">
+            <button class="fundraisers-donate-btn" onclick="openDonateModal(${item.id})">
+              Donate
             </button>
 
-            ${!isCompleted ? `
-              <button class="fundraisers-complete-btn"
-                onclick="markCompleted(${item.id})">
-                Complete
-              </button>
-            ` : ''}
-
-            <button class="fundraisers-delete-btn"
-              onclick="deleteFundraiser(${item.id})">
-              Delete
+            <button class="fundraisers-fav-btn" onclick="favourite(${item.id})">
+              ♡ Favourite
             </button>
-
           </div>
         ` : ''}
 
@@ -160,38 +174,77 @@
       `;
     }
 
-    async function markCompleted(id) {
-      if (!confirm('Mark this fundraiser as completed?')) return;
+    function openDonateModal(id) {
+      if (!isDonee) {
+        showAlert('Only donees can donate.');
+        return;
+      }
 
-      const res = await fetch(`/api/fundraisers/${id}/complete`, {
-        method: 'PATCH',
+      document.getElementById('donate-fundraiser-id').value = id;
+      document.getElementById('donate-amount').value = '';
+      document.getElementById('donate-modal-overlay').style.display = 'flex';
+    }
+
+    function closeDonateModal() {
+      document.getElementById('donate-modal-overlay').style.display = 'none';
+    }
+
+    async function submitDonation() {
+      const fundraiserId = document.getElementById('donate-fundraiser-id').value;
+      const amount = document.getElementById('donate-amount').value;
+
+      if (!isDonee) {
+        showAlert('Only donees can donate.');
+        return;
+      }
+
+      if (!amount || Number(amount) <= 0) {
+        showAlert('Donation amount must be more than 0.');
+        return;
+      }
+
+      const res = await fetch('/api/donations', {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
-        }
+        },
+        body: JSON.stringify({
+          fundraiser_id: fundraiserId,
+          amount: amount
+        })
       });
 
       const data = await res.json();
 
-      alert(data.message || data.error || 'Fundraiser updated');
+      if (!res.ok || data.error) {
+        showAlert(data.error || 'Donation failed.');
+        return;
+      }
 
+      showAlert(data.message || 'Donation successful.');
+      closeDonateModal();
       loadDetails();
     }
 
-    async function deleteFundraiser(id) {
-      if (!confirm('Delete this fundraiser? This cannot be undone.')) return;
+    async function favourite(id) {
+      if (!isDonee) {
+        showAlert('Only donees can favourite campaigns.');
+        return;
+      }
 
-      const res = await fetch(`/api/fundraisers/${id}`, {
-        method: 'DELETE',
+      const res = await fetch('/api/favourites', {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
-        }
+        },
+        body: JSON.stringify({ fundraiser_id: id })
       });
 
       const data = await res.json();
-
-      alert(data.message || data.error || 'Fundraiser deleted');
-
-      window.location.href = 'my-fundraisers.html';
+      showAlert(data.error || data.message || 'Added to favourites.');
+      loadDetails();
     }
 
     loadDetails();
