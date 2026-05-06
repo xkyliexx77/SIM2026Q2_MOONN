@@ -2280,3 +2280,69 @@ hr {
 a:hover {
   text-decoration: none;
 }
+
+/* =========================
+   MY FUNDRAISERS BUTTONS
+========================= */
+
+.fundraisers-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.fundraisers-actions button {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-width: 120px;
+}
+
+/* VIEW */
+.fundraisers-view-btn {
+  background: #f3f4f6;
+  color: #2d3436;
+}
+
+.fundraisers-view-btn:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+/* EDIT */
+.fundraisers-edit-btn {
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
+  color: white;
+}
+
+.fundraisers-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(9, 132, 227, 0.25);
+}
+
+/* COMPLETE */
+.fundraisers-complete-btn {
+  background: linear-gradient(135deg, #00b894, #55efc4);
+  color: white;
+}
+
+.fundraisers-complete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 184, 148, 0.25);
+}
+
+/* DELETE */
+.fundraisers-delete-btn {
+  background: linear-gradient(135deg, #ff7675, #ff9f9f);
+  color: white;
+}
+
+.fundraisers-delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(255, 118, 117, 0.25);
+}
