@@ -40,6 +40,14 @@
       </div>
     </div>
 
+    <!-- RECOMMENDATIONS -->
+    <div id="recommendations-section" class="fundraisers-filter-card" style="display:none;">
+      <h2>Recommended For You</h2>
+      <p>Suggested campaigns based on your donation history, favourites, categories and campaign popularity.</p>
+
+      <div id="recommendations-list" class="fundraisers-list"></div>
+    </div>
+
     <div id="fundraisers-list" class="fundraisers-list"></div>
 
   </div>
@@ -182,6 +190,7 @@
       if (!data.error) {
         closeDonateModal();
         loadFundraisers();
+        loadRecommendations();
       }
     }
 
@@ -208,8 +217,95 @@
       });
 
       const data = await res.json();
-      showMessage(data.error || data.message || 'Added to favourites.', data.error ? 'error' : 'success');
+
+      showMessage(
+        data.error || data.message || 'Added to favourites.',
+        data.error ? 'error' : 'success'
+      );
+
       loadFundraisers();
+      loadRecommendations();
+    }
+
+    async function loadRecommendations() {
+      if (!isDonee) return;
+
+      const token = localStorage.getItem('token');
+
+      if (!token) return;
+
+      const res = await fetch('/api/fundraisers/recommendations', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      if (!Array.isArray(data) || !data.length) {
+        document.getElementById('recommendations-section').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('recommendations-section').style.display = 'block';
+
+      const recList = document.getElementById('recommendations-list');
+      recList.innerHTML = '';
+
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'fundraisers-item-card';
+        div.style.cursor = 'pointer';
+
+        div.onclick = function () {
+          openFundraiser(item.id);
+        };
+
+        div.innerHTML = `
+          <div class="fundraisers-item-top">
+            <div>
+              <h3>${item.title || 'No Title'}</h3>
+              <p>${item.description || 'No description provided.'}</p>
+            </div>
+
+            <span class="fundraisers-category-badge">
+              ${item.category_name || 'No Category'}
+            </span>
+          </div>
+
+          <div class="fundraisers-info-grid">
+            <div>
+              <span>Target</span>
+              <strong>$${item.target_amount || 0}</strong>
+            </div>
+
+            <div>
+              <span>Raised</span>
+              <strong>$${item.current_amount || 0}</strong>
+            </div>
+          </div>
+
+          <p class="fundraisers-created-by">
+            Created By: <strong>${item.fundraiser_name || 'Unknown'}</strong>
+          </p>
+
+          <div class="fundraisers-actions">
+            <button class="fundraisers-view-btn" onclick="event.stopPropagation(); openFundraiser(${item.id})">
+              View Details
+            </button>
+
+            <button class="fundraisers-donate-btn" onclick="event.stopPropagation(); donate(${item.id})">
+              Donate
+            </button>
+
+            <button class="fundraisers-fav-btn" onclick="event.stopPropagation(); favourite(${item.id})">
+              ♡ Favourite
+            </button>
+          </div>
+        `;
+
+        recList.appendChild(div);
+      });
     }
 
     async function loadFundraisers() {
@@ -297,6 +393,7 @@
 
     loadCategories();
     loadFundraisers();
+    loadRecommendations();
   </script>
 </body>
 </html>

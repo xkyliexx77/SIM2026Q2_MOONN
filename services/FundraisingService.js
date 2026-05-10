@@ -226,6 +226,51 @@ class FundraisingService {
       );
     });
   }
+  static getRecommendations(userId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          f.*,
+          c.name AS category_name,
+          u.name AS fundraiser_name,
+          (
+            IFNULL(f.views, 0) +
+            IFNULL(f.favourite_count, 0) * 3 +
+            IFNULL(f.current_amount, 0) * 0.05 +
+            CASE 
+              WHEN f.category_id IN (
+                SELECT DISTINCT f2.category_id
+                FROM donations d
+                JOIN fundraisers f2 ON d.fundraiser_id = f2.id
+                WHERE d.user_id = ?
+              ) THEN 20 ELSE 0
+            END +
+            CASE
+              WHEN f.category_id IN (
+                SELECT DISTINCT f3.category_id
+                FROM favourites fav
+                JOIN fundraisers f3 ON fav.fundraiser_id = f3.id
+                WHERE fav.user_id = ?
+              ) THEN 15 ELSE 0
+            END
+          ) AS recommendation_score
+        FROM fundraisers f
+        LEFT JOIN categories c ON f.category_id = c.id
+        LEFT JOIN users u ON f.fundraiser_id = u.id
+        WHERE LOWER(f.status) = 'active'
+        AND f.id NOT IN (
+          SELECT fundraiser_id FROM donations WHERE user_id = ?
+        )
+        ORDER BY recommendation_score DESC, f.id DESC
+        LIMIT 6
+      `;
+
+      db.all(query, [userId, userId, userId], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
 }
 
 module.exports = FundraisingService;
