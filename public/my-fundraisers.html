@@ -5,45 +5,6 @@
   <title>My Fundraisers</title>
   <link rel="stylesheet" href="css/styles.css">
 
-  <style>
-    .fundraisers-list {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    @media (max-width: 900px) {
-      .fundraisers-list {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .fundraisers-list {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .fundraisers-item-card {
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .fundraisers-item-card:hover {
-      transform: translateY(-3px);
-    }
-
-    .search-buttons {
-      display: flex;
-      gap: 10px;
-      align-items: end;
-    }
-
-    .clear-btn {
-      background: #dfe6e9;
-      color: #2d3436;
-    }
-  </style>
 </head>
 
 <body class="fundraisers-body">
