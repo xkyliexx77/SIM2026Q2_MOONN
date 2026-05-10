@@ -19,6 +19,19 @@ class FundraisingController {
       res.status(500).json({ error: error.message });
     }
   }
+  static async getById(req, res) {
+    try {
+      const fundraiser = await FundraisingService.getById(req.params.id);
+
+      if (!fundraiser) {
+        return res.status(404).json({ error: 'Fundraiser not found' });
+      }
+
+      res.json(fundraiser);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 
   static async addView(req, res) {
     try {

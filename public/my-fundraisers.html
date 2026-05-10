@@ -28,6 +28,17 @@
     .fundraisers-item-card:hover {
       transform: translateY(-3px);
     }
+
+    .search-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .clear-btn {
+      background: #dfe6e9;
+      color: #2d3436;
+    }
   </style>
 </head>
 
@@ -69,6 +80,7 @@
       <h2>Search & Filter</h2>
 
       <div class="fundraisers-filters">
+
         <div>
           <label>Search</label>
           <input type="text" id="searchInput" placeholder="Search title">
@@ -93,7 +105,16 @@
           </select>
         </div>
 
-        <button class="fundraisers-search-btn" onclick="loadMyFundraisers()">Search</button>
+        <div class="search-buttons">
+          <button class="fundraisers-search-btn" onclick="loadMyFundraisers()">
+            Search
+          </button>
+
+          <button class="clear-btn" type="button" onclick="clearSearch()">
+            Clear
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -108,12 +129,23 @@
       return localStorage.getItem('token');
     }
 
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('sortFilter').value = 'latest';
+
+      loadMyFundraisers();
+    }
+
     function updateSummary(data) {
       document.getElementById('totalCampaigns').textContent = data.length;
+
       document.getElementById('totalViews').textContent =
         data.reduce((s, i) => s + (i.views || 0), 0);
+
       document.getElementById('totalFavourites').textContent =
         data.reduce((s, i) => s + (i.favourite_count || 0), 0);
+
       document.getElementById('totalRaised').textContent =
         '$' + data.reduce((s, i) => s + (i.current_amount || 0), 0);
     }
@@ -134,7 +166,9 @@
       const token = getToken();
 
       const res = await fetch('/api/fundraisers/mine/list', {
-        headers: { 'Authorization': 'Bearer ' + token }
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
       });
 
       let data = await res.json();
@@ -156,12 +190,32 @@
         data = data.filter(f => f.status === status);
       }
 
-      if (sort === 'mostViews') data.sort((a,b)=>b.views-a.views);
-      else if (sort === 'mostFavourites') data.sort((a,b)=>b.favourite_count-a.favourite_count);
-      else if (sort === 'mostRaised') data.sort((a,b)=>b.current_amount-a.current_amount);
-      else data.sort((a,b)=>b.id-a.id);
+      if (sort === 'mostViews') {
+        data.sort((a,b)=>b.views-a.views);
+      }
+
+      else if (sort === 'mostFavourites') {
+        data.sort((a,b)=>b.favourite_count-a.favourite_count);
+      }
+
+      else if (sort === 'mostRaised') {
+        data.sort((a,b)=>b.current_amount-a.current_amount);
+      }
+
+      else {
+        data.sort((a,b)=>b.id-a.id);
+      }
 
       list.innerHTML = '';
+
+      if (!data.length) {
+        list.innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>No fundraisers found.</p>
+          </div>
+        `;
+        return;
+      }
 
       data.forEach(item => {
         const div = document.createElement('div');
@@ -173,32 +227,50 @@
 
         div.innerHTML = `
           <h3>${item.title}</h3>
-          <p>${(item.description || '').substring(0,80)}...</p>
 
-          <p><strong>Category:</strong> ${item.category_name || 'No Category'}</p>
-          <p><strong>Target:</strong> $${item.target_amount}</p>
-          <p><strong>Created By:</strong> ${item.fundraiser_name || 'You'}</p>
+          <p>
+            ${(item.description || '').substring(0,80)}...
+          </p>
+
+          <p>
+            <strong>Category:</strong>
+            ${item.category_name || 'No Category'}
+          </p>
+
+          <p>
+            <strong>Target:</strong>
+            $${item.target_amount}
+          </p>
+
+          <p>
+            <strong>Created By:</strong>
+            ${item.fundraiser_name || 'You'}
+          </p>
 
           <div class="fundraisers-actions">
 
-            <button class="fundraisers-view-btn"
+            <button
+              class="fundraisers-view-btn"
               onclick="event.stopPropagation(); window.location.href='fundraiser-detail.html?id=${item.id}'">
               View Details
             </button>
 
             ${item.status !== 'completed' ? `
-            <button class="fundraisers-edit-btn"
-              onclick="event.stopPropagation(); window.location.href='edit-fundraiser.html?id=${item.id}'">
-              Edit
-            </button>
+              <button
+                class="fundraisers-edit-btn"
+                onclick="event.stopPropagation(); window.location.href='edit-fundraiser.html?id=${item.id}'">
+                Edit
+              </button>
 
-              <button class="fundraisers-complete-btn"
+              <button
+                class="fundraisers-complete-btn"
                 onclick="event.stopPropagation(); completeFundraiser(${item.id})">
                 Complete
               </button>
             ` : ''}
 
-            <button class="fundraisers-delete-btn"
+            <button
+              class="fundraisers-delete-btn"
               onclick="event.stopPropagation(); deleteFundraiser(${item.id})">
               Delete
             </button>
@@ -212,11 +284,14 @@
 
     async function deleteFundraiser(id) {
       const token = getToken();
-      if (!confirm('Delete?')) return;
+
+      if (!confirm('Delete fundraiser?')) return;
 
       await fetch(`/api/fundraisers/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
       });
 
       loadMyFundraisers();
@@ -227,7 +302,9 @@
 
       await fetch(`/api/fundraisers/${id}/complete`, {
         method: 'PATCH',
-        headers: { 'Authorization': 'Bearer ' + token }
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
       });
 
       loadMyFundraisers();

@@ -108,6 +108,29 @@ class FundraisingService {
     });
   }
 
+  static getById(id) {
+    return new Promise((resolve, reject) => {
+      db.get(
+        `
+        SELECT 
+          f.*,
+          c.name AS category_name,
+          u.name AS fundraiser_name
+        FROM fundraisers f
+        LEFT JOIN categories c ON f.category_id = c.id
+        LEFT JOIN users u ON f.fundraiser_id = u.id
+        LEFT JOIN donations d ON d.fundraiser_id = f.id
+        WHERE f.id = ?
+        `,
+        [id],
+        (err, row) => {
+          if (err) return reject(err);
+          resolve(row);
+        }
+      );
+    });
+  }
+
   static getCompleted(ownerId, category, dateFrom, dateTo) {
     return new Promise((resolve, reject) => {
       let query = `

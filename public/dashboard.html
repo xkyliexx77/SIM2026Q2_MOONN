@@ -65,6 +65,7 @@
 
       const menu = document.getElementById('dashboard-menu');
 
+      // ADMIN
       if (role === 'admin') {
         document.getElementById('dashboard-role-label').textContent = 'User Admin Workspace';
         document.getElementById('dashboard-title').textContent = 'User Admin Dashboard';
@@ -79,6 +80,7 @@
         `;
       }
 
+      // MANAGER
       else if (role === 'manager') {
         document.getElementById('dashboard-role-label').textContent = 'Manager Workspace';
         document.getElementById('dashboard-title').textContent = 'Management Dashboard';
@@ -98,6 +100,7 @@
         `;
       }
 
+      // FUNDRAISER
       else if (role === 'fundraiser') {
         document.getElementById('dashboard-role-label').textContent = 'Fundraiser Workspace';
         document.getElementById('dashboard-title').textContent = 'Fundraiser Dashboard';
@@ -117,6 +120,7 @@
         `;
       }
 
+      // DONEE
       else if (role === 'donee') {
         document.getElementById('dashboard-role-label').textContent = 'Donee Workspace';
         document.getElementById('dashboard-title').textContent = 'Donation Dashboard';
@@ -136,7 +140,12 @@
 
           <a class="dashboard-action-card" href="donations.html">
             <span>My Donations</span>
-            <small>Track your donation history</small>
+            <small>Track your donation transaction history</small>
+          </a>
+
+          <a class="dashboard-action-card" href="completed-donation-history.html">
+            <span>Completed Activity History</span>
+            <small>View completed fundraising activities you donated to</small>
           </a>
         `;
       }

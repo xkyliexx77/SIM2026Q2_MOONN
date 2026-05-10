@@ -20,6 +20,22 @@ class DonationController {
       res.status(500).json({ error: error.message });
     }
   }
+  static async completedHistory(req, res) {
+    try {
+      const { category, dateFrom, dateTo } = req.query;
+
+      const result = await DonationService.getCompletedHistory(
+        req.user.id,
+        category,
+        dateFrom,
+        dateTo
+      );
+
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = DonationController;

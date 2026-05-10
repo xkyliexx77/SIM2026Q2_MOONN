@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My Donations</title>
+  <title>Completed Fundraising History</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -11,52 +11,43 @@
 
     <div class="donation-header">
       <div>
-        <h1>My Donation History</h1>
-        <p>Track and review your donation transactions.</p>
+        <h1>Completed Fundraising History</h1>
+        <p>View completed fundraising activities you have donated to.</p>
       </div>
 
-      <a href="dashboard.html" class="donation-back-btn">
-        Back to Dashboard
-      </a>
+      <a href="dashboard.html" class="donation-back-btn">Back to Dashboard</a>
     </div>
 
     <div class="donation-filter-card">
-      <h2>Search Donation History</h2>
+      <h2>Search Completed Activities</h2>
 
       <div class="donation-filters">
-
         <div>
           <label>Category</label>
-          <select id="category-filter"></select>
+          <select id="completed-category-filter"></select>
         </div>
 
         <div>
-          <label>From Date</label>
-          <input type="date" id="date-from">
+          <label>From Donation Date</label>
+          <input type="date" id="completed-date-from">
         </div>
 
         <div>
-          <label>To Date</label>
-          <input type="date" id="date-to">
+          <label>To Donation Date</label>
+          <input type="date" id="completed-date-to">
         </div>
 
-        <button class="donation-filter-btn" onclick="loadDonations()">
-          Search
-        </button>
-
-        <button class="donation-clear-btn" onclick="clearFilters()">
-          Clear
-        </button>
-
+        <button class="donation-filter-btn" onclick="loadCompletedHistory()">Search</button>
+        <button class="donation-clear-btn" onclick="clearCompletedFilters()">Clear</button>
       </div>
     </div>
 
-    <div id="donation-list" class="donation-list"></div>
+    <div id="completed-list" class="donation-list"></div>
 
   </div>
 
   <script>
-    const list = document.getElementById('donation-list');
+    const list = document.getElementById('completed-list');
 
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
@@ -66,7 +57,7 @@
     }
 
     if (user && user.role !== 'donee') {
-      alert('Only donees can access donation history.');
+      alert('Only donees can view completed fundraising history.');
       window.location.href = 'dashboard.html';
     }
 
@@ -74,11 +65,8 @@
       const res = await fetch('/api/categories');
       const categories = await res.json();
 
-      const select = document.getElementById('category-filter');
-
-      select.innerHTML = `
-        <option value="">All Categories</option>
-      `;
+      const select = document.getElementById('completed-category-filter');
+      select.innerHTML = '<option value="">All Categories</option>';
 
       categories.forEach(c => {
         const option = document.createElement('option');
@@ -88,24 +76,17 @@
       });
     }
 
-    function clearFilters() {
-      document.getElementById('category-filter').value = '';
-      document.getElementById('date-from').value = '';
-      document.getElementById('date-to').value = '';
-
-      loadDonations();
+    function clearCompletedFilters() {
+      document.getElementById('completed-category-filter').value = '';
+      document.getElementById('completed-date-from').value = '';
+      document.getElementById('completed-date-to').value = '';
+      loadCompletedHistory();
     }
 
-    async function loadDonations() {
-
-      const category =
-        document.getElementById('category-filter').value;
-
-      const dateFrom =
-        document.getElementById('date-from').value;
-
-      const dateTo =
-        document.getElementById('date-to').value;
+    async function loadCompletedHistory() {
+      const category = document.getElementById('completed-category-filter').value;
+      const dateFrom = document.getElementById('completed-date-from').value;
+      const dateTo = document.getElementById('completed-date-to').value;
 
       const query = new URLSearchParams();
 
@@ -113,59 +94,42 @@
       if (dateFrom) query.append('dateFrom', dateFrom);
       if (dateTo) query.append('dateTo', dateTo);
 
-      const res = await fetch(
-        `/api/donations/mine?${query.toString()}`,
-        {
-          headers: {
-            'Authorization': 'Bearer ' + token
-          }
+      const res = await fetch(`/api/donations/completed-history?${query.toString()}`, {
+        headers: {
+          'Authorization': 'Bearer ' + token
         }
-      );
+      });
 
       const data = await res.json();
 
       list.innerHTML = '';
 
       if (!Array.isArray(data) || !data.length) {
-
         list.innerHTML = `
           <div class="donation-empty-card">
-            <h3>No donations found</h3>
-            <p>
-              You have not made any donations
-              for the selected filter.
-            </p>
+            <h3>No completed fundraising history found</h3>
+            <p>You have not donated to any completed fundraising activities for the selected filter.</p>
           </div>
         `;
-
         return;
       }
 
       data.forEach(item => {
-
-        const progress =
-          item.target_amount > 0
-            ? Math.min(
-                (item.current_amount / item.target_amount) * 100,
-                100
-              ).toFixed(1)
-            : 0;
+        const progress = item.target_amount > 0
+          ? Math.min((item.current_amount / item.target_amount) * 100, 100).toFixed(1)
+          : 0;
 
         const div = document.createElement('div');
         div.className = 'donation-item-card';
 
         div.innerHTML = `
           <div class="donation-item-top">
-
             <div>
               <h3>${item.title}</h3>
               <p>${item.category_name || 'No Category'}</p>
             </div>
 
-            <span class="donation-amount">
-              $${item.amount}
-            </span>
-
+            <span class="donation-amount">$${item.amount}</span>
           </div>
 
           <div class="donation-info-row">
@@ -180,19 +144,10 @@
 
           <div class="donation-info-row">
             <span>Campaign Progress</span>
-
-            <strong>
-              $${item.current_amount}
-              /
-              $${item.target_amount}
-              (${progress}%)
-            </strong>
+            <strong>$${item.current_amount} / $${item.target_amount} (${progress}%)</strong>
           </div>
 
-          <button
-            class="donation-browse-btn"
-            onclick="window.location.href='fundraiser-detail.html?id=${item.fundraiser_id}'"
-          >
+          <button class="donation-browse-btn" onclick="window.location.href='fundraiser-detail.html?id=${item.fundraiser_id}'">
             View Campaign Details
           </button>
         `;
@@ -203,7 +158,7 @@
 
     async function init() {
       await loadCategories();
-      await loadDonations();
+      await loadCompletedHistory();
     }
 
     init();

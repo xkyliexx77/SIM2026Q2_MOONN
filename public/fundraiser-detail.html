@@ -22,7 +22,6 @@
 
   </div>
 
-  <!-- DONATION MODAL -->
   <div id="donate-modal-overlay" class="donate-modal-overlay">
     <div class="donate-modal">
       <h2>Make a Donation</h2>
@@ -56,9 +55,13 @@
     function calcProgress(raised, target) {
       const r = Number(raised || 0);
       const t = Number(target || 0);
+
       if (t === 0) return 0;
+
       const percentage = (r / t) * 100;
+
       if (percentage > 100) return 100;
+
       return percentage.toFixed(2);
     }
 
@@ -66,31 +69,31 @@
       alert(message);
     }
 
-    async function loadDetails() {
-      let res;
+    function showNotFound(message) {
+      document.getElementById('detailBox').innerHTML = `
+        <div class="fundraisers-empty-card">
+          <p>${message}</p>
+        </div>
+      `;
+    }
 
-      if (user && user.role === 'fundraiser') {
-        res = await fetch('/api/fundraisers/mine/list', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-      } else {
-        res = await fetch('/api/fundraisers');
+    async function loadDetails() {
+      if (!id || id === 'undefined' || id === 'null') {
+        showNotFound('Fundraiser ID is missing. Please return to donation history and try again.');
+        return;
       }
 
-      const result = await res.json();
-      const data = result.items || result || [];
-      const item = data.find(f => String(f.id) === String(id));
+      const res = await fetch(`/api/fundraisers/${id}`);
+      const item = await res.json();
 
-      if (!item) {
-        document.getElementById('detailBox').innerHTML = `
-          <div class="fundraisers-empty-card">
-            <p>Fundraiser not found.</p>
-          </div>
-        `;
+      if (!res.ok || item.error) {
+        showNotFound('Fundraiser not found.');
         return;
       }
 
       const progress = calcProgress(item.current_amount, item.target_amount);
+      const status = item.status || 'active';
+      const isCompleted = status.toLowerCase() === 'completed';
 
       document.getElementById('detailBox').innerHTML = `
         <div class="fundraisers-item-top">
@@ -117,6 +120,11 @@
             <strong>$${item.current_amount || 0}</strong>
           </div>
 
+          <div>
+            <span>Status</span>
+            <strong>${status}</strong>
+          </div>
+
           ${!isDonee ? `
             <div>
               <span>Views</span>
@@ -132,11 +140,6 @@
               <span>Donations</span>
               <strong>${item.donation_count || 0}</strong>
             </div>
-
-            <div>
-              <span>Status</span>
-              <strong>${item.status || 'active'}</strong>
-            </div>
           ` : ''}
         </div>
 
@@ -146,13 +149,19 @@
 
         ${isDonee ? `
           <div class="fundraisers-actions" style="margin-top:20px;">
-            <button class="fundraisers-donate-btn" onclick="openDonateModal(${item.id})">
-              Donate
-            </button>
+            ${!isCompleted ? `
+              <button class="fundraisers-donate-btn" onclick="openDonateModal(${item.id})">
+                Donate
+              </button>
 
-            <button class="fundraisers-fav-btn" onclick="favourite(${item.id})">
-              ♡ Favourite
-            </button>
+              <button class="fundraisers-fav-btn" onclick="favourite(${item.id})">
+                ♡ Favourite
+              </button>
+            ` : `
+              <button class="fundraisers-complete-btn" disabled style="opacity:0.7;cursor:not-allowed;">
+                Campaign Completed
+              </button>
+            `}
           </div>
         ` : ''}
 
