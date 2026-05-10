@@ -33,9 +33,11 @@
 </head>
 
 <body class="category-body">
+
   <div class="category-container">
 
     <div class="category-header">
+
       <div>
         <h1>Category Management</h1>
         <p>Create, edit, search and manage fundraiser categories.</p>
@@ -44,10 +46,12 @@
       <a href="dashboard.html" class="category-back-btn">
         Back to Dashboard
       </a>
+
     </div>
 
     <!-- ADD CATEGORY -->
     <div class="category-form-card">
+
       <h2>Add New Category</h2>
 
       <p id="category-flash" class="flash"></p>
@@ -68,42 +72,47 @@
         </button>
 
       </form>
+
     </div>
 
-    <!-- SEARCH CATEGORY -->
+    <!-- SEARCH -->
     <div class="category-search-card">
+
       <h2>Search Categories</h2>
 
-    <div class="category-search-row">
+      <div class="category-search-row">
 
-      <input
-        type="text"
-        id="category-search"
-        placeholder="Search category name..."
-      >
+        <input
+          type="text"
+          id="category-search"
+          placeholder="Search category name..."
+        >
 
-      <button
-        class="category-add-btn"
-        onclick="searchCategories()"
-      >
-        Search
-      </button>
+        <button
+          class="category-add-btn"
+          onclick="searchCategories()"
+        >
+          Search
+        </button>
 
-      <button
-        class="category-clear-btn"
-        onclick="clearSearch()"
-      >
-        Clear
-      </button>
+        <button
+          class="category-clear-btn"
+          onclick="clearSearch()"
+        >
+          Clear
+        </button>
 
-    </div>
+      </div>
+
     </div>
 
     <!-- CATEGORY LIST -->
     <div class="category-list-card">
+
       <h2>Category List</h2>
 
       <div id="category-list" class="category-list"></div>
+
     </div>
 
   </div>
@@ -299,10 +308,7 @@
 
         if (response.ok) {
 
-          showMessage(
-            'Category added successfully.',
-            'success'
-          );
+          alert('Category added successfully.');
 
           form.reset();
 
@@ -378,10 +384,7 @@
 
         if (response.ok) {
 
-          showMessage(
-            'Category updated successfully.',
-            'success'
-          );
+          alert('Category updated successfully.');
 
           closeEditModal();
 
@@ -429,10 +432,7 @@
 
         if (response.ok) {
 
-          showMessage(
-            'Category deleted successfully.',
-            'success'
-          );
+          alert('Category deleted successfully.');
 
           loadCategories();
 
@@ -456,5 +456,6 @@
     loadCategories();
 
   </script>
+
 </body>
 </html>

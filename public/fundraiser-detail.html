@@ -65,10 +65,6 @@
       return percentage.toFixed(2);
     }
 
-    function showAlert(message) {
-      alert(message);
-    }
-
     function showNotFound(message) {
       document.getElementById('detailBox').innerHTML = `
         <div class="fundraisers-empty-card">
@@ -79,7 +75,7 @@
 
     async function loadDetails() {
       if (!id || id === 'undefined' || id === 'null') {
-        showNotFound('Fundraiser ID is missing. Please return to donation history and try again.');
+        showNotFound('Fundraiser ID is missing. Please return and try again.');
         return;
       }
 
@@ -185,7 +181,7 @@
 
     function openDonateModal(id) {
       if (!isDonee) {
-        showAlert('Only donees can donate.');
+        alert('Only donees can donate.');
         return;
       }
 
@@ -203,12 +199,12 @@
       const amount = document.getElementById('donate-amount').value;
 
       if (!isDonee) {
-        showAlert('Only donees can donate.');
+        alert('Only donees can donate.');
         return;
       }
 
       if (!amount || Number(amount) <= 0) {
-        showAlert('Donation amount must be more than 0.');
+        alert('Donation amount must be more than 0.');
         return;
       }
 
@@ -227,18 +223,18 @@
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        showAlert(data.error || 'Donation failed.');
+        alert(data.error || 'Donation failed.');
         return;
       }
 
-      showAlert(data.message || 'Donation successful.');
+      alert('You have donated successfully.');
       closeDonateModal();
       loadDetails();
     }
 
     async function favourite(id) {
       if (!isDonee) {
-        showAlert('Only donees can favourite campaigns.');
+        alert('Only donees can favourite campaigns.');
         return;
       }
 
@@ -252,7 +248,13 @@
       });
 
       const data = await res.json();
-      showAlert(data.error || data.message || 'Added to favourites.');
+
+      if (!res.ok || data.error) {
+        alert(data.error || 'Failed to add to favourites.');
+        return;
+      }
+
+      alert('Added to favourites successfully.');
       loadDetails();
     }
 

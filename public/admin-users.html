@@ -110,10 +110,12 @@
       const data = await res.json();
 
       if (res.ok) {
-        showMessage('User created successfully.', 'success');
+        alert('User created successfully.');
+
         document.getElementById('create-name').value = '';
         document.getElementById('create-email').value = '';
         document.getElementById('create-password').value = '';
+
         loadUsers();
       } else {
         showMessage(data.error || 'Failed to create user.', 'error');
@@ -186,7 +188,13 @@
           </div>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-view-btn" onclick="window.location.href='edit-user.html?id=${user.id}'">Edit</button>                    ${
+            <button
+              class="fundraisers-view-btn"
+              onclick="window.location.href='edit-user.html?id=${user.id}'">
+              Edit
+            </button>
+
+            ${
               user.status === 'suspended'
                 ? `<button class="fundraisers-donate-btn" onclick="activateUser(${user.id})">Activate</button>`
                 : `<button class="fundraisers-fav-btn" onclick="suspendUser(${user.id})">Suspend</button>`
@@ -198,41 +206,10 @@
       });
     }
 
-    function escapeText(text) {
-      return String(text || '').replace(/'/g, "\\'");
-    }
-
-    async function editUser(id, oldName, oldEmail, oldRole) {
-      const token = getToken();
-
-      const name = prompt('Enter new name:', oldName);
-      if (name === null) return;
-
-      const email = prompt('Enter new email:', oldEmail);
-      if (email === null) return;
-
-      const role = prompt('Enter role: admin, fundraiser, donee, manager', oldRole);
-      if (role === null) return;
-
-      const res = await fetch(`/api/users/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ name, email, role })
-      });
-
-      const data = await res.json();
-
-      showMessage(data.message || data.error, data.error ? 'error' : 'success');
-      loadUsers();
-    }
-
     async function suspendUser(id) {
       const token = getToken();
 
-      if (!confirm('Suspend this user account?')) return;
+      if (!confirm('Are you sure you want to suspend this user account?')) return;
 
       const res = await fetch(`/api/users/${id}/suspend`, {
         method: 'PATCH',
@@ -243,12 +220,19 @@
 
       const data = await res.json();
 
-      showMessage(data.message || data.error, data.error ? 'error' : 'success');
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Failed to suspend user.', 'error');
+        return;
+      }
+
+      alert('User account suspended successfully.');
       loadUsers();
     }
 
     async function activateUser(id) {
       const token = getToken();
+
+      if (!confirm('Are you sure you want to activate this user account?')) return;
 
       const res = await fetch(`/api/users/${id}/activate`, {
         method: 'PATCH',
@@ -259,7 +243,12 @@
 
       const data = await res.json();
 
-      showMessage(data.message || data.error, data.error ? 'error' : 'success');
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Failed to activate user.', 'error');
+        return;
+      }
+
+      alert('User account activated successfully.');
       loadUsers();
     }
 
