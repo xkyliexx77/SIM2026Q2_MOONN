@@ -8,6 +8,82 @@
   <link rel="stylesheet" href="css/styles.css">
 
   <style>
+    .report-action-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin: 24px 0;
+    }
+
+    .report-action-card {
+      background: white;
+      border: none;
+      border-radius: 18px;
+      padding: 24px;
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 8px 22px rgba(108, 92, 231, 0.14);
+      transition: 0.2s ease;
+    }
+
+    .report-action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(108, 92, 231, 0.22);
+    }
+
+    .report-action-card h2 {
+      margin: 0 0 8px;
+      color: #2d3436;
+    }
+
+    .report-action-card p {
+      color: #636e72;
+      margin: 0;
+    }
+
+    .selected-report {
+      outline: 3px solid #6c5ce7;
+    }
+
+    .detailed-report-card {
+      background: white;
+      border-radius: 20px;
+      padding: 26px;
+      margin-top: 22px;
+      box-shadow: 0 8px 22px rgba(108, 92, 231, 0.14);
+      display: none;
+    }
+
+    .detailed-report-card h2 {
+      margin-top: 0;
+      color: #2d3436;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .detail-item {
+      background: #f8f7ff;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .detail-item span {
+      display: block;
+      color: #636e72;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .detail-item strong {
+      color: #2d3436;
+      font-size: 20px;
+    }
+
     .comparison-bars {
       display: grid;
       gap: 18px;
@@ -46,21 +122,20 @@
       text-align: right;
     }
 
-    .report-card p {
-      color: #2d3436;
-    }
-
-    .report-card span,
     .report-summary-grid span {
       color: #636e72;
     }
 
-    .report-card strong,
     .report-summary-grid strong {
       color: #2d3436;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
+      .report-action-grid,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
       .comparison-row {
         grid-template-columns: 1fr;
       }
@@ -78,7 +153,7 @@
     <div class="report-header">
       <div>
         <h1>Manager Report Dashboard</h1>
-        <p>View daily, weekly and monthly donation reports.</p>
+        <p>View platform summary first, then open daily, weekly or monthly detailed reports.</p>
       </div>
 
       <a href="dashboard.html" class="report-back-btn">Back to Dashboard</a>
@@ -86,31 +161,44 @@
 
     <p id="report-flash" class="flash"></p>
 
+    <!-- OVERALL SUMMARY -->
     <div class="report-summary-card">
       <h2>Overall Summary</h2>
       <div id="report-summary-box" class="report-summary-grid"></div>
     </div>
 
-    <div class="report-mini-grid">
-      <div class="report-card">
+    <!-- REPORT SELECTION -->
+    <div class="report-action-grid">
+      <button id="daily-card" class="report-action-card" onclick="showReport('daily')">
         <h2>Daily Report</h2>
-        <div id="report-daily-box"></div>
-      </div>
+        <p>Monitor today's platform activities.</p>
+      </button>
 
-      <div class="report-card">
+      <button id="weekly-card" class="report-action-card" onclick="showReport('weekly')">
         <h2>Weekly Report</h2>
-        <div id="report-weekly-box"></div>
-      </div>
+        <p>Analyse donation and activity trends this week.</p>
+      </button>
 
-      <div class="report-card">
+      <button id="monthly-card" class="report-action-card" onclick="showReport('monthly')">
         <h2>Monthly Report</h2>
-        <div id="report-monthly-box"></div>
-      </div>
+        <p>Evaluate overall monthly platform performance.</p>
+      </button>
     </div>
 
+    <!-- DETAILED REPORT -->
+    <div id="detailed-report-card" class="detailed-report-card">
+      <h2 id="detailed-report-title">Detailed Report</h2>
+      <p id="detailed-report-desc" style="color:#636e72;"></p>
+
+      <div id="detailed-report-box" class="detail-grid"></div>
+    </div>
+
+    <!-- CHART -->
     <div class="report-chart-card">
       <h2>Donation Amount Comparison</h2>
-      <p style="color:#636e72;">Compares total donation amount for today, this week and this month.</p>
+      <p style="color:#636e72;">
+        Compare donation amounts across daily, weekly and monthly reports.
+      </p>
 
       <div class="comparison-bars">
         <div class="comparison-row">
@@ -145,6 +233,10 @@
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
 
+    let dailyReport = null;
+    let weeklyReport = null;
+    let monthlyReport = null;
+
     if (!user || !token) {
       window.location.href = 'login.html';
     }
@@ -171,7 +263,7 @@
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to load report data.');
+        throw new Error(data.error || 'Failed to load report.');
       }
 
       return data;
@@ -189,36 +281,129 @@
       document.getElementById(amountId).textContent = money(amount);
     }
 
+    function resetSelectedCards() {
+      document.getElementById('daily-card').classList.remove('selected-report');
+      document.getElementById('weekly-card').classList.remove('selected-report');
+      document.getElementById('monthly-card').classList.remove('selected-report');
+    }
+
+    function showReport(type) {
+      let data = null;
+      let title = '';
+      let desc = '';
+
+      resetSelectedCards();
+
+      if (type === 'daily') {
+        data = dailyReport;
+        title = 'Daily Detailed Report';
+        desc = 'This report monitors today’s platform activities.';
+        document.getElementById('daily-card').classList.add('selected-report');
+      }
+
+      if (type === 'weekly') {
+        data = weeklyReport;
+        title = 'Weekly Detailed Report';
+        desc = 'This report analyses trends over the past 7 days.';
+        document.getElementById('weekly-card').classList.add('selected-report');
+      }
+
+      if (type === 'monthly') {
+        data = monthlyReport;
+        title = 'Monthly Detailed Report';
+        desc = 'This report evaluates the platform performance for this month.';
+        document.getElementById('monthly-card').classList.add('selected-report');
+      }
+
+      if (!data) return;
+
+      document.getElementById('detailed-report-card').style.display = 'block';
+      document.getElementById('detailed-report-title').textContent = title;
+      document.getElementById('detailed-report-desc').textContent = desc;
+
+      document.getElementById('detailed-report-box').innerHTML = `
+        <div class="detail-item">
+          <span>Donation Count</span>
+          <strong>${data.donation_count || 0}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Total Donation Amount</span>
+          <strong>${money(data.donation_amount)}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Average Donation</span>
+          <strong>${money(data.average_donation)}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Unique Donors</span>
+          <strong>${data.unique_donors || 0}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>New Fundraisers</span>
+          <strong>${data.new_fundraisers || 0}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Active Fundraisers</span>
+          <strong>${data.active_fundraisers || 0}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Completed Fundraisers</span>
+          <strong>${data.completed_fundraisers || 0}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Total Views</span>
+          <strong>${data.total_views || 0}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Total Favourites</span>
+          <strong>${data.total_favourites || 0}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Top Category</span>
+          <strong>${data.top_category || 'No category'}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Most Viewed Fundraiser</span>
+          <strong>${data.most_viewed_fundraiser || 'No fundraiser'}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Most Favourited Fundraiser</span>
+          <strong>${data.most_favourited_fundraiser || 'No fundraiser'}</strong>
+        </div>
+      `;
+    }
+
     async function loadReports() {
       try {
         const summary = await fetchReport('/api/reports/summary');
-        const daily = await fetchReport('/api/reports/daily');
-        const weekly = await fetchReport('/api/reports/weekly');
-        const monthly = await fetchReport('/api/reports/monthly');
+        dailyReport = await fetchReport('/api/reports/daily');
+        weeklyReport = await fetchReport('/api/reports/weekly');
+        monthlyReport = await fetchReport('/api/reports/monthly');
         const comparison = await fetchReport('/api/reports/comparison');
 
         document.getElementById('report-summary-box').innerHTML = `
           <div><span>Total Users</span><strong>${summary.total_users || 0}</strong></div>
+          <div><span>Total Fundraiser Users</span><strong>${summary.total_fundraiser_users || 0}</strong></div>
+          <div><span>Total Donees</span><strong>${summary.total_donees || 0}</strong></div>
           <div><span>Total Categories</span><strong>${summary.total_categories || 0}</strong></div>
           <div><span>Total Fundraisers</span><strong>${summary.total_fundraisers || 0}</strong></div>
+          <div><span>Active Fundraisers</span><strong>${summary.active_fundraisers || 0}</strong></div>
+          <div><span>Completed Fundraisers</span><strong>${summary.completed_fundraisers || 0}</strong></div>
           <div><span>Total Favourites</span><strong>${summary.total_favourites || 0}</strong></div>
           <div><span>Total Donations</span><strong>${summary.total_donations || 0}</strong></div>
           <div><span>Total Donation Amount</span><strong>${money(summary.total_donation_amount)}</strong></div>
-        `;
-
-        document.getElementById('report-daily-box').innerHTML = `
-          <p><span>Donation Count</span><strong>${daily.donation_count || 0}</strong></p>
-          <p><span>Donation Amount</span><strong>${money(daily.donation_amount)}</strong></p>
-        `;
-
-        document.getElementById('report-weekly-box').innerHTML = `
-          <p><span>Donation Count</span><strong>${weekly.donation_count || 0}</strong></p>
-          <p><span>Donation Amount</span><strong>${money(weekly.donation_amount)}</strong></p>
-        `;
-
-        document.getElementById('report-monthly-box').innerHTML = `
-          <p><span>Donation Count</span><strong>${monthly.donation_count || 0}</strong></p>
-          <p><span>Donation Amount</span><strong>${money(monthly.donation_amount)}</strong></p>
+          <div><span>Average Donation</span><strong>${money(summary.average_donation)}</strong></div>
         `;
 
         const dailyAmount = Number(comparison.daily_amount || 0);
