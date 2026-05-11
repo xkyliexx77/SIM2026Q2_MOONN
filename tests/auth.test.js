@@ -1,154 +1,213 @@
-const request = require('supertest');
+const supertest = require('supertest');
 const app = require('../server');
+const request = supertest(app);
+
+// before all test cases start
+beforeAll(async () => {
+  console.log('Connecting to authentication API test suite...');
+});
+
+// after all test cases finish
+afterAll(async () => {
+  console.log('Authentication API test suite completed.');
+
+});
 
 describe('POST /api/auth/login', () => {
 
-  beforeEach(() => {
-    console.log('Starting authentication test...');
-  });
+  describe('given invalid email and password', () => {
 
-  afterEach(() => {
-    console.log('Authentication test completed.');
-  });
+    // test 1
+    test('should respond with status code 401', async () => {
 
-  test('should reject invalid email and password', async () => {
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'notfound@gmail.com',
+          password: '123456'
+        });
 
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'notfound@gmail.com',
-        password: '123456'
-      });
+      expect(response.statusCode).toBe(401);
 
-    expect(res.statusCode).toBe(401);
+    });
 
   });
 
-  test('should reject missing email and password', async () => {
+  describe('when email or password is missing', () => {
 
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: '',
-        password: ''
-      });
+    // test 2
+    test('should respond with status code 401', async () => {
 
-    expect(res.statusCode).toBe(401);
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: '',
+          password: ''
+        });
 
-  });
+      expect(response.statusCode).toBe(401);
 
-  test('should reject missing email only', async () => {
-
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        password: '123456'
-      });
-
-    expect(res.statusCode).toBe(401);
+    });
 
   });
 
-  test('should reject missing password only', async () => {
+  describe('when email is missing', () => {
 
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'admin@gmail.com'
-      });
+    // test 3
+    test('should reject missing email', async () => {
 
-    expect(res.statusCode).toBe(401);
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          password: '123456'
+        });
 
-  });
+      expect(response.statusCode).toBe(401);
 
-  test('should reject empty request body', async () => {
-
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({});
-
-    expect(res.statusCode).toBe(401);
+    });
 
   });
 
-  test('should reject incorrect password', async () => {
+  describe('when password is missing', () => {
 
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'admin@gmail.com',
-        password: 'wrongpassword'
-      });
+    // test 4
+    test('should reject missing password', async () => {
 
-    expect(res.statusCode).toBe(401);
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'admin@gmail.com'
+        });
 
-  });
+      expect(response.statusCode).toBe(401);
 
-  test('should reject non-existing email', async () => {
-
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'idontexist@gmail.com',
-        password: '123456'
-      });
-
-    expect(res.statusCode).toBe(401);
+    });
 
   });
 
-  test('should reject invalid email format', async () => {
+  describe('when request body is empty', () => {
 
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'invalidemail',
-        password: '123456'
-      });
+    // test 5
+    test('should reject empty request body', async () => {
 
-    expect(res.statusCode).toBe(401);
+      const response = await request
+        .post('/api/auth/login')
+        .send({});
 
-  });
+      expect(response.statusCode).toBe(401);
 
-  test('should return JSON response', async () => {
-
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'notfound@gmail.com',
-        password: '123456'
-      });
-
-    expect(res.headers['content-type'])
-      .toEqual(expect.stringContaining('json'));
+    });
 
   });
 
-  test('should return an error message for failed login', async () => {
+  describe('when password is incorrect', () => {
 
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'notfound@gmail.com',
-        password: '123456'
-      });
+    // test 6
+    test('should reject incorrect password', async () => {
 
-    expect(res.body.error || res.body.message)
-      .toBeDefined();
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'admin@gmail.com',
+          password: 'wrongpassword'
+        });
+
+      expect(response.statusCode).toBe(401);
+
+    });
 
   });
 
-  test('should not return token for failed login', async () => {
+  describe('when email does not exist', () => {
 
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'notfound@gmail.com',
-        password: '123456'
-      });
+    // test 7
+    test('should reject non-existing email', async () => {
 
-    expect(res.body.token)
-      .toBeUndefined();
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'idontexist@gmail.com',
+          password: '123456'
+        });
+
+      expect(response.statusCode).toBe(401);
+
+    });
+
+  });
+
+  describe('when email format is invalid', () => {
+
+    // test 8
+    test('should reject invalid email format', async () => {
+
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'invalidemail',
+          password: '123456'
+        });
+
+      expect(response.statusCode).toBe(401);
+
+    });
+
+  });
+
+  describe('when login fails', () => {
+
+    // test 9
+    test('should return JSON response', async () => {
+
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'notfound@gmail.com',
+          password: '123456'
+        });
+
+      expect(response.headers['content-type'])
+        .toEqual(expect.stringContaining('json'));
+
+    });
+
+  });
+
+  describe('when login credentials are invalid', () => {
+
+    // test 10
+    test('should return an error message', async () => {
+
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'notfound@gmail.com',
+          password: '123456'
+        });
+
+      expect(response.body.error || response.body.message)
+        .toBeDefined();
+
+    });
+
+  });
+
+  describe('when login attempt fails', () => {
+
+    // test 11
+    test('should not return token for failed login', async () => {
+
+      const response = await request
+        .post('/api/auth/login')
+        .send({
+          email: 'notfound@gmail.com',
+          password: '123456'
+        });
+
+      expect(response.body.token)
+        .toBeUndefined();
+
+    });
 
   });
 
