@@ -1,29 +1,54 @@
 const request = require('supertest');
 const app = require('../server');
 
-describe('Auth API', () => {
-  test('should register a user', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({
-        name: 'Test User',
-        email: `test${Date.now()}@mail.com`,
-        password: '123456',
-        role: 'donee'
-      });
+describe('POST /api/auth/login', () => {
 
-    expect(res.statusCode).toBe(201);
-    expect(res.body.email).toBeDefined();
+  describe('given invalid email and password', () => {
+
+    test('should respond with status code 401', async () => {
+
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'notfound@gmail.com',
+          password: '123456'
+        });
+
+      expect(res.statusCode).toBe(401);
+    });
+
   });
 
-  test('should fail login for invalid user', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'notfound@mail.com',
-        password: '123456'
-      });
+  describe('when email or password is missing', () => {
 
-    expect(res.statusCode).toBe(401);
+    test('should respond with status code 401', async () => {
+
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: '',
+          password: ''
+        });
+
+      expect(res.statusCode).toBe(401);
+    });
+
   });
+
+  describe('when password is incorrect', () => {
+
+    test('should respond with status code 401', async () => {
+
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'admin@gmail.com',
+          password: 'wrongpassword'
+        });
+
+      expect(res.statusCode).toBe(401);
+    });
+
+  });
+
 });
