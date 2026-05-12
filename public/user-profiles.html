@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profiles</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>User Profile Management</h1>
+        <p>Create, search, update, suspend and activate user profiles.</p>
+      </div>
+
+      <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="fundraisers-filter-card">
+      <h2>Create User Profile</h2>
+      <p id="profile-flash" class="flash"></p>
+
+      <div class="fundraisers-filters">
+        <div>
+          <label>Profile Name</label>
+          <input type="text" id="profile-name" placeholder="Example: Donee Profile">
+        </div>
+
+        <div>
+          <label>Role Name</label>
+            <select id="profile-role">
+            <option value="donee">Donee</option>
+            <option value="fundraiser">Fundraiser</option>
+            <option value="manager">Platform Manager</option>
+            <option value="admin">User Admin</option>
+            </select>        
+        </div>
+
+        <button class="fundraisers-search-btn" onclick="createProfile()">Create</button>
+      </div>
+    </div>
+
+    <div class="fundraisers-filter-card">
+      <h2>Search User Profiles</h2>
+
+      <div class="fundraisers-filters">
+        <div>
+          <label>Search</label>
+          <input type="text" id="search-input" placeholder="Search profile name, role or status">
+        </div>
+
+        <button class="fundraisers-search-btn" onclick="loadProfiles()">Search</button>
+        <button class="fundraisers-clear-btn" onclick="clearSearch()">Clear</button>
+      </div>
+    </div>
+
+    <div id="profile-list" class="fundraisers-list"></div>
+
+  </div>
+
+  <script>
+    const list = document.getElementById('profile-list');
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+
+    if (!user || !token) {
+      window.location.href = 'login.html';
+    }
+
+    if (user && user.role !== 'admin') {
+      alert('Only user admin can manage user profiles.');
+      window.location.href = 'dashboard.html';
+    }
+
+    function showMessage(text, type = 'success') {
+      const msg = document.getElementById('profile-flash');
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 3000);
+    }
+
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      loadProfiles();
+    }
+
+    async function createProfile() {
+      const profileName = document.getElementById('profile-name').value.trim();
+      const role = document.getElementById('profile-role').value.trim();
+
+      if (!profileName) {
+        showMessage('Profile name is required.', 'error');
+        return;
+      }
+
+      if (!role) {
+        showMessage('Role name is required.', 'error');
+        return;
+      }
+
+      const res = await fetch('/api/profiles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          profile_name: profileName,
+          role: role
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Failed to create profile.', 'error');
+        return;
+      }
+
+      alert('User profile created successfully.');
+      document.getElementById('profile-name').value = '';
+      document.getElementById('profile-role').value = '';
+      loadProfiles();
+    }
+
+    async function loadProfiles() {
+      const search = document.getElementById('search-input').value.trim();
+      const query = new URLSearchParams();
+
+      if (search) query.append('search', search);
+
+      const res = await fetch(`/api/profiles?${query.toString()}`, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      list.innerHTML = '';
+
+      if (!Array.isArray(data) || data.length === 0) {
+        list.innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>No user profiles found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      data.forEach(profile => {
+        const safeName = String(profile.profile_name || '').replace(/'/g, "\\'");
+        const safeRole = String(profile.role || '').replace(/'/g, "\\'");
+
+        const div = document.createElement('div');
+        div.className = 'fundraisers-item-card';
+
+        div.innerHTML = `
+          <div class="fundraisers-item-top">
+            <div>
+              <h3>${profile.profile_name}</h3>
+              <p>Profile ID: ${profile.id}</p>
+            </div>
+
+            <span class="fundraisers-category-badge">
+              ${profile.role}
+            </span>
+          </div>
+
+          <div class="fundraisers-info-grid">
+            <div>
+              <span>Status</span>
+              <strong>${profile.status}</strong>
+            </div>
+          </div>
+
+          <div class="fundraisers-actions">
+            <button class="fundraisers-view-btn" onclick="editProfile(${profile.id}, '${safeName}', '${safeRole}')">
+              Edit
+            </button>
+
+            ${
+              profile.status === 'suspended'
+                ? `<button class="fundraisers-donate-btn" onclick="activateProfile(${profile.id})">Activate</button>`
+                : `<button class="fundraisers-fav-btn" onclick="suspendProfile(${profile.id})">Suspend</button>`
+            }
+          </div>
+        `;
+
+        list.appendChild(div);
+      });
+    }
+
+    async function editProfile(id, oldName, oldRole) {
+      const profileName = prompt('Enter new profile name:', oldName);
+      if (profileName === null) return;
+
+      const role = prompt('Enter role name:', oldRole);
+      if (role === null) return;
+
+      const res = await fetch(`/api/profiles/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          profile_name: profileName,
+          role: role
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Failed to update profile.', 'error');
+        return;
+      }
+
+      alert('User profile updated successfully.');
+      loadProfiles();
+    }
+
+    async function suspendProfile(id) {
+      if (!confirm('Are you sure you want to suspend this user profile?')) return;
+
+      const res = await fetch(`/api/profiles/${id}/suspend`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Failed to suspend profile.', 'error');
+        return;
+      }
+
+      alert('User profile suspended successfully.');
+      loadProfiles();
+    }
+
+    async function activateProfile(id) {
+      if (!confirm('Are you sure you want to activate this user profile?')) return;
+
+      const res = await fetch(`/api/profiles/${id}/activate`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Failed to activate profile.', 'error');
+        return;
+      }
+
+      alert('User profile activated successfully.');
+      loadProfiles();
+    }
+
+    loadProfiles();
+  </script>
+</body>
+</html>

@@ -65,22 +65,25 @@
 
       const menu = document.getElementById('dashboard-menu');
 
-      // ADMIN
       if (role === 'admin') {
         document.getElementById('dashboard-role-label').textContent = 'User Admin Workspace';
         document.getElementById('dashboard-title').textContent = 'User Admin Dashboard';
         document.getElementById('dashboard-action-subtitle').textContent =
-          'Manage all user accounts, roles and access control.';
+          'Manage user profiles and user accounts.';
 
         menu.innerHTML = `
+          <a class="dashboard-action-card" href="user-profiles.html">
+            <span>Manage User Profiles</span>
+            <small>Create, view, update, suspend and search user profiles</small>
+          </a>
+
           <a class="dashboard-action-card" href="admin-users.html">
-            <span>Manage Users</span>
-            <small>Create, search, update, suspend and activate users</small>
+            <span>Manage User Accounts</span>
+            <small>View, update, suspend, activate and search user accounts</small>
           </a>
         `;
       }
 
-      // MANAGER
       else if (role === 'manager') {
         document.getElementById('dashboard-role-label').textContent = 'Manager Workspace';
         document.getElementById('dashboard-title').textContent = 'Management Dashboard';
@@ -100,7 +103,6 @@
         `;
       }
 
-      // FUNDRAISER
       else if (role === 'fundraiser') {
         document.getElementById('dashboard-role-label').textContent = 'Fundraiser Workspace';
         document.getElementById('dashboard-title').textContent = 'Fundraiser Dashboard';
@@ -120,7 +122,6 @@
         `;
       }
 
-      // DONEE
       else if (role === 'donee') {
         document.getElementById('dashboard-role-label').textContent = 'Donee Workspace';
         document.getElementById('dashboard-title').textContent = 'Donation Dashboard';

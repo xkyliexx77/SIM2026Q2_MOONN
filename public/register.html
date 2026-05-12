@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Register | Fundraising System</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -13,7 +14,7 @@
     <div class="auth-left">
       <h1>Create Your Account</h1>
       <p>
-        Join the fundraising platform to manage campaigns, donations and support requests in one place.
+        Join the fundraising platform by selecting an active user profile created by the user admin.
       </p>
     </div>
 
@@ -32,15 +33,10 @@
 
         <label>Password</label>
         <input type="password" id="password" placeholder="Enter your password" required>
-        <p class="small-text auth-hint">
-          At least 6 characters, with at least 1 letter and 1 number.
-        </p>
 
-        <label>Role</label>
+        <label>User Profile</label>
         <select id="role" required>
-          <option value="fundraiser">Fundraiser</option>
-          <option value="donee">Donee</option>
-          <option value="manager">Manager</option>
+          <option value="">Loading profiles...</option>
         </select>
 
         <button type="submit" class="auth-btn">Register</button>
@@ -68,6 +64,31 @@
       }, 3500);
     }
 
+    async function loadProfiles() {
+      try {
+        const response = await fetch('/api/profiles/active');
+        const profiles = await response.json();
+
+        const select = document.getElementById('role');
+        select.innerHTML = '<option value="">Select user profile</option>';
+
+        if (!Array.isArray(profiles) || profiles.length === 0) {
+          select.innerHTML = '<option value="">No active profiles available</option>';
+          return;
+        }
+
+        profiles.forEach(profile => {
+          const option = document.createElement('option');
+          option.value = profile.role;
+          option.textContent = profile.profile_name;
+          select.appendChild(option);
+        });
+
+      } catch (error) {
+        showMessage('Unable to load user profiles.', 'error');
+      }
+    }
+
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -78,8 +99,13 @@
         role: document.getElementById('role').value
       };
 
+      if (!userData.role) {
+        showMessage('Please select a user profile.', 'error');
+        return;
+      }
+
       try {
-        const response = await fetch('http://localhost:3000/api/auth/register', {
+        const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -90,12 +116,12 @@
         const data = await response.json();
 
         if (response.ok) {
-          showMessage('Registration successful. Redirecting to login...', 'success');
+          alert('Account registered successfully.');
           form.reset();
 
           setTimeout(() => {
             window.location.href = 'login.html';
-          }, 1000);
+          }, 800);
         } else {
           showMessage(data.error || 'Registration failed.', 'error');
         }
@@ -104,6 +130,8 @@
         showMessage('Cannot connect to server. Please make sure server.js is running.', 'error');
       }
     });
+
+    loadProfiles();
   </script>
 </body>
 </html>
