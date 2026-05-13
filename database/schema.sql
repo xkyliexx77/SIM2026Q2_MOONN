@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS users (
     status TEXT DEFAULT 'active' CHECK(status IN ('active', 'suspended'))
 );
 
+INSERT OR IGNORE INTO users (name, email, password, role, status)
+VALUES ('Admin', 'admin@gmail.com', 'admin123', 'admin', 'active');
+
 CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE
@@ -53,3 +56,4 @@ CREATE TABLE IF NOT EXISTS donations (
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(fundraiser_id) REFERENCES fundraisers(id)
 );
+
