@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile Details</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body fundraisers-admin">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>User Profile Details</h1>
+        <p>View full user profile information.</p>
+      </div>
+
+      <a href="user-profiles.html" class="fundraisers-back-btn">
+        Back
+      </a>
+    </div>
+
+    <div id="detailBox" class="fundraisers-item-card"></div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    async function loadProfileById() {
+      try {
+        const res = await fetch(`/api/profiles/${id}`, {
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        });
+
+        const data = await res.json();
+
+        if (res.ok && !data.error) {
+          return data;
+        }
+      } catch (error) {}
+
+      const resAll = await fetch('/api/profiles', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const profiles = await resAll.json();
+
+      if (Array.isArray(profiles)) {
+        return profiles.find(profile =>
+          String(profile.id) === String(id)
+        );
+      }
+
+      return null;
+    }
+
+    async function loadDetails() {
+      const profile = await loadProfileById();
+
+      if (!profile) {
+        document.getElementById('detailBox').innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>User profile not found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      document.getElementById('detailBox').innerHTML = `
+        <div class="fundraisers-item-top">
+          <div>
+            <h3>${profile.profile_name || '-'}</h3>
+            <p>Profile ID: ${profile.id}</p>
+          </div>
+
+          <span class="fundraisers-category-badge">
+            ${profile.status || 'active'}
+          </span>
+        </div>
+
+        <div class="fundraisers-info-grid">
+          <div>
+            <span>Profile ID</span>
+            <strong>${profile.id}</strong>
+          </div>
+
+          <div>
+            <span>Profile Name</span>
+            <strong>${profile.profile_name || '-'}</strong>
+          </div>
+
+          <div>
+            <span>Description</span>
+            <strong>${profile.description || profile.profile_description || 'No description'}</strong>
+          </div>
+
+          <div>
+            <span>Status</span>
+            <strong>${profile.status || 'active'}</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    loadDetails();
+  </script>
+</body>
+</html>

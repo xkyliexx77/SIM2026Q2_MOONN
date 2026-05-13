@@ -24,6 +24,22 @@ class UserAccountEntity {
       );
     });
   }
+  static viewOne(id) {
+    return new Promise((resolve, reject) => {
+      db.get(
+        `
+        SELECT id, name, email, role, status
+        FROM users
+        WHERE id = ?
+        `,
+        [id],
+        (err, row) => {
+          if (err) return reject(err);
+          resolve(row);
+        }
+      );
+    });
+  }
 
   static viewAll() {
     return new Promise((resolve, reject) => {

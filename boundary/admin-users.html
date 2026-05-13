@@ -1,201 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>User Admin - Manage Accounts</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8" />
+  <title>User Management</title>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 
-<body class="fundraisers-body">
+<body class="fundraisers-body fundraisers-admin">
+
   <div class="fundraisers-container">
 
     <div class="fundraisers-header">
+
       <div>
-        <h1>User Account Management</h1>
-        <p>Search, update, suspend and activate user accounts.</p>
+        <h1>User Management</h1>
+        <p>Manage all user accounts and profiles.</p>
       </div>
 
-      <div style="display:flex; gap:12px;">
-        <a href="create-user-account.html" class="admin-btn">Create User</a>
-        <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
+      <div class="fundraisers-header-actions">
+
+        <a
+          href="create-user-account.html"
+          class="admin-btn">
+          Create User
+        </a>
+        
+        <a
+          href="dashboard.html"
+          class="fundraisers-back-btn">
+          Back
+        </a>
+
       </div>
+
     </div>
 
     <div class="fundraisers-filter-card">
-      <h2>Search Users</h2>
-      <p id="admin-users-flash" class="flash"></p>
 
-      <div class="fundraisers-filters">
+      <h2>Search Users</h2>
+
+      <div class="fundraisers-filter-grid">
+
         <div>
           <label>Search</label>
-          <input type="text" id="search-input" placeholder="Search name, email or role">
+
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search user name or email">
         </div>
 
-        <button class="admin-btn" onclick="loadUsers()">Search</button>
-        <button class="fundraisers-clear-btn" onclick="clearSearch()">Clear</button>
       </div>
+
+      <div class="fundraisers-actions">
+
+        <button
+          class="admin-btn"
+          onclick="searchUsers()">
+          Search
+        </button>
+
+        <button
+          class="fundraisers-clear-btn"
+          onclick="clearSearch()">
+          Clear
+        </button>
+
+      </div>
+
     </div>
 
-    <div id="users-list" class="fundraisers-list"></div>
+    <div
+      class="fundraisers-grid"
+      id="usersGrid">
+    </div>
 
   </div>
 
   <script>
-    const list = document.getElementById('users-list');
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
 
-    if (!token || !user) {
-      window.location.href = 'login.html';
+    const token =
+      localStorage.getItem('token');
+
+    if (!token) {
+
+      window.location.href =
+        'login.html';
+
     }
 
-    if (user && user.role !== 'admin') {
-      alert('Only user admin can access this page.');
-      window.location.href = 'dashboard.html';
-    }
-
-    function showMessage(text, type = 'success') {
-      const msg = document.getElementById('admin-users-flash');
-      msg.textContent = text;
-      msg.className = `flash ${type}`;
-      msg.style.display = 'block';
-
-      setTimeout(() => {
-        msg.style.display = 'none';
-      }, 3000);
-    }
-
-    function escapeText(value) {
-      return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function clearSearch() {
-      document.getElementById('search-input').value = '';
-      loadUsers();
-    }
+    window.allUsers = [];
 
     async function loadUsers() {
-      const search = document.getElementById('search-input').value.trim();
-      const query = new URLSearchParams();
 
-      if (search) query.append('search', search);
+      try {
 
-      const url = search
-        ? `/api/users/search?${query.toString()}`
-        : '/api/users';
+        const response =
+          await fetch('/api/users', {
 
-      const res = await fetch(url, {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
+            headers: {
+              Authorization:
+                'Bearer ' + token
+            }
 
-      const data = await res.json();
+          });
 
-      list.innerHTML = '';
+        const users =
+          await response.json();
 
-      if (!Array.isArray(data) || data.length === 0) {
-        list.innerHTML = `
+        window.allUsers = users;
+
+        renderUsers(users);
+
+      } catch (error) {
+
+        console.error(error);
+
+        document.getElementById(
+          'usersGrid'
+        ).innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>Unable to load users.</p>
+          </div>
+        `;
+
+      }
+
+    }
+
+    function renderUsers(users) {
+
+      const grid =
+        document.getElementById(
+          'usersGrid'
+        );
+
+      if (
+        !Array.isArray(users) ||
+        users.length === 0
+      ) {
+
+        grid.innerHTML = `
           <div class="fundraisers-empty-card">
             <p>No users found.</p>
           </div>
         `;
+
         return;
+
       }
 
-      data.forEach(user => {
-        const div = document.createElement('div');
-        div.className = 'fundraisers-item-card';
+      grid.innerHTML = users.map(user => `
 
-        div.innerHTML = `
+        <div class="fundraisers-item-card">
+
           <div class="fundraisers-item-top">
+
             <div>
-              <h3>${escapeText(user.name)}</h3>
-              <p>${escapeText(user.email)}</p>
+
+              <h3>
+                ${user.name}
+              </h3>
+
+              <p>
+                ${user.email}
+              </p>
+
             </div>
 
             <span class="fundraisers-category-badge">
-              ${escapeText(user.role)}
+              ${user.role}
             </span>
+
           </div>
 
           <div class="fundraisers-info-grid">
+
             <div>
               <span>User ID</span>
-              <strong>${user.id}</strong>
+
+              <strong>
+                ${user.id}
+              </strong>
             </div>
 
             <div>
               <span>Status</span>
-              <strong>${escapeText(user.status || 'active')}</strong>
+
+              <strong>
+                ${user.status || 'active'}
+              </strong>
             </div>
+
           </div>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-view-btn" onclick="window.location.href='edit-user.html?id=${user.id}'">
+
+            <button
+              class="fundraisers-view-btn"
+              onclick="window.location.href='user-account-detail.html?id=${user.id}'">
+              View Details
+            </button>
+
+            <button
+              class="fundraisers-edit-btn"
+              onclick="window.location.href='edit-user.html?id=${user.id}'">
               Edit
             </button>
 
-            ${
-              user.status === 'suspended'
-                ? `<button class="fundraisers-donate-btn" onclick="activateUser(${user.id})">Activate</button>`
-                : `<button class="fundraisers-fav-btn" onclick="suspendUser(${user.id})">Suspend</button>`
-            }
-          </div>
-        `;
+            <button
+              class="fundraisers-delete-btn"
+              onclick="suspendUser(${user.id})">
+              Suspend
+            </button>
 
-        list.appendChild(div);
-      });
+          </div>
+
+        </div>
+
+      `).join('');
+
+    }
+
+    function searchUsers() {
+
+      const keyword =
+        document.getElementById(
+          'searchInput'
+        )
+        .value
+        .toLowerCase();
+
+      const filtered =
+        window.allUsers.filter(user =>
+
+          String(user.name || '')
+            .toLowerCase()
+            .includes(keyword)
+
+          ||
+
+          String(user.email || '')
+            .toLowerCase()
+            .includes(keyword)
+
+        );
+
+      renderUsers(filtered);
+
+    }
+
+    function clearSearch() {
+
+      document.getElementById(
+        'searchInput'
+      ).value = '';
+
+      renderUsers(window.allUsers);
+
     }
 
     async function suspendUser(id) {
-      if (!confirm('Are you sure you want to suspend this user account?')) return;
 
-      const res = await fetch(`/api/users/${id}/suspend`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': 'Bearer ' + token
+      const confirmSuspend =
+        confirm(
+          'Suspend this user account?'
+        );
+
+      if (!confirmSuspend) return;
+
+      try {
+
+        const response =
+          await fetch(`/api/users/${id}/suspend`, {
+
+            method: 'PUT',
+
+            headers: {
+              Authorization:
+                'Bearer ' + token
+            }
+
+          });
+
+        const data =
+          await response.json();
+
+        if (!response.ok || data.error) {
+
+          alert(
+            data.error ||
+            'Unable to suspend user.'
+          );
+
+          return;
+
         }
-      });
 
-      const data = await res.json();
+        alert(
+          'User suspended successfully.'
+        );
 
-      if (!res.ok || data.error) {
-        showMessage(data.error || 'Failed to suspend user.', 'error');
-        return;
+        loadUsers();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          'Something went wrong.'
+        );
+
       }
 
-      alert('User account suspended successfully.');
-      loadUsers();
-    }
-
-    async function activateUser(id) {
-      if (!confirm('Are you sure you want to activate this user account?')) return;
-
-      const res = await fetch(`/api/users/${id}/activate`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        showMessage(data.error || 'Failed to activate user.', 'error');
-        return;
-      }
-
-      alert('User account activated successfully.');
-      loadUsers();
     }
 
     loadUsers();
+
   </script>
+
 </body>
 </html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Account Details</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body fundraisers-admin">
+  <div class="fundraisers-container">
+    <div class="fundraisers-header">
+      <div>
+        <h1>User Account Details</h1>
+        <p>View full user account information.</p>
+      </div>
+      <a href="admin-users.html" class="fundraisers-back-btn">Back</a>
+    </div>
+
+    <div id="detailBox" class="fundraisers-item-card"></div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    async function loadUserById() {
+      try {
+        const res = await fetch(`/api/users/${id}`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        const data = await res.json();
+
+        if (res.ok && !data.error) {
+          return data;
+        }
+      } catch (error) {}
+
+      const resAll = await fetch('/api/users', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+
+      const users = await resAll.json();
+
+      if (Array.isArray(users)) {
+        return users.find(user => String(user.id) === String(id));
+      }
+
+      return null;
+    }
+
+    async function loadDetails() {
+      const user = await loadUserById();
+
+      if (!user) {
+        document.getElementById('detailBox').innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>User account not found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      document.getElementById('detailBox').innerHTML = `
+        <div class="fundraisers-item-top">
+          <div>
+            <h3>${user.name}</h3>
+            <p>${user.email}</p>
+          </div>
+          <span class="fundraisers-category-badge">${user.role}</span>
+        </div>
+
+        <div class="fundraisers-info-grid">
+          <div>
+            <span>User ID</span>
+            <strong>${user.id}</strong>
+          </div>
+
+          <div>
+            <span>Name</span>
+            <strong>${user.name}</strong>
+          </div>
+
+          <div>
+            <span>Email</span>
+            <strong>${user.email}</strong>
+          </div>
+
+          <div>
+            <span>Role</span>
+            <strong>${user.role}</strong>
+          </div>
+
+          <div>
+            <span>Status</span>
+            <strong>${user.status || 'active'}</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    loadDetails();
+  </script>
+</body>
+</html>
