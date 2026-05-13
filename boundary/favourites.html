@@ -122,7 +122,9 @@
           </div>
 
           <div class="favourite-actions">
-            <a href="fundraisers.html" class="favourite-view-btn">View Fundraisers</a>
+            <a class="favourite-view-btn" href="fundraiser-detail.html?id=${item.id}">
+              View Campaign Details
+            </a>
             <button class="favourite-remove-btn" onclick="removeFavourite(${item.id})">Remove Favourite</button>
           </div>
         `;

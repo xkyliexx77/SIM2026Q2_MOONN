@@ -1,6 +1,6 @@
 const db = require('../database/db');
 
-class FundraisingActivityEntity {
+class FundraisingEntity {
   static create(data, fundraiserId) {
     return new Promise((resolve, reject) => {
       db.run(
@@ -39,21 +39,38 @@ class FundraisingActivityEntity {
 
   static viewOne(id) {
     return new Promise((resolve, reject) => {
-      db.get(
+      db.run(
         `
-        SELECT
-          f.*,
-          c.name AS category_name,
-          u.name AS fundraiser_name
-        FROM fundraisers f
-        LEFT JOIN categories c ON f.category_id = c.id
-        LEFT JOIN users u ON f.fundraiser_id = u.id
-        WHERE f.id = ?
+        UPDATE fundraisers
+        SET views = views + 1
+        WHERE id = ?
         `,
         [id],
-        (err, row) => {
-          if (err) return reject(err);
-          resolve(row);
+        (updateErr) => {
+          if (updateErr) return reject(updateErr);
+
+          db.get(
+            `
+            SELECT
+              f.*,
+              c.name AS category_name,
+              u.name AS fundraiser_name,
+              COUNT(DISTINCT d.id) AS donation_count,
+              COUNT(DISTINCT fav.id) AS favourite_count
+            FROM fundraisers f
+            LEFT JOIN categories c ON f.category_id = c.id
+            LEFT JOIN users u ON f.fundraiser_id = u.id
+            LEFT JOIN donations d ON d.fundraiser_id = f.id
+            LEFT JOIN favourites fav ON fav.fundraiser_id = f.id
+            WHERE f.id = ?
+            GROUP BY f.id
+            `,
+            [id],
+            (err, row) => {
+              if (err) return reject(err);
+              resolve(row);
+            }
+          );
         }
       );
     });
@@ -65,11 +82,18 @@ class FundraisingActivityEntity {
         `
         SELECT
           f.*,
-          c.name AS category_name
+          c.name AS category_name,
+          u.name AS fundraiser_name,
+          COUNT(DISTINCT d.id) AS donation_count,
+          COUNT(DISTINCT fav.id) AS favourite_count
         FROM fundraisers f
         LEFT JOIN categories c ON f.category_id = c.id
-        WHERE fundraiser_id = ?
-        ORDER BY id DESC
+        LEFT JOIN users u ON f.fundraiser_id = u.id
+        LEFT JOIN donations d ON d.fundraiser_id = f.id
+        LEFT JOIN favourites fav ON fav.fundraiser_id = f.id
+        WHERE f.fundraiser_id = ?
+        GROUP BY f.id
+        ORDER BY f.id DESC
         `,
         [userId],
         (err, rows) => {
@@ -161,10 +185,14 @@ class FundraisingActivityEntity {
         SELECT
           f.*,
           c.name AS category_name,
-          u.name AS fundraiser_name
+          u.name AS fundraiser_name,
+          COUNT(DISTINCT d.id) AS donation_count,
+          COUNT(DISTINCT fav.id) AS favourite_count
         FROM fundraisers f
         LEFT JOIN categories c ON f.category_id = c.id
         LEFT JOIN users u ON f.fundraiser_id = u.id
+        LEFT JOIN donations d ON d.fundraiser_id = f.id
+        LEFT JOIN favourites fav ON fav.fundraiser_id = f.id
         WHERE f.status = 'active'
       `;
 
@@ -180,7 +208,10 @@ class FundraisingActivityEntity {
         params.push(query.category);
       }
 
-      sql += ` ORDER BY f.id DESC`;
+      sql += `
+        GROUP BY f.id
+        ORDER BY f.id DESC
+      `;
 
       db.all(sql, params, (err, rows) => {
         if (err) return reject(err);
@@ -190,4 +221,4 @@ class FundraisingActivityEntity {
   }
 }
 
-module.exports = FundraisingActivityEntity;
+module.exports = FundraisingEntity;
