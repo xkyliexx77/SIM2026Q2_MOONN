@@ -1,4 +1,4 @@
-const FundraisingActivityEntity = require('../entity/FundraisingActivityEntity');
+const FundraisingActivityEntity = require('../entity/FundraisingEntity');
 
 class CompleteFundraisingActivityController {
   static async complete(id, fundraiserId) {

@@ -1,4 +1,4 @@
-const FundraisingActivityEntity = require('../entity/FundraisingActivityEntity');
+const FundraisingActivityEntity = require('../entity/FundraisingEntity');
 
 class SearchFundraisingActivityController {
   static async search(query) {

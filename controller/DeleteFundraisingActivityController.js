@@ -1,4 +1,4 @@
-const FundraisingActivityEntity = require('../entity/FundraisingActivityEntity');
+const FundraisingActivityEntity = require('../entity/FundraisingEntity');
 
 class DeleteFundraisingActivityController {
   static async delete(id, fundraiserId) {
