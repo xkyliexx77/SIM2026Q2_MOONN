@@ -390,7 +390,7 @@
         dailyReport = await fetchReport('/api/reports/daily');
         weeklyReport = await fetchReport('/api/reports/weekly');
         monthlyReport = await fetchReport('/api/reports/monthly');
-        const comparison = await fetchReport('/api/reports/comparison');
+        const comparison = await fetchReport('/api/reports/compare');
 
         document.getElementById('report-summary-box').innerHTML = `
           <div><span>Total Users</span><strong>${summary.total_users || 0}</strong></div>

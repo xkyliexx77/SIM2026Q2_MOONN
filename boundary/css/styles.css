@@ -1,99 +1,24 @@
-/* =========================
-   RESET
-========================= */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* =========================
-   BODY
-========================= */
 body {
   font-family: Arial, sans-serif;
-  background: #eef2f7;   /* soft grey background */
+  background: #eef2f7;
   color: #2d3436;
-  margin: 0;
-  padding: 0;
 }
 
-/* =========================
-   CONTAINER (CENTERED BOX)
-========================= */
-.container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 0 10px;
-}
-
-/* =========================
-   HEADER (OPTIONAL NAVBAR)
-========================= */
-.header {
-  background: #2f3640;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-}
-
-.header a {
-  color: #dcdde1;
-  margin-right: 15px;
+a {
+  color: #3498db;
   text-decoration: none;
 }
 
-.header a:hover {
-  text-decoration: underline;
+a:hover {
+  text-decoration: none;
 }
 
-/* =========================
-   CARD (MAIN BOX)
-========================= */
-.card {
-  background: #ffffff;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-/* 🔥 GRID: 3 cards per row */
-.fundraisers-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-/* responsive */
-@media (max-width: 900px) {
-  .fundraisers-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 600px) {
-  .fundraisers-list {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* card click effect */
-.fundraisers-item-card {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.fundraisers-item-card:hover {
-  transform: translateY(-3px);
-}
-
-/* =========================
-   TEXT
-========================= */
 h1, h2, h3 {
   margin-bottom: 12px;
 }
@@ -102,26 +27,6 @@ p {
   margin-bottom: 8px;
 }
 
-.small-text {
-  font-size: 14px;
-  color: #636e72;
-}
-
-/* =========================
-   LINKS
-========================= */
-a {
-  color: #3498db;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* =========================
-   FORM ELEMENTS
-========================= */
 label {
   display: block;
   margin-top: 10px;
@@ -145,9 +50,6 @@ textarea {
   resize: vertical;
 }
 
-/* =========================
-   BUTTONS
-========================= */
 button {
   padding: 8px 14px;
   border: none;
@@ -155,6 +57,49 @@ button {
   cursor: pointer;
   margin-right: 6px;
   margin-top: 5px;
+}
+
+hr {
+  margin: 15px 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
+
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 10px;
+}
+
+.header {
+  background: #2f3640;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.header a {
+  color: #dcdde1;
+  margin-right: 15px;
+}
+
+.header a:hover {
+  text-decoration: underline;
+}
+
+.card {
+  background: #ffffff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.small-text {
+  font-size: 14px;
+  color: #636e72;
 }
 
 .btn-primary {
@@ -193,9 +138,6 @@ button {
   background: #636e72;
 }
 
-/* =========================
-   FLASH MESSAGES
-========================= */
 .flash {
   display: none;
   padding: 12px;
@@ -215,9 +157,6 @@ button {
   color: #721c24;
 }
 
-/* =========================
-   FILTER GRID
-========================= */
 .inline-filters {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr auto;
@@ -226,31 +165,12 @@ button {
   margin-bottom: 16px;
 }
 
-@media (max-width: 700px) {
-  .inline-filters {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================
-   ACTION BUTTON AREA
-========================= */
 .list-actions {
   margin-top: 10px;
 }
 
-/* =========================
-   DIVIDER
-========================= */
-hr {
-  margin: 15px 0;
-  border: none;
-  border-top: 1px solid #eee;
-}
+/* AUTH */
 
-/* =========================
-   AUTH THEME - LOGIN / REGISTER
-========================= */
 .auth-body {
   min-height: 100vh;
   background: linear-gradient(135deg, #f1f4f9, #f8f5ff);
@@ -371,28 +291,7 @@ hr {
   text-decoration: underline;
 }
 
-@media (max-width: 800px) {
-  .auth-wrapper {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-left {
-    padding: 35px 28px;
-    text-align: center;
-  }
-
-  .auth-left h1 {
-    font-size: 26px;
-  }
-
-  .auth-card {
-    padding: 35px 28px;
-  }
-}
-
-/* =========================
-   ROLE-BASED DASHBOARD
-========================= */
+/* DASHBOARD */
 
 .dashboard-page-body {
   min-height: 100vh;
@@ -406,7 +305,6 @@ hr {
   margin: auto;
 }
 
-/* HEADER / BANNER */
 .dashboard-role-banner {
   background: linear-gradient(135deg, #2d3436, #6c5ce7);
   padding: 32px;
@@ -418,7 +316,6 @@ hr {
   box-shadow: 0 14px 35px rgba(45, 52, 54, 0.18);
 }
 
-/* ROLE COLORS */
 .dashboard-manager .dashboard-role-banner {
   background: linear-gradient(135deg, #2d3436, #6c5ce7);
 }
@@ -448,7 +345,6 @@ hr {
   margin-bottom: 0;
 }
 
-/* LOGOUT BUTTON */
 .dashboard-logout-btn {
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -464,14 +360,12 @@ hr {
   color: #2d3436;
 }
 
-/* GRID */
 .dashboard-content-grid {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 22px;
 }
 
-/* PROFILE PANEL */
 .dashboard-profile-panel,
 .dashboard-action-panel {
   background: white;
@@ -487,7 +381,6 @@ hr {
   margin-bottom: 18px;
 }
 
-/* AVATAR */
 .dashboard-avatar {
   width: 78px;
   height: 78px;
@@ -501,7 +394,6 @@ hr {
   margin-bottom: 18px;
 }
 
-/* ROLE AVATAR COLORS */
 .dashboard-manager .dashboard-avatar {
   background: linear-gradient(135deg, #6c5ce7, #a29bfe);
 }
@@ -514,7 +406,6 @@ hr {
   background: linear-gradient(135deg, #00b894, #55efc4);
 }
 
-/* TEXT */
 .dashboard-profile-panel p {
   margin-bottom: 10px;
   color: #2d3436;
@@ -525,13 +416,11 @@ hr {
   margin-bottom: 20px;
 }
 
-/* ACTION MENU */
 .dashboard-menu {
   display: grid;
   gap: 14px;
 }
 
-/* ACTION CARDS */
 .dashboard-action-card {
   display: block;
   padding: 18px;
@@ -551,7 +440,6 @@ hr {
   color: #636e72;
 }
 
-/* ROLE CARD COLORS */
 .dashboard-manager .dashboard-action-card {
   background: #f5f2ff;
   border: 1px solid #ded6ff;
@@ -567,7 +455,6 @@ hr {
   border: 1px solid #c8f7ec;
 }
 
-/* HOVER EFFECT */
 .dashboard-action-card:hover {
   transform: translateY(-3px);
   text-decoration: none;
@@ -591,25 +478,11 @@ hr {
   color: white;
 }
 
-/* RESPONSIVE */
-@media (max-width: 800px) {
-  .dashboard-role-banner {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
+/* FUNDRAISERS COMMON */
 
-  .dashboard-content-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================
-   ALL FUNDRAISERS PAGE
-========================= */
 .fundraisers-body {
   min-height: 100vh;
-  background: #f4f6fb;
+  background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
   padding: 40px 20px;
 }
 
@@ -619,6 +492,7 @@ hr {
 }
 
 .fundraisers-header {
+  background: linear-gradient(135deg, #2d3436, #6c5ce7);
   color: white;
   padding: 28px 32px;
   border-radius: 18px;
@@ -629,7 +503,6 @@ hr {
   box-shadow: 0 10px 25px rgba(45, 52, 54, 0.15);
 }
 
-/* Role colours */
 .fundraisers-manager .fundraisers-header {
   background: linear-gradient(135deg, #2d3436, #6c5ce7);
 }
@@ -660,345 +533,6 @@ hr {
 }
 
 .fundraisers-back-btn:hover {
-  text-decoration: none;
-  background: #f4f1ff;
-}
-
-.fundraisers-filter-card,
-.fundraisers-item-card,
-.fundraisers-empty-card {
-  background: white;
-  border-radius: 18px;
-  padding: 25px;
-  box-shadow: 0 8px 22px rgba(45, 52, 54, 0.08);
-  border: 1px solid #eeeeff;
-  margin-bottom: 20px;
-}
-
-.fundraisers-filters {
-  display: grid;
-  grid-template-columns: 1.5fr 1.2fr auto auto;
-  gap: 14px;
-  align-items: end;
-}
-
-.fundraisers-filters input,
-.fundraisers-filters select {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #dcdde1;
-}
-
-.fundraisers-search-btn,
-.fundraisers-clear-btn,
-.fundraisers-view-btn,
-.fundraisers-fav-btn,
-.fundraisers-donate-btn {
-  padding: 11px 16px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.fundraisers-search-btn,
-.fundraisers-fav-btn {
-  background: #ff7675;
-  color: white;
-}
-
-.fundraisers-clear-btn,
-.fundraisers-view-btn {
-  background: #f1f2f6;
-  color: #2d3436;
-}
-
-.fundraisers-donate-btn {
-  background: #00b894;
-  color: white;
-}
-
-.fundraisers-item-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.fundraisers-category-badge {
-  background: #eeeaff;
-  color: #6c5ce7;
-  padding: 7px 13px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 700;
-  height: fit-content;
-}
-
-.fundraisers-info-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin: 18px 0;
-}
-
-.fundraisers-info-grid div {
-  background: #faf9ff;
-  border: 1px solid #eeeaff;
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.fundraisers-info-grid span {
-  display: block;
-  font-size: 13px;
-  color: #636e72;
-  margin-bottom: 6px;
-}
-
-.fundraisers-info-grid strong {
-  color: #2d3436;
-  font-size: 18px;
-}
-
-.fundraisers-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* Donation modal */
-.donate-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(45, 52, 54, 0.55);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.donate-modal {
-  background: white;
-  width: 100%;
-  max-width: 430px;
-  border-radius: 20px;
-  padding: 30px;
-}
-
-.donate-modal input {
-  width: 100%;
-  padding: 13px;
-  border-radius: 10px;
-  border: 1px solid #dcdde1;
-  margin: 8px 0 20px;
-}
-
-.donate-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.donate-cancel-btn,
-.donate-confirm-btn {
-  padding: 11px 18px;
-  border-radius: 10px;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.donate-cancel-btn {
-  background: #f1f2f6;
-}
-
-.donate-confirm-btn {
-  background: #00b894;
-  color: white;
-}
-
-@media (max-width: 768px) {
-  .fundraisers-header,
-  .fundraisers-item-top {
-    flex-direction: column;
-  }
-
-  .fundraisers-filters,
-  .fundraisers-info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================
-   CREATE FUNDRAISER PAGE
-========================= */
-.create-fundraiser-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f3f7ff, #f7fbff);
-  padding: 40px 20px;
-}
-
-.create-fundraiser-container {
-  max-width: 980px;
-  margin: auto;
-}
-
-.create-fundraiser-header {
-  background: linear-gradient(135deg, #273c75, #00a8ff);
-  color: white;
-  padding: 28px 32px;
-  border-radius: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  box-shadow: 0 10px 25px rgba(39, 60, 117, 0.18);
-}
-
-.create-fundraiser-header h1 {
-  margin-bottom: 6px;
-}
-
-.create-fundraiser-header p {
-  color: #eef8ff;
-  margin-bottom: 0;
-}
-
-.create-fundraiser-back-btn {
-  background: white;
-  color: #0984e3;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-
-.create-fundraiser-back-btn:hover {
-  background: #f1f8ff;
-  text-decoration: none;
-}
-
-.create-fundraiser-card {
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 10px 26px rgba(45, 52, 54, 0.1);
-  border: 1px solid #dceeff;
-}
-
-.create-fundraiser-card h2 {
-  color: #2d3436;
-  margin-bottom: 6px;
-}
-
-.create-fundraiser-subtext {
-  color: #636e72;
-  margin-bottom: 24px;
-}
-
-.create-fundraiser-card label {
-  font-weight: 700;
-  color: #2d3436;
-}
-
-.create-fundraiser-card input,
-.create-fundraiser-card textarea,
-.create-fundraiser-card select {
-  width: 100%;
-  padding: 13px;
-  border-radius: 11px;
-  border: 1px solid #dcdde1;
-  margin-bottom: 18px;
-  background: white;
-}
-
-.create-fundraiser-card textarea {
-  min-height: 140px;
-}
-
-.create-fundraiser-card input:focus,
-.create-fundraiser-card textarea:focus,
-.create-fundraiser-card select:focus {
-  outline: none;
-  border-color: #0984e3;
-  box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.15);
-}
-
-.create-fundraiser-submit-btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #273c75, #00a8ff);
-  color: white;
-  font-weight: 800;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.create-fundraiser-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(9, 132, 227, 0.25);
-}
-
-.create-fundraiser-submit-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-@media (max-width: 768px) {
-  .create-fundraiser-header {
-    flex-direction: column;
-    gap: 14px;
-    text-align: center;
-  }
-}
-
-/* =========================
-   ALL FUNDRAISERS PAGE
-========================= */
-.fundraisers-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
-  padding: 40px 20px;
-}
-
-.fundraisers-container {
-  max-width: 1050px;
-  margin: auto;
-}
-
-.fundraisers-header {
-  background: linear-gradient(135deg, #2d3436, #6c5ce7);
-  color: white;
-  padding: 28px 32px;
-  border-radius: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  box-shadow: 0 10px 25px rgba(45, 52, 54, 0.15);
-}
-
-.fundraisers-header h1 {
-  margin-bottom: 6px;
-}
-
-.fundraisers-header p {
-  color: #f0efff;
-  margin-bottom: 0;
-}
-
-.fundraisers-back-btn {
-  background: white;
-  color: #6c5ce7;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-
-.fundraisers-back-btn:hover {
-  text-decoration: none;
   background: #f4f1ff;
 }
 
@@ -1057,16 +591,34 @@ hr {
 }
 
 .fundraisers-search-btn {
-  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  background: linear-gradient(135deg, #006266, #00b894);
   color: white;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 16px;
 }
 
-.fundraisers-clear-btn {
+.fundraisers-clear-btn,
+.fundraisers-view-btn {
   background: #f1f2f6;
   color: #2d3436;
 }
 
-.fundraisers-search-btn:hover,
+.fundraisers-fav-btn {
+  background: #ff7675;
+  color: white;
+}
+
+.fundraisers-donate-btn {
+  background: #00b894;
+  color: white;
+}
+
+.fundraisers-search-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
 .fundraisers-view-btn:hover,
 .fundraisers-fav-btn:hover,
 .fundraisers-donate-btn:hover {
@@ -1075,7 +627,17 @@ hr {
 
 .fundraisers-list {
   display: grid;
-  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.fundraisers-item-card {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.fundraisers-item-card:hover {
+  transform: translateY(-3px);
 }
 
 .fundraisers-item-top {
@@ -1137,23 +699,50 @@ hr {
 
 .fundraisers-actions {
   display: flex;
-  gap: 10px;
   flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
 }
 
-.fundraisers-view-btn {
-  background: #f1f2f6;
-  color: #2d3436;
+.fundraisers-actions button {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-width: 120px;
 }
 
-.fundraisers-fav-btn {
-  background: #ff7675;
+.fundraisers-edit-btn {
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
   color: white;
 }
 
-.fundraisers-donate-btn {
-  background: #00b894;
+.fundraisers-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(9, 132, 227, 0.25);
+}
+
+.fundraisers-complete-btn {
+  background: linear-gradient(135deg, #00b894, #55efc4);
   color: white;
+}
+
+.fundraisers-complete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 184, 148, 0.25);
+}
+
+.fundraisers-delete-btn {
+  background: linear-gradient(135deg, #ff7675, #ff9f9f);
+  color: white;
+}
+
+.fundraisers-delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(255, 118, 117, 0.25);
 }
 
 .fundraisers-empty-card {
@@ -1161,29 +750,175 @@ hr {
   color: #636e72;
 }
 
-@media (max-width: 768px) {
-  .fundraisers-header {
-    flex-direction: column;
-    gap: 14px;
-    text-align: center;
-  }
+/* DONATION MODAL */
 
-  .fundraisers-filters {
-    grid-template-columns: 1fr;
-  }
-
-  .fundraisers-item-top {
-    flex-direction: column;
-  }
-
-  .fundraisers-info-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.donate-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 52, 54, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 }
 
-/* =========================
-   MY FUNDRAISERS PAGE
-========================= */
+.donate-modal {
+  background: white;
+  width: 100%;
+  max-width: 430px;
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.donate-modal input {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid #dcdde1;
+  margin: 8px 0 20px;
+}
+
+.donate-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.donate-cancel-btn,
+.donate-confirm-btn {
+  padding: 11px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.donate-cancel-btn {
+  background: #f1f2f6;
+}
+
+.donate-confirm-btn {
+  background: #00b894;
+  color: white;
+}
+
+/* CREATE FUNDRAISER */
+
+.create-fundraiser-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f3f7ff, #f7fbff);
+  padding: 40px 20px;
+}
+
+.create-fundraiser-container {
+  max-width: 980px;
+  margin: auto;
+}
+
+.create-fundraiser-header {
+  background: linear-gradient(135deg, #273c75, #00a8ff);
+  color: white;
+  padding: 28px 32px;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 25px rgba(39, 60, 117, 0.18);
+}
+
+.create-fundraiser-header h1 {
+  margin-bottom: 6px;
+}
+
+.create-fundraiser-header p {
+  color: #eef8ff;
+  margin-bottom: 0;
+}
+
+.create-fundraiser-back-btn {
+  background: white;
+  color: #0984e3;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.create-fundraiser-back-btn:hover {
+  background: #f1f8ff;
+}
+
+.create-fundraiser-card {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 10px 26px rgba(45, 52, 54, 0.1);
+  border: 1px solid #dceeff;
+}
+
+.create-fundraiser-card h2 {
+  color: #2d3436;
+  margin-bottom: 6px;
+}
+
+.create-fundraiser-subtext {
+  color: #636e72;
+  margin-bottom: 24px;
+}
+
+.create-fundraiser-card label {
+  font-weight: 700;
+  color: #2d3436;
+}
+
+.create-fundraiser-card input,
+.create-fundraiser-card textarea,
+.create-fundraiser-card select {
+  width: 100%;
+  padding: 13px;
+  border-radius: 11px;
+  border: 1px solid #dcdde1;
+  margin-bottom: 18px;
+  background: white;
+}
+
+.create-fundraiser-card textarea {
+  min-height: 140px;
+}
+
+.create-fundraiser-card input:focus,
+.create-fundraiser-card textarea:focus,
+.create-fundraiser-card select:focus {
+  outline: none;
+  border-color: #0984e3;
+  box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.15);
+}
+
+.fundraiser-submit-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #273c75, #00a8ff);
+  color: white;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.fundraiser-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(9, 132, 227, 0.25);
+}
+
+.fundraiser-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* MY FUNDRAISERS */
+
 .myfund-body {
   min-height: 100vh;
   background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
@@ -1216,7 +951,8 @@ hr {
   margin-bottom: 0;
 }
 
-.myfund-header-actions {
+.myfund-header-actions,
+.myfund-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
@@ -1232,7 +968,6 @@ hr {
 
 .myfund-light-btn:hover {
   background: #f4f1ff;
-  text-decoration: none;
 }
 
 .myfund-message-card,
@@ -1331,12 +1066,6 @@ hr {
   font-size: 18px;
 }
 
-.myfund-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
 .myfund-edit-btn,
 .myfund-complete-btn,
 .myfund-delete-btn,
@@ -1376,7 +1105,6 @@ hr {
 .myfund-delete-btn:hover,
 .myfund-create-btn:hover {
   transform: translateY(-2px);
-  text-decoration: none;
 }
 
 .myfund-empty-card {
@@ -1384,21 +1112,8 @@ hr {
   color: #636e72;
 }
 
-@media (max-width: 768px) {
-  .myfund-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 14px;
-  }
+/* CATEGORY */
 
-  .myfund-stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* =========================
-   CATEGORY MANAGEMENT PAGE
-========================= */
 .category-body {
   min-height: 100vh;
   background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
@@ -1441,7 +1156,6 @@ hr {
 
 .category-back-btn:hover {
   background: #f4f1ff;
-  text-decoration: none;
 }
 
 .category-form-card,
@@ -1460,7 +1174,8 @@ hr {
   color: #2d3436;
 }
 
-.category-form-card label {
+.category-form-card label,
+.category-modal label {
   font-weight: 600;
   color: #2d3436;
 }
@@ -1518,14 +1233,20 @@ hr {
   color: #2d3436;
 }
 
-.category-item p {
+.category-item p,
+.category-modal-text {
   color: #636e72;
   margin-bottom: 0;
 }
 
-.category-actions {
+.category-actions,
+.category-modal-actions {
   display: flex;
   gap: 10px;
+}
+
+.category-modal-actions {
+  justify-content: flex-end;
 }
 
 .category-edit-btn,
@@ -1539,7 +1260,8 @@ hr {
   transition: all 0.25s ease;
 }
 
-.category-edit-btn {
+.category-edit-btn,
+.category-cancel-btn {
   background: #f1f2f6;
   color: #2d3436;
 }
@@ -1547,11 +1269,6 @@ hr {
 .category-delete-btn {
   background: #ff7675;
   color: white;
-}
-
-.category-cancel-btn {
-  background: #f1f2f6;
-  color: #2d3436;
 }
 
 .category-edit-btn:hover,
@@ -1566,7 +1283,6 @@ hr {
   padding: 20px;
 }
 
-/* MODAL */
 .category-modal-overlay {
   position: fixed;
   top: 0;
@@ -1595,39 +1311,32 @@ hr {
   margin-bottom: 8px;
 }
 
-.category-modal-text {
-  color: #636e72;
-  margin-bottom: 18px;
+.category-search-card {
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.12);
 }
 
-.category-modal label {
-  font-weight: 600;
+.category-search-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.category-search-row input {
+  flex: 1;
+}
+
+.category-clear-btn,
+.clear-btn {
+  background: #dfe6e9;
   color: #2d3436;
 }
 
-.category-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
+/* REPORT */
 
-@media (max-width: 768px) {
-  .category-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 14px;
-  }
-
-  .category-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
-}
-
-/* =========================
-   REPORT PAGE
-========================= */
 .report-body {
   min-height: 100vh;
   background: linear-gradient(135deg, #f3f5fb, #f9f6ff);
@@ -1670,7 +1379,6 @@ hr {
 
 .report-back-btn:hover {
   background: #f4f1ff;
-  text-decoration: none;
 }
 
 .report-summary-card,
@@ -1740,34 +1448,23 @@ hr {
   max-height: 330px;
 }
 
-@media (max-width: 900px) {
-  .report-summary-grid,
-  .report-mini-grid {
-    grid-template-columns: 1fr;
-  }
+/* DONATION HISTORY */
 
-  .report-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 14px;
-  }
-}
-
-/* =========================
-    DONATION HISTORY PAGE
-========================= */
-.donation-body {
+.donation-body,
+.favourite-body {
   min-height: 100vh;
   background: linear-gradient(135deg, #f3f5fb, #effffb);
   padding: 40px 20px;
 }
 
-.donation-container {
+.donation-container,
+.favourite-container {
   max-width: 1050px;
   margin: auto;
 }
 
-.donation-header {
+.donation-header,
+.favourite-header {
   background: linear-gradient(135deg, #006266, #00b894);
   color: white;
   padding: 28px 32px;
@@ -1779,17 +1476,22 @@ hr {
   box-shadow: 0 10px 25px rgba(0, 98, 102, 0.18);
 }
 
-.donation-header h1 {
+.donation-header h1,
+.favourite-header h1 {
   margin-bottom: 6px;
 }
 
-.donation-header p {
+.donation-header p,
+.favourite-header p {
   color: #eafff9;
   margin-bottom: 0;
 }
 
 .donation-back-btn,
-.donation-browse-btn {
+.donation-browse-btn,
+.favourite-back-btn,
+.favourite-browse-btn,
+.favourite-view-btn {
   background: white;
   color: #008f7a;
   padding: 10px 16px;
@@ -1799,14 +1501,18 @@ hr {
 }
 
 .donation-back-btn:hover,
-.donation-browse-btn:hover {
+.donation-browse-btn:hover,
+.favourite-back-btn:hover,
+.favourite-browse-btn:hover,
+.favourite-view-btn:hover {
   background: #effffb;
-  text-decoration: none;
 }
 
 .donation-filter-card,
 .donation-item-card,
-.donation-empty-card {
+.donation-empty-card,
+.favourite-item-card,
+.favourite-empty-card {
   background: white;
   border-radius: 16px;
   padding: 25px;
@@ -1871,12 +1577,14 @@ hr {
   transform: translateY(-2px);
 }
 
-.donation-list {
+.donation-list,
+.favourite-list {
   display: grid;
   gap: 18px;
 }
 
-.donation-item-top {
+.donation-item-top,
+.favourite-item-top {
   display: flex;
   justify-content: space-between;
   gap: 20px;
@@ -1884,17 +1592,20 @@ hr {
   margin-bottom: 18px;
 }
 
-.donation-item-top h3 {
+.donation-item-top h3,
+.favourite-item-top h3 {
   color: #2d3436;
   margin-bottom: 6px;
 }
 
-.donation-item-top p {
+.donation-item-top p,
+.favourite-item-top p {
   color: #636e72;
   margin-bottom: 0;
 }
 
-.donation-amount {
+.donation-amount,
+.favourite-badge {
   background: #effffb;
   color: #008f7a;
   padding: 10px 16px;
@@ -1921,127 +1632,21 @@ hr {
   color: #2d3436;
 }
 
-.donation-empty-card {
+.donation-empty-card,
+.favourite-empty-card {
   text-align: center;
   color: #636e72;
 }
 
-.donation-empty-card h3 {
+.donation-empty-card h3,
+.favourite-empty-card h3 {
   color: #2d3436;
   margin-bottom: 8px;
 }
 
-.donation-empty-card p {
+.donation-empty-card p,
+.favourite-empty-card p {
   margin-bottom: 16px;
-}
-
-@media (max-width: 768px) {
-  .donation-header {
-    flex-direction: column;
-    gap: 14px;
-    text-align: center;
-  }
-
-  .donation-filters {
-    grid-template-columns: 1fr;
-  }
-
-  .donation-item-top {
-    flex-direction: column;
-  }
-}
-
-/* =========================
-   FAVOURITES PAGE
-========================= */
-.favourite-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f3f5fb, #effffb);
-  padding: 40px 20px;
-}
-
-.favourite-container {
-  max-width: 1050px;
-  margin: auto;
-}
-
-.favourite-header {
-  background: linear-gradient(135deg, #006266, #00b894);
-  color: white;
-  padding: 28px 32px;
-  border-radius: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  box-shadow: 0 10px 25px rgba(0, 98, 102, 0.18);
-}
-
-.favourite-header h1 {
-  margin-bottom: 6px;
-}
-
-.favourite-header p {
-  color: #eafff9;
-  margin-bottom: 0;
-}
-
-.favourite-back-btn,
-.favourite-browse-btn,
-.favourite-view-btn {
-  background: white;
-  color: #008f7a;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 700;
-  display: inline-block;
-}
-
-.favourite-back-btn:hover,
-.favourite-browse-btn:hover,
-.favourite-view-btn:hover {
-  background: #effffb;
-  text-decoration: none;
-}
-
-.favourite-list {
-  display: grid;
-  gap: 18px;
-}
-
-.favourite-item-card,
-.favourite-empty-card {
-  background: white;
-  border-radius: 16px;
-  padding: 25px;
-  box-shadow: 0 8px 22px rgba(45, 52, 54, 0.08);
-  border: 1px solid #d7fff5;
-}
-
-.favourite-item-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 18px;
-}
-
-.favourite-item-top h3 {
-  color: #2d3436;
-  margin-bottom: 8px;
-}
-
-.favourite-item-top p {
-  color: #636e72;
-  margin-bottom: 0;
-}
-
-.favourite-badge {
-  background: #effffb;
-  color: #008f7a;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-weight: 800;
-  height: fit-content;
 }
 
 .favourite-progress-section {
@@ -2096,35 +1701,8 @@ hr {
   transform: translateY(-2px);
 }
 
-.favourite-empty-card {
-  text-align: center;
-  color: #636e72;
-}
+/* COMPLETED FUNDRAISERS */
 
-.favourite-empty-card h3 {
-  color: #2d3436;
-  margin-bottom: 8px;
-}
-
-.favourite-empty-card p {
-  margin-bottom: 16px;
-}
-
-@media (max-width: 768px) {
-  .favourite-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 14px;
-  }
-
-  .favourite-item-top {
-    flex-direction: column;
-  }
-}
-
-/* =========================
-   COMPLETED FUNDRAISERS PAGE (FIXED)
-========================= */
 .completed-body {
   min-height: 100vh;
   background: linear-gradient(135deg, #f3f7ff, #f7fbff);
@@ -2136,7 +1714,6 @@ hr {
   margin: auto;
 }
 
-/* HEADER */
 .completed-header {
   background: linear-gradient(135deg, #273c75, #00a8ff);
   color: white;
@@ -2166,7 +1743,6 @@ hr {
   background: #f1f8ff;
 }
 
-/* CARDS */
 .completed-filter-card,
 .completed-item-card,
 .completed-empty-card {
@@ -2178,7 +1754,6 @@ hr {
   margin-bottom: 20px;
 }
 
-/* FILTERS */
 .completed-filters {
   display: grid;
   grid-template-columns: 1.2fr 1fr 1fr auto;
@@ -2215,13 +1790,11 @@ hr {
   box-shadow: 0 8px 18px rgba(9, 132, 227, 0.25);
 }
 
-/* LIST */
 .completed-list {
   display: grid;
   gap: 18px;
 }
 
-/* ITEM */
 .completed-item-header {
   display: flex;
   justify-content: space-between;
@@ -2242,7 +1815,6 @@ hr {
   margin-bottom: 14px;
 }
 
-/* INFO GRID */
 .completed-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2256,129 +1828,100 @@ hr {
   padding: 14px;
 }
 
-/* EMPTY */
 .completed-empty-card {
   text-align: center;
   color: #636e72;
 }
 
-/* MOBILE */
+/* SEARCH */
+
+.search-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .fundraisers-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .report-summary-grid,
+  .report-mini-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .auth-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-left {
+    padding: 35px 28px;
+    text-align: center;
+  }
+
+  .auth-left h1 {
+    font-size: 26px;
+  }
+
+  .auth-card {
+    padding: 35px 28px;
+  }
+
+  .dashboard-role-banner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .dashboard-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
+  .fundraisers-header,
+  .fundraisers-item-top,
+  .create-fundraiser-header,
+  .myfund-header,
+  .category-header,
+  .report-header,
+  .donation-header,
+  .favourite-header,
   .completed-header {
     flex-direction: column;
     gap: 14px;
     text-align: center;
   }
 
+  .fundraisers-filters,
+  .fundraisers-info-grid,
+  .donation-filters,
   .completed-filters,
   .completed-info-grid {
     grid-template-columns: 1fr;
   }
+
+  .category-item,
+  .donation-item-top,
+  .favourite-item-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .myfund-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-/* REMOVE ALL UNDERLINES */
-a:hover {
-  text-decoration: none;
-}
-
-/* =========================
-   MY FUNDRAISERS BUTTONS
-========================= */
-
-.fundraisers-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.fundraisers-actions button {
-  border: none;
-  border-radius: 12px;
-  padding: 12px 18px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  min-width: 120px;
-}
-
-/* VIEW */
-.fundraisers-view-btn {
-  background: #f3f4f6;
-  color: #2d3436;
-}
-
-.fundraisers-view-btn:hover {
-  background: #e5e7eb;
-  transform: translateY(-2px);
-}
-
-/* EDIT */
-.fundraisers-edit-btn {
-  background: linear-gradient(135deg, #0984e3, #74b9ff);
-  color: white;
-}
-
-.fundraisers-edit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(9, 132, 227, 0.25);
-}
-
-/* COMPLETE */
-.fundraisers-complete-btn {
-  background: linear-gradient(135deg, #00b894, #55efc4);
-  color: white;
-}
-
-.fundraisers-complete-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(0, 184, 148, 0.25);
-}
-
-/* DELETE */
-.fundraisers-delete-btn {
-  background: linear-gradient(135deg, #ff7675, #ff9f9f);
-  color: white;
-}
-
-.fundraisers-delete-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(255, 118, 117, 0.25);
-}
-
-.category-search-card {
-  background: white;
-  padding: 24px;
-  border-radius: 18px;
-  margin-bottom: 24px;
-  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.12);
-}
-
-.category-search-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.category-search-row input {
-  flex: 1;
-}
-
-.category-clear-btn {
-  background: #dfe6e9;
-  color: #2d3436;
-}
-
-.fundraisers-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-@media (max-width: 900px) {
-  .fundraisers-list {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 700px) {
+  .inline-filters {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2388,39 +1931,10 @@ a:hover {
   }
 }
 
-.fundraisers-item-card {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.fundraisers-item-card:hover {
-  transform: translateY(-3px);
-}
-
-.search-buttons {
-  display: flex;
-  gap: 10px;
-  align-items: end;
-}
-
-.clear-btn {
-  background: #dfe6e9;
-  color: #2d3436;
-}
-
-.fundraisers-search-btn {
-  background: linear-gradient(135deg, #006266, #00b894);
+.admin-btn{
+  background: linear-gradient(135deg, #414b4e, #9286ea);
   color: white;
-  border: none;
-  border-radius: 14px;
-  padding: 14px 20px;
-  font-size: 16px;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.fundraisers-search-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
 }

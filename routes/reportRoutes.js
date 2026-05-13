@@ -3,44 +3,50 @@ const router = express.Router();
 
 const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 
-const GenerateDailyReportController = require('../controller/GenerateDailyReportController');
-const GenerateWeeklyReportController = require('../controller/GenerateWeeklyReportController');
-const GenerateMonthlyReportController = require('../controller/GenerateMonthlyReportController');
-const CompareDonationReportController = require('../controller/CompareDonationReportController');
+const ReportEntity = require('../entity/ReportEntity');
+
+router.get('/summary', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
+  try {
+    const result = await ReportEntity.summary();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to load summary report' });
+  }
+});
 
 router.get('/daily', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const result = await GenerateDailyReportController.generate();
+    const result = await ReportEntity.daily();
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: 'Unable to generate daily report' });
+    res.status(500).json({ error: 'Unable to load daily report' });
   }
 });
 
 router.get('/weekly', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const result = await GenerateWeeklyReportController.generate();
+    const result = await ReportEntity.weekly();
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: 'Unable to generate weekly report' });
+    res.status(500).json({ error: 'Unable to load weekly report' });
   }
 });
 
 router.get('/monthly', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const result = await GenerateMonthlyReportController.generate();
+    const result = await ReportEntity.monthly();
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: 'Unable to generate monthly report' });
+    res.status(500).json({ error: 'Unable to load monthly report' });
   }
 });
 
-router.get('/comparison', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
+router.get('/compare', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const result = await CompareDonationReportController.compare();
+    const result = await ReportEntity.compare();
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: 'Unable to compare donation report' });
+    res.status(500).json({ error: 'Unable to compare donation reports' });
   }
 });
 
