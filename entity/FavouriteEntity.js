@@ -3,27 +3,50 @@ const db = require('../database/db');
 class FavouriteEntity {
   static add(userId, fundraiserId) {
     return new Promise((resolve, reject) => {
-      db.run(
+      db.get(
         `
-        INSERT INTO favourites
-        (user_id, fundraiser_id)
-        VALUES (?, ?)
+        SELECT *
+        FROM favourites
+        WHERE user_id = ?
+        AND fundraiser_id = ?
         `,
         [userId, fundraiserId],
-        function (err) {
-          if (err) return reject(err);
+        (checkErr, existing) => {
+          if (checkErr) return reject(checkErr);
+
+          if (existing) {
+            return resolve({
+              alreadyExists: true
+            });
+          }
 
           db.run(
             `
-            UPDATE fundraisers
-            SET favourite_count = favourite_count + 1
-            WHERE id = ?
+            INSERT INTO favourites (user_id, fundraiser_id)
+            VALUES (?, ?)
             `,
-            [fundraiserId],
-            () => {
-              resolve({
-                id: this.lastID
-              });
+            [userId, fundraiserId],
+            function (err) {
+              if (err) return reject(err);
+
+              const favouriteId = this.lastID;
+
+              db.run(
+                `
+                UPDATE fundraisers
+                SET favourite_count = favourite_count + 1
+                WHERE id = ?
+                `,
+                [fundraiserId],
+                function (updateErr) {
+                  if (updateErr) return reject(updateErr);
+
+                  resolve({
+                    id: favouriteId,
+                    alreadyExists: false
+                  });
+                }
+              );
             }
           );
         }
@@ -63,9 +86,24 @@ class FavouriteEntity {
         function (err) {
           if (err) return reject(err);
 
-          resolve({
-            changes: this.changes
-          });
+          if (this.changes > 0) {
+            db.run(
+              `
+              UPDATE fundraisers
+              SET favourite_count = CASE
+                WHEN favourite_count > 0 THEN favourite_count - 1
+                ELSE 0
+              END
+              WHERE id = ?
+              `,
+              [fundraiserId],
+              () => {
+                resolve({ changes: this.changes });
+              }
+            );
+          } else {
+            resolve({ changes: 0 });
+          }
         }
       );
     });
