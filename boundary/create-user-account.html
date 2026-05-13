@@ -12,17 +12,20 @@
     <div class="fundraisers-header">
       <div>
         <h1>Create User Account</h1>
-        <p>Create a new account and select a profile role from the database.</p>
+        <p>Create user account details and profile role.</p>
       </div>
 
-      <a href="admin-users.html" class="fundraisers-back-btn">Back</a>
+      <a href="admin-users.html" class="fundraisers-back-btn">
+        Back to User Management
+      </a>
     </div>
 
     <div class="fundraisers-filter-card">
-      <h2>Create User Account</h2>
+      <h2>User Details</h2>
+
       <p id="flash-message" class="flash"></p>
 
-      <div class="fundraisers-filters">
+      <div style="display:flex; flex-direction:column; gap:20px; margin-top:20px;">
         <div>
           <label>Name</label>
           <input type="text" id="create-name" placeholder="Enter name">
@@ -44,8 +47,16 @@
             <option value="">Select Profile Role</option>
           </select>
         </div>
+      </div>
 
-        <button class="fundraisers-search-btn" onclick="createUser()">Create User</button>
+      <div style="display:flex; gap:16px; margin-top:28px;">
+        <button class="fundraisers-search-btn" onclick="createUser()">
+          Create User
+        </button>
+
+        <button class="fundraisers-clear-btn" onclick="window.location.href='admin-users.html'">
+          Cancel
+        </button>
       </div>
     </div>
 

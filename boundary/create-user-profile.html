@@ -12,28 +12,39 @@
     <div class="fundraisers-header">
       <div>
         <h1>Create User Profile</h1>
-        <p>Create a new profile name and description.</p>
+        <p>Create profile name and description.</p>
       </div>
 
-      <a href="user-profiles.html" class="fundraisers-back-btn">Back</a>
+      <a href="user-profiles.html" class="fundraisers-back-btn">
+        Back to Profile Management
+      </a>
     </div>
 
     <div class="fundraisers-filter-card">
-      <h2>Create User Profile</h2>
+      <h2>Profile Details</h2>
+
       <p id="flash-message" class="flash"></p>
 
-      <div class="fundraisers-filters">
+      <div style="display:flex; flex-direction:column; gap:28px; margin-top:28px;">
         <div>
           <label>Profile Name</label>
-          <input type="text" id="profile-name" placeholder="Example: fundraiser">
+          <input type="text" id="profile-name" placeholder="Enter profile name">
         </div>
 
         <div>
           <label>Profile Description</label>
-          <input type="text" id="profile-description" placeholder="Example: Able to create fundraising activities">
+          <input type="text" id="profile-description" placeholder="Enter profile description">
         </div>
+      </div>
 
-        <button class="fundraisers-search-btn" onclick="createProfile()">Create Profile</button>
+      <div style="display:flex; gap:16px; margin-top:28px;">
+        <button class="fundraisers-search-btn" onclick="createProfile()">
+          Create Profile
+        </button>
+
+        <button class="fundraisers-clear-btn" onclick="window.location.href='user-profiles.html'">
+          Cancel
+        </button>
       </div>
     </div>
 
