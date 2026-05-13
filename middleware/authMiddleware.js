@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { SECRET } = require('../services/AuthService');
+
+const SECRET_KEY = 'fundraising_secret_key';
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -10,25 +11,31 @@ function authMiddleware(req, res, next) {
 
   const token = authHeader.split(' ')[1];
 
+  if (!token) {
+    return res.status(401).json({ error: 'Invalid token format' });
+  }
+
   try {
-    const decoded = jwt.verify(token, SECRET);
+    const decoded = jwt.verify(token, SECRET_KEY);
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
+    return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
-function roleMiddleware(roles) {
+function roleMiddleware(allowedRoles) {
   return function (req, res, next) {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
       return res.status(403).json({ error: 'Access denied' });
     }
+
     next();
   };
 }
 
 module.exports = {
   authMiddleware,
-  roleMiddleware
+  roleMiddleware,
+  SECRET_KEY
 };
