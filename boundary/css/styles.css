@@ -703,7 +703,7 @@ hr {
 
 .fundraisers-search-btn,
 .fundraisers-fav-btn {
-  background: #6c5ce7;
+  background: #ff7675;
   color: white;
 }
 
@@ -1147,7 +1147,7 @@ hr {
 }
 
 .fundraisers-fav-btn {
-  background: #6c5ce7;
+  background: #ff7675;
   color: white;
 }
 
@@ -2408,3 +2408,19 @@ a:hover {
   color: #2d3436;
 }
 
+.fundraisers-search-btn {
+  background: linear-gradient(135deg, #006266, #00b894);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.fundraisers-search-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
