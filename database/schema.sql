@@ -15,7 +15,13 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 INSERT OR IGNORE INTO users (name, email, password, role, status)
-VALUES ('Admin', 'admin@gmail.com', 'admin123', 'admin', 'active');
+VALUES (
+  'Admin',
+  'admin@gmail.com',
+  '$2b$10$hjqYzlLOk2bfRBZuhKm6Zu49cYl.9dJ67G27AbJIVSHIzjJxEQIx2',
+  'admin',
+  'active'
+);
 
 CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
