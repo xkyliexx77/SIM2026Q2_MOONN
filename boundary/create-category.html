@@ -74,6 +74,7 @@
 
     async function createCategory() {
       const name = document.getElementById('category-name').value.trim();
+      const description = document.getElementById('category-description').value.trim();
 
       if (!name) {
         showMessage('Category name is required.', 'error');
@@ -87,7 +88,8 @@
           'Authorization': 'Bearer ' + token
         },
         body: JSON.stringify({
-          name
+          name,
+          description
         })
       });
 

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Category Details</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body fundraisers-manager">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>Category Details</h1>
+        <p>View full category information.</p>
+      </div>
+
+      <a href="categories.html" class="fundraisers-back-btn">
+        Back
+      </a>
+    </div>
+
+    <div id="detailBox" class="fundraisers-item-card"></div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    async function loadCategory() {
+      const res = await fetch(`/api/categories/${id}`, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const category = await res.json();
+
+      if (!res.ok || category.error) {
+        document.getElementById('detailBox').innerHTML = `
+          <div class="fundraisers-empty-card">
+            <p>Category not found.</p>
+          </div>
+        `;
+        return;
+      }
+
+      document.getElementById('detailBox').innerHTML = `
+        <div class="fundraisers-item-top">
+          <div>
+            <h3>${category.name || 'No Category Name'}</h3>
+            <p>${category.description || 'No description provided.'}</p>
+          </div>
+
+          <span class="fundraisers-category-badge">
+            Category
+          </span>
+        </div>
+
+        <hr>
+
+        <div class="fundraisers-info-grid">
+          <div>
+            <span>Category ID</span>
+            <strong>${category.id}</strong>
+          </div>
+
+          <div>
+            <span>Category Name</span>
+            <strong>${category.name || '-'}</strong>
+          </div>
+
+          <div>
+            <span>Description</span>
+            <strong>${category.description || 'No description'}</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    loadCategory();
+  </script>
+</body>
+</html>

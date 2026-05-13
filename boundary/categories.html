@@ -7,183 +7,384 @@
 </head>
 
 <body class="fundraisers-body fundraisers-manager">
+
   <div class="fundraisers-container">
 
     <div class="fundraisers-header">
+
       <div>
         <h1>Category Management</h1>
         <p>Search, update and delete fundraising categories.</p>
       </div>
 
       <div style="display:flex; gap:12px;">
-        <a href="create-category.html" class="admin-btn">Create Category</a>
-        <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
+
+        <a
+          href="create-category.html"
+          class="admin-btn">
+          Create Category
+        </a>
+
+        <a
+          href="dashboard.html"
+          class="fundraisers-back-btn">
+          Back to Dashboard
+        </a>
+
       </div>
+
     </div>
 
+    <!-- SEARCH -->
     <div class="fundraisers-filter-card">
+
       <h2>Search Categories</h2>
-      <p id="category-flash" class="flash"></p>
+
+      <p
+        id="category-flash"
+        class="flash">
+      </p>
 
       <div class="fundraisers-filters">
+
         <div>
+
           <label>Search</label>
-          <input type="text" id="search-input" placeholder="Search category name">
+
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search category name"
+          >
+
         </div>
 
-        <button class="admin-btn" onclick="loadCategories()">Search</button>
-        <button class="fundraisers-clear-btn" onclick="clearSearch()">Clear</button>
+        <button
+          class="admin-btn"
+          onclick="loadCategories()"
+        >
+          Search
+        </button>
+
+        <button
+          class="fundraisers-clear-btn"
+          onclick="clearSearch()"
+        >
+          Clear
+        </button>
+
       </div>
+
     </div>
 
-    <div id="category-list" class="fundraisers-list"></div>
+    <!-- LIST -->
+    <div
+      id="category-list"
+      class="fundraisers-list">
+    </div>
 
   </div>
 
   <script>
-    const list = document.getElementById('category-list');
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
+
+    const list =
+      document.getElementById(
+        'category-list'
+      );
+
+    const token =
+      localStorage.getItem('token');
+
+    const user =
+      JSON.parse(
+        localStorage.getItem('user')
+      );
 
     if (!token || !user) {
-      window.location.href = 'login.html';
+
+      window.location.href =
+        'login.html';
+
     }
 
-    if (user && !String(user.role || '').toLowerCase().includes('manager')) {
-      alert('Only platform manager can manage categories.');
-      window.location.href = 'dashboard.html';
+    if (
+      user &&
+      !String(user.role || '')
+        .toLowerCase()
+        .includes('manager')
+    ) {
+
+      alert(
+        'Only platform manager can manage categories.'
+      );
+
+      window.location.href =
+        'dashboard.html';
+
     }
 
-    function showMessage(text, type = 'success') {
-      const msg = document.getElementById('category-flash');
+    function showMessage(
+      text,
+      type = 'success'
+    ) {
+
+      const msg =
+        document.getElementById(
+          'category-flash'
+        );
+
       msg.textContent = text;
-      msg.className = `flash ${type}`;
+
+      msg.className =
+        `flash ${type}`;
+
       msg.style.display = 'block';
 
       setTimeout(() => {
+
         msg.style.display = 'none';
+
       }, 3000);
+
     }
 
     function escapeText(value) {
+
       return String(value || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+
     }
 
     function clearSearch() {
-      document.getElementById('search-input').value = '';
+
+      document.getElementById(
+        'search-input'
+      ).value = '';
+
       loadCategories();
+
     }
 
     async function loadCategories() {
-      const search = document.getElementById('search-input').value.trim();
-      const query = new URLSearchParams();
+
+      const search =
+        document.getElementById(
+          'search-input'
+        ).value.trim();
+
+      const query =
+        new URLSearchParams();
 
       if (search) {
-        query.append('search', search);
+
+        query.append(
+          'search',
+          search
+        );
+
       }
 
-      const url = search
-        ? `/api/categories/search?${query.toString()}`
-        : '/api/categories';
+      const url =
+        search
+          ? `/api/categories/search?${query.toString()}`
+          : '/api/categories';
 
-      const res = await fetch(url, {
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
+      const res =
+        await fetch(url, {
 
-      const data = await res.json();
+          headers: {
+            'Authorization':
+              'Bearer ' + token
+          }
+
+        });
+
+      const data =
+        await res.json();
 
       list.innerHTML = '';
 
-      if (!Array.isArray(data) || data.length === 0) {
+      if (
+        !Array.isArray(data) ||
+        data.length === 0
+      ) {
+
         list.innerHTML = `
           <div class="fundraisers-empty-card">
             <p>No categories found.</p>
           </div>
         `;
+
         return;
       }
 
       data.forEach(category => {
-        const div = document.createElement('div');
-        div.className = 'fundraisers-item-card';
+
+        const div =
+          document.createElement('div');
+
+        div.className =
+          'fundraisers-item-card';
 
         div.innerHTML = `
+
           <div class="fundraisers-item-top">
+
             <div>
-              <h3>${escapeText(category.name)}</h3>
-              <p>Category ID: ${category.id}</p>
-              <p>${escapeText(category.description || 'No description')}</p>
+
+              <h3>
+                ${escapeText(category.name)}
+              </h3>
+
+              <p>
+                Category ID:
+                ${category.id}
+              </p>
+
+              <p>
+                ${escapeText(
+                  category.description ||
+                  'No description'
+                )}
+              </p>
+
             </div>
 
             <span class="fundraisers-category-badge">
               Category
             </span>
+
           </div>
 
           <div class="fundraisers-info-grid">
+
             <div>
-              <span>Category Name</span>
-              <strong>${escapeText(category.name)}</strong>
+
+              <span>
+                Category Name
+              </span>
+
+              <strong>
+                ${escapeText(category.name)}
+              </strong>
+
             </div>
 
             <div>
-              <span>Description</span>
-              <strong>${escapeText(category.description || 'No description')}</strong>
+
+              <span>
+                Description
+              </span>
+
+              <strong>
+                ${escapeText(
+                  category.description ||
+                  'No description'
+                )}
+              </strong>
+
             </div>
+
           </div>
 
           <div class="fundraisers-actions">
+
             <button
               class="fundraisers-view-btn"
-              onclick="editCategory(${category.id})">
+              onclick="viewCategory(${category.id})"
+            >
+              View Details
+            </button>
+
+            <button
+              class="fundraisers-edit-btn"
+              onclick="editCategory(${category.id})"
+            >
               Edit
             </button>
 
             <button
               class="fundraisers-delete-btn"
-              onclick="deleteCategory(${category.id})">
+              onclick="deleteCategory(${category.id})"
+            >
               Delete
             </button>
+
           </div>
+
         `;
 
         list.appendChild(div);
+
       });
+
+    }
+
+    function viewCategory(id) {
+
+      window.location.href =
+        `category-detail.html?id=${id}`;
+
     }
 
     function editCategory(id) {
-      window.location.href = `edit-category.html?id=${id}`;
+
+      window.location.href =
+        `edit-category.html?id=${id}`;
+
     }
 
     async function deleteCategory(id) {
-      if (!confirm('Are you sure you want to delete this category?')) return;
 
-      const res = await fetch(`/api/categories/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
+      if (
+        !confirm(
+          'Are you sure you want to delete this category?'
+        )
+      ) return;
 
-      const data = await res.json();
+      const res =
+        await fetch(
+          `/api/categories/${id}`,
+          {
+            method: 'DELETE',
+
+            headers: {
+              'Authorization':
+                'Bearer ' + token
+            }
+          }
+        );
+
+      const data =
+        await res.json();
 
       if (!res.ok || data.error) {
-        showMessage(data.error || 'Unable to delete category.', 'error');
+
+        showMessage(
+          data.error ||
+          'Unable to delete category.',
+          'error'
+        );
+
         return;
+
       }
 
-      alert('Category deleted successfully.');
+      alert(
+        'Category deleted successfully.'
+      );
+
       loadCategories();
+
     }
 
     loadCategories();
+
   </script>
+
 </body>
 </html>
