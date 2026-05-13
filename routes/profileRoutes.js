@@ -1,43 +1,69 @@
 const express = require('express');
 const router = express.Router();
-const ProfileController = require('../controllers/ProfileController');
+
 const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 
-router.get('/active', ProfileController.getActive);
+const CreateUserProfileController = require('../controller/CreateUserProfileController');
+const ViewUserProfileController = require('../controller/ViewUserProfileController');
+const UpdateUserProfileController = require('../controller/UpdateUserProfileController');
+const SuspendUserProfileController = require('../controller/SuspendUserProfileController');
+const SearchUserProfileController = require('../controller/SearchUserProfileController');
 
-router.get(
-  '/',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  ProfileController.getAll
-);
+router.get('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+  try {
+    const result = await ViewUserProfileController.viewAll();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to load user profiles' });
+  }
+});
 
-router.post(
-  '/',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  ProfileController.create
-);
+router.get('/search', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+  try {
+    const result = await SearchUserProfileController.search(req.query.search);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to search user profiles' });
+  }
+});
 
-router.put(
-  '/:id',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  ProfileController.update
-);
+router.post('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+  try {
+    const { profile_name } = req.body;
 
-router.patch(
-  '/:id/suspend',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  ProfileController.suspend
-);
+    if (!profile_name || !profile_name.trim()) {
+      return res.status(400).json({ error: 'Profile name is required' });
+    }
 
-router.patch(
-  '/:id/activate',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  ProfileController.activate
-);
+    const result = await CreateUserProfileController.create(req.body);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.put('/:id', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+  try {
+    const { profile_name } = req.body;
+
+    if (!profile_name || !profile_name.trim()) {
+      return res.status(400).json({ error: 'Profile name is required' });
+    }
+
+    const result = await UpdateUserProfileController.update(req.params.id, req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.patch('/:id/suspend', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+  try {
+    const result = await SuspendUserProfileController.suspend(req.params.id);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 module.exports = router;
