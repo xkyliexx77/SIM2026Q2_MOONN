@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit User Profile</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body">
+
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>Edit User Profile</h1>
+        <p>Update profile name and description.</p>
+      </div>
+
+      <a href="user-profiles.html" class="fundraisers-back-btn">
+        Back to Profile Management
+      </a>
+    </div>
+
+    <div class="fundraisers-filter-card">
+
+      <h2>Profile Details</h2>
+
+      <p id="flash-message" class="flash"></p>
+
+      <div style="display:flex; flex-direction:column; gap:28px; margin-top:28px;">
+
+        <div>
+          <label>Profile Name</label>
+
+          <input
+            type="text"
+            id="profile-name"
+            placeholder="Enter profile name">
+        </div>
+
+        <div>
+          <label>Profile Description</label>
+
+          <input
+            type="text"
+            id="profile-description"
+            placeholder="Enter profile description">
+        </div>
+
+      </div>
+
+      <div style="display:flex; gap:16px; margin-top:28px;">
+
+        <button
+          class="fundraisers-search-btn"
+          onclick="updateProfile()">
+          Update Profile
+        </button>
+
+        <button
+          class="fundraisers-clear-btn"
+          onclick="window.location.href='user-profiles.html'">
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const token = localStorage.getItem('token');
+
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    const params = new URLSearchParams(window.location.search);
+
+    const profileId = params.get('id');
+
+    if (!token || !user) {
+      window.location.href = 'login.html';
+    }
+
+    if (user && user.role !== 'admin') {
+      alert('Only user admin can access this page.');
+      window.location.href = 'dashboard.html';
+    }
+
+    if (!profileId) {
+      alert('Profile ID is missing.');
+      window.location.href = 'user-profiles.html';
+    }
+
+    function showMessage(text, type = 'success') {
+
+      const msg = document.getElementById('flash-message');
+
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 3000);
+
+    }
+
+    async function loadProfile() {
+
+      const res = await fetch('/api/profiles', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const profiles = await res.json();
+
+      if (!res.ok || !Array.isArray(profiles)) {
+        showMessage('Unable to load profile details.', 'error');
+        return;
+      }
+
+      const profile = profiles.find(
+        p => String(p.id) === String(profileId)
+      );
+
+      if (!profile) {
+        alert('Profile not found.');
+        window.location.href = 'user-profiles.html';
+        return;
+      }
+
+      document.getElementById('profile-name').value =
+        profile.profile_name || '';
+
+      document.getElementById('profile-description').value =
+        profile.profile_description || '';
+
+    }
+
+    async function updateProfile() {
+
+      const profile_name =
+        document.getElementById('profile-name').value.trim();
+
+      const profile_description =
+        document.getElementById('profile-description').value.trim();
+
+      if (!profile_name) {
+        showMessage('Profile name is required.', 'error');
+        return;
+      }
+
+      const res = await fetch(`/api/profiles/${profileId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          profile_name,
+          profile_description
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(
+          data.error || 'Unable to update user profile.',
+          'error'
+        );
+        return;
+      }
+
+      alert('User profile updated successfully.');
+
+      window.location.href = 'user-profiles.html';
+
+    }
+
+    loadProfile();
+
+  </script>
+
+</body>
+</html>

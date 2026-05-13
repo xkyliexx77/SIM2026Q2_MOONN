@@ -95,9 +95,14 @@ class UserAccountEntity {
         FROM users
         WHERE name LIKE ?
         OR email LIKE ?
+        OR role LIKE ?
         ORDER BY id DESC
         `,
-        [`%${search}%`, `%${search}%`],
+        [
+          `%${search}%`,
+          `%${search}%`,
+          `%${search}%`
+        ],
         (err, rows) => {
           if (err) return reject(err);
           resolve(rows);

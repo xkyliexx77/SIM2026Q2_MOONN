@@ -12,48 +12,18 @@
     <div class="fundraisers-header">
       <div>
         <h1>User Account Management</h1>
-        <p>Create, search, update, suspend and activate user accounts.</p>
+        <p>Search, update, suspend and activate user accounts.</p>
       </div>
 
-      <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
-    </div>
-
-    <div class="fundraisers-filter-card">
-      <h2>Create User Account</h2>
-      <p id="admin-users-flash" class="flash"></p>
-
-      <div class="fundraisers-filters">
-        <div>
-          <label>Name</label>
-          <input type="text" id="create-name" placeholder="Enter name">
-        </div>
-
-        <div>
-          <label>Email</label>
-          <input type="email" id="create-email" placeholder="Enter email">
-        </div>
-
-        <div>
-          <label>Password</label>
-          <input type="password" id="create-password" placeholder="Enter password">
-        </div>
-
-        <div>
-          <label>Role</label>
-          <select id="create-role">
-            <option value="admin">User Admin</option>
-            <option value="fundraiser">Fundraiser</option>
-            <option value="donee">Donee</option>
-            <option value="manager">Platform Manager</option>
-          </select>
-        </div>
-
-        <button class="fundraisers-search-btn" onclick="createUser()">Create</button>
+      <div style="display:flex; gap:12px;">
+        <a href="create-user-account.html" class="fundraisers-search-btn">Create User</a>
+        <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
       </div>
     </div>
 
     <div class="fundraisers-filter-card">
       <h2>Search Users</h2>
+      <p id="admin-users-flash" class="flash"></p>
 
       <div class="fundraisers-filters">
         <div>
@@ -72,6 +42,17 @@
 
   <script>
     const list = document.getElementById('users-list');
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user) {
+      window.location.href = 'login.html';
+    }
+
+    if (user && user.role !== 'admin') {
+      alert('Only user admin can access this page.');
+      window.location.href = 'dashboard.html';
+    }
 
     function showMessage(text, type = 'success') {
       const msg = document.getElementById('admin-users-flash');
@@ -84,42 +65,13 @@
       }, 3000);
     }
 
-    function getToken() {
-      return localStorage.getItem('token');
-    }
-
-    async function createUser() {
-      const token = getToken();
-
-      const body = {
-        name: document.getElementById('create-name').value,
-        email: document.getElementById('create-email').value,
-        password: document.getElementById('create-password').value,
-        role: document.getElementById('create-role').value
-      };
-
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify(body)
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert('User created successfully.');
-
-        document.getElementById('create-name').value = '';
-        document.getElementById('create-email').value = '';
-        document.getElementById('create-password').value = '';
-
-        loadUsers();
-      } else {
-        showMessage(data.error || 'Failed to create user.', 'error');
-      }
+    function escapeText(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     function clearSearch() {
@@ -128,19 +80,16 @@
     }
 
     async function loadUsers() {
-      const token = getToken();
-
-      if (!token) {
-        window.location.href = 'login.html';
-        return;
-      }
-
       const search = document.getElementById('search-input').value.trim();
       const query = new URLSearchParams();
 
       if (search) query.append('search', search);
 
-      const res = await fetch(`/api/users?${query.toString()}`, {
+      const url = search
+        ? `/api/users/search?${query.toString()}`
+        : '/api/users';
+
+      const res = await fetch(url, {
         headers: {
           'Authorization': 'Bearer ' + token
         }
@@ -166,12 +115,12 @@
         div.innerHTML = `
           <div class="fundraisers-item-top">
             <div>
-              <h3>${user.name}</h3>
-              <p>${user.email}</p>
+              <h3>${escapeText(user.name)}</h3>
+              <p>${escapeText(user.email)}</p>
             </div>
 
             <span class="fundraisers-category-badge">
-              ${user.role}
+              ${escapeText(user.role)}
             </span>
           </div>
 
@@ -183,14 +132,12 @@
 
             <div>
               <span>Status</span>
-              <strong>${user.status || 'active'}</strong>
+              <strong>${escapeText(user.status || 'active')}</strong>
             </div>
           </div>
 
           <div class="fundraisers-actions">
-            <button
-              class="fundraisers-view-btn"
-              onclick="window.location.href='edit-user.html?id=${user.id}'">
+            <button class="fundraisers-view-btn" onclick="window.location.href='edit-user.html?id=${user.id}'">
               Edit
             </button>
 
@@ -207,8 +154,6 @@
     }
 
     async function suspendUser(id) {
-      const token = getToken();
-
       if (!confirm('Are you sure you want to suspend this user account?')) return;
 
       const res = await fetch(`/api/users/${id}/suspend`, {
@@ -230,8 +175,6 @@
     }
 
     async function activateUser(id) {
-      const token = getToken();
-
       if (!confirm('Are you sure you want to activate this user account?')) return;
 
       const res = await fetch(`/api/users/${id}/activate`, {

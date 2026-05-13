@@ -7,6 +7,7 @@
 </head>
 
 <body class="fundraisers-body">
+
   <div class="fundraisers-container">
 
     <div class="fundraisers-header">
@@ -15,41 +16,111 @@
         <p>Update user account details and role.</p>
       </div>
 
-      <a href="admin-users.html" class="fundraisers-back-btn">Back to User Management</a>
+      <a href="admin-users.html" class="fundraisers-back-btn">
+        Back to User Management
+      </a>
     </div>
 
     <div class="fundraisers-filter-card">
+
       <h2>User Details</h2>
-      <p id="edit-user-flash" class="flash"></p>
 
-      <form id="edit-user-form">
-        <label>Name</label>
-        <input type="text" id="edit-name" required>
+      <p id="flash-message" class="flash"></p>
 
-        <label>Email</label>
-        <input type="email" id="edit-email" required>
+      <div style="display:flex; flex-direction:column; gap:28px; margin-top:28px;">
 
-        <label>Role</label>
-        <select id="edit-role" required>
-          <option value="admin">User Admin</option>
-          <option value="fundraiser">Fundraiser</option>
-          <option value="donee">Donee</option>
-          <option value="manager">Platform Manager</option>
-        </select>
+        <div>
+          <label>Name</label>
 
-        <button type="submit" class="fundraisers-search-btn">Update User</button>
-        <button type="button" class="fundraisers-clear-btn" onclick="goBack()">Cancel</button>
-      </form>
+          <input
+            type="text"
+            id="edit-name"
+            placeholder="Enter name">
+        </div>
+
+        <div>
+          <label>Email</label>
+
+          <input
+            type="email"
+            id="edit-email"
+            placeholder="Enter email">
+        </div>
+
+        <div>
+          <label>Role</label>
+
+          <select id="edit-role">
+            <option value="">Select Profile Role</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div
+        style="
+          display:flex;
+          gap:16px;
+          margin-top:28px;
+        ">
+
+        <button
+          class="fundraisers-search-btn"
+          onclick="updateUser()">
+          Update User
+        </button>
+
+        <button
+          class="fundraisers-clear-btn"
+          onclick="window.location.href='admin-users.html'">
+          Cancel
+        </button>
+
+      </div>
+
     </div>
 
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
+
+    const token = localStorage.getItem('token');
+
+    const loginUser =
+      JSON.parse(localStorage.getItem('user'));
+
+    const params =
+      new URLSearchParams(window.location.search);
+
     const userId = params.get('id');
 
+    let currentUser = null;
+
+    if (!token || !loginUser) {
+      window.location.href = 'login.html';
+    }
+
+    if (loginUser && loginUser.role !== 'admin') {
+
+      alert('Only user admin can access this page.');
+
+      window.location.href = 'dashboard.html';
+
+    }
+
+    if (!userId) {
+
+      alert('User ID is missing.');
+
+      window.location.href = 'admin-users.html';
+
+    }
+
     function showMessage(text, type = 'success') {
-      const msg = document.getElementById('edit-user-flash');
+
+      const msg =
+        document.getElementById('flash-message');
+
       msg.textContent = text;
       msg.className = `flash ${type}`;
       msg.style.display = 'block';
@@ -57,19 +128,60 @@
       setTimeout(() => {
         msg.style.display = 'none';
       }, 3000);
+
     }
 
-    function getToken() {
-      return localStorage.getItem('token');
+    async function loadProfileRoles(selectedRole) {
+
+      const roleSelect =
+        document.getElementById('edit-role');
+
+      roleSelect.innerHTML =
+        '<option value="">Select Profile Role</option>';
+
+      const res = await fetch('/api/profiles', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const profiles = await res.json();
+
+      if (!res.ok || !Array.isArray(profiles)) {
+
+        showMessage(
+          'Unable to load profile roles.',
+          'error'
+        );
+
+        return;
+      }
+
+      profiles
+        .filter(profile => profile.status === 'active')
+        .forEach(profile => {
+
+          const option =
+            document.createElement('option');
+
+          option.value = profile.profile_name;
+
+          option.textContent =
+            profile.profile_name;
+
+          if (
+            profile.profile_name === selectedRole
+          ) {
+            option.selected = true;
+          }
+
+          roleSelect.appendChild(option);
+
+        });
+
     }
 
     async function loadUser() {
-      const token = getToken();
-
-      if (!token) {
-        window.location.href = 'login.html';
-        return;
-      }
 
       const res = await fetch('/api/users', {
         headers: {
@@ -78,28 +190,86 @@
       });
 
       const users = await res.json();
-      const user = users.find(u => String(u.id) === String(userId));
 
-      if (!user) {
-        showMessage('User not found.', 'error');
+      if (!res.ok || !Array.isArray(users)) {
+
+        showMessage(
+          'Unable to load user details.',
+          'error'
+        );
+
         return;
       }
 
-      document.getElementById('edit-name').value = user.name;
-      document.getElementById('edit-email').value = user.email;
-      document.getElementById('edit-role').value = user.role;
+      currentUser =
+        users.find(
+          u => String(u.id) === String(userId)
+        );
+
+      if (!currentUser) {
+
+        alert('User not found.');
+
+        window.location.href = 'admin-users.html';
+
+        return;
+      }
+
+      document.getElementById('edit-name').value =
+        currentUser.name || '';
+
+      document.getElementById('edit-email').value =
+        currentUser.email || '';
+
+      await loadProfileRoles(currentUser.role);
+
     }
 
-    document.getElementById('edit-user-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
+    async function updateUser() {
 
-      const token = getToken();
+      const name =
+        document.getElementById('edit-name')
+          .value
+          .trim();
 
-      const body = {
-        name: document.getElementById('edit-name').value,
-        email: document.getElementById('edit-email').value,
-        role: document.getElementById('edit-role').value
-      };
+      const email =
+        document.getElementById('edit-email')
+          .value
+          .trim();
+
+      const role =
+        document.getElementById('edit-role')
+          .value;
+
+      if (!name) {
+
+        showMessage(
+          'Name is required.',
+          'error'
+        );
+
+        return;
+      }
+
+      if (!email) {
+
+        showMessage(
+          'Email is required.',
+          'error'
+        );
+
+        return;
+      }
+
+      if (!role) {
+
+        showMessage(
+          'Profile role is required.',
+          'error'
+        );
+
+        return;
+      }
 
       const res = await fetch(`/api/users/${userId}`, {
         method: 'PUT',
@@ -107,27 +277,34 @@
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          name,
+          email,
+          role
+        })
       });
 
       const data = await res.json();
 
-      if (res.ok) {
-        showMessage('User updated successfully.', 'success');
+      if (!res.ok || data.error) {
 
-        setTimeout(() => {
-          window.location.href = 'admin-users.html';
-        }, 1000);
-      } else {
-        showMessage(data.error || 'Failed to update user.', 'error');
+        showMessage(
+          data.error || 'Unable to update user account.',
+          'error'
+        );
+
+        return;
       }
-    });
 
-    function goBack() {
+      alert('User account updated successfully.');
+
       window.location.href = 'admin-users.html';
+
     }
 
     loadUser();
+
   </script>
+
 </body>
 </html>

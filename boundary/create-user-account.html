@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create User Account</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>Create User Account</h1>
+        <p>Create a new account and select a profile role from the database.</p>
+      </div>
+
+      <a href="admin-users.html" class="fundraisers-back-btn">Back</a>
+    </div>
+
+    <div class="fundraisers-filter-card">
+      <h2>Create User Account</h2>
+      <p id="flash-message" class="flash"></p>
+
+      <div class="fundraisers-filters">
+        <div>
+          <label>Name</label>
+          <input type="text" id="create-name" placeholder="Enter name">
+        </div>
+
+        <div>
+          <label>Email</label>
+          <input type="email" id="create-email" placeholder="Enter email">
+        </div>
+
+        <div>
+          <label>Password</label>
+          <input type="password" id="create-password" placeholder="Enter password">
+        </div>
+
+        <div>
+          <label>Profile Role</label>
+          <select id="role">
+            <option value="">Select Profile Role</option>
+          </select>
+        </div>
+
+        <button class="fundraisers-search-btn" onclick="createUser()">Create User</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user) {
+      window.location.href = 'login.html';
+    }
+
+    if (user && user.role !== 'admin') {
+      alert('Only user admin can access this page.');
+      window.location.href = 'dashboard.html';
+    }
+
+    function showMessage(text, type = 'success') {
+      const msg = document.getElementById('flash-message');
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 3000);
+    }
+
+    async function loadProfileRoles() {
+      const roleSelect = document.getElementById('role');
+      roleSelect.innerHTML = '<option value="">Select Profile Role</option>';
+
+      const res = await fetch('/api/profiles', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const profiles = await res.json();
+
+      if (!res.ok || !Array.isArray(profiles)) {
+        showMessage('Unable to load profile roles.', 'error');
+        return;
+      }
+
+      profiles
+        .filter(profile => profile.status === 'active')
+        .forEach(profile => {
+          const option = document.createElement('option');
+          option.value = profile.profile_name;
+          option.textContent = profile.profile_name;
+          roleSelect.appendChild(option);
+        });
+    }
+
+    async function createUser() {
+      const name = document.getElementById('create-name').value.trim();
+      const email = document.getElementById('create-email').value.trim();
+      const password = document.getElementById('create-password').value;
+      const role = document.getElementById('role').value;
+
+      if (!name) {
+        showMessage('Name is required.', 'error');
+        return;
+      }
+
+      if (!email) {
+        showMessage('Email is required.', 'error');
+        return;
+      }
+
+      if (!password || password.length < 6) {
+        showMessage('Password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      if (!role) {
+        showMessage('Profile role is required.', 'error');
+        return;
+      }
+
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Failed to create user.', 'error');
+        return;
+      }
+
+      alert('User account created successfully.');
+      window.location.href = 'admin-users.html';
+    }
+
+    loadProfileRoles();
+  </script>
+</body>
+</html>

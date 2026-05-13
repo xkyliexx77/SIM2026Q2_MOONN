@@ -12,42 +12,45 @@
     <div class="fundraisers-header">
       <div>
         <h1>User Profile Management</h1>
-        <p>Create, search, update and suspend user profiles.</p>
+        <p>Search, update and suspend user profiles.</p>
       </div>
 
-      <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
-    </div>
+      <div style="display:flex; gap:12px;">
+        <a href="create-user-profile.html" class="fundraisers-search-btn">
+          Create Profile
+        </a>
 
-    <div class="fundraisers-filter-card">
-      <h2>Create User Profile</h2>
-      <p id="profile-flash" class="flash"></p>
-
-      <div class="fundraisers-filters">
-        <div>
-          <label>Profile Name</label>
-          <input type="text" id="profile-name" placeholder="Example: Premium Donor Profile">
-        </div>
-
-        <div>
-          <label>Profile Description</label>
-          <input type="text" id="profile-description" placeholder="Example: Profile for users who donate to campaigns">
-        </div>
-
-        <button class="fundraisers-search-btn" onclick="createProfile()">Create</button>
+        <a href="dashboard.html" class="fundraisers-back-btn">
+          Back to Dashboard
+        </a>
       </div>
     </div>
 
     <div class="fundraisers-filter-card">
       <h2>Search User Profiles</h2>
 
+      <p id="profile-flash" class="flash"></p>
+
       <div class="fundraisers-filters">
         <div>
           <label>Search</label>
-          <input type="text" id="search-input" placeholder="Search profile name or description">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search profile name or description">
         </div>
 
-        <button class="fundraisers-search-btn" onclick="loadProfiles()">Search</button>
-        <button class="fundraisers-clear-btn" onclick="clearSearch()">Clear</button>
+        <button
+          class="fundraisers-search-btn"
+          onclick="loadProfiles()">
+          Search
+        </button>
+
+        <button
+          class="fundraisers-clear-btn"
+          onclick="clearSearch()">
+          Clear
+        </button>
       </div>
     </div>
 
@@ -56,12 +59,14 @@
   </div>
 
   <script>
+
     const list = document.getElementById('profile-list');
 
-    const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
 
-    if (!user || !token) {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user) {
       window.location.href = 'login.html';
     }
 
@@ -71,7 +76,9 @@
     }
 
     function showMessage(text, type = 'success') {
+
       const msg = document.getElementById('profile-flash');
+
       msg.textContent = text;
       msg.className = `flash ${type}`;
       msg.style.display = 'block';
@@ -79,65 +86,43 @@
       setTimeout(() => {
         msg.style.display = 'none';
       }, 3000);
+
     }
 
     function escapeText(value) {
+
       return String(value || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+
     }
 
     function clearSearch() {
+
       document.getElementById('search-input').value = '';
       loadProfiles();
-    }
 
-    async function createProfile() {
-      const profileName = document.getElementById('profile-name').value.trim();
-      const profileDescription = document.getElementById('profile-description').value.trim();
-
-      if (!profileName) {
-        showMessage('Profile name is required.', 'error');
-        return;
-      }
-
-      const res = await fetch('/api/profiles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          profile_name: profileName,
-          profile_description: profileDescription
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        showMessage(data.error || 'Failed to create profile.', 'error');
-        return;
-      }
-
-      alert('User profile created successfully.');
-
-      document.getElementById('profile-name').value = '';
-      document.getElementById('profile-description').value = '';
-
-      loadProfiles();
     }
 
     async function loadProfiles() {
-      const search = document.getElementById('search-input').value.trim();
+
+      const search =
+        document.getElementById('search-input').value.trim();
+
       const query = new URLSearchParams();
 
-      if (search) query.append('search', search);
+      if (search) {
+        query.append('search', search);
+      }
 
-      const res = await fetch(`/api/profiles?${query.toString()}`, {
+      const url = search
+        ? `/api/profiles/search?${query.toString()}`
+        : '/api/profiles';
+
+      const res = await fetch(url, {
         headers: {
           'Authorization': 'Bearer ' + token
         }
@@ -148,105 +133,82 @@
       list.innerHTML = '';
 
       if (!Array.isArray(data) || data.length === 0) {
+
         list.innerHTML = `
           <div class="fundraisers-empty-card">
             <p>No user profiles found.</p>
           </div>
         `;
+
         return;
       }
 
       data.forEach(profile => {
-        const safeName = escapeText(profile.profile_name);
-        const safeDescription = escapeText(profile.profile_description || 'No description');
 
         const div = document.createElement('div');
+
         div.className = 'fundraisers-item-card';
 
         div.innerHTML = `
           <div class="fundraisers-item-top">
+
             <div>
-              <h3>${safeName}</h3>
+              <h3>${escapeText(profile.profile_name)}</h3>
               <p>Profile ID: ${profile.id}</p>
             </div>
 
             <span class="fundraisers-category-badge">
               ${escapeText(profile.status || 'active')}
             </span>
+
           </div>
 
           <div class="fundraisers-info-grid">
+
             <div>
               <span>Description</span>
-              <strong>${safeDescription}</strong>
+              <strong>
+                ${escapeText(profile.profile_description || 'No description')}
+              </strong>
             </div>
 
             <div>
               <span>Status</span>
-              <strong>${escapeText(profile.status || 'active')}</strong>
+              <strong>
+                ${escapeText(profile.status || 'active')}
+              </strong>
             </div>
+
           </div>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-view-btn" onclick="editProfile(${profile.id})">
+
+            <button
+              class="fundraisers-view-btn"
+              onclick="window.location.href='edit-profile.html?id=${profile.id}'">
               Edit
             </button>
 
-            <button class="fundraisers-fav-btn" onclick="suspendProfile(${profile.id})">
+            <button
+              class="fundraisers-fav-btn"
+              onclick="suspendProfile(${profile.id})">
               Suspend
             </button>
+
           </div>
         `;
 
-        div.dataset.profileName = profile.profile_name || '';
-        div.dataset.profileDescription = profile.profile_description || '';
-
         list.appendChild(div);
-      });
-    }
 
-    async function editProfile(id) {
-      const card = event.target.closest('.fundraisers-item-card');
-
-      const oldName = card.dataset.profileName;
-      const oldDescription = card.dataset.profileDescription;
-
-      const profileName = prompt('Enter new profile name:', oldName);
-      if (profileName === null) return;
-
-      if (!profileName.trim()) {
-        showMessage('Profile name is required.', 'error');
-        return;
-      }
-
-      const profileDescription = prompt('Enter new profile description:', oldDescription);
-      if (profileDescription === null) return;
-
-      const res = await fetch(`/api/profiles/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          profile_name: profileName.trim(),
-          profile_description: profileDescription.trim()
-        })
       });
 
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        showMessage(data.error || 'Failed to update profile.', 'error');
-        return;
-      }
-
-      alert('User profile updated successfully.');
-      loadProfiles();
     }
 
     async function suspendProfile(id) {
-      if (!confirm('Are you sure you want to suspend this user profile?')) return;
+
+      if (!confirm('Are you sure you want to suspend this user profile?')) {
+        return;
+      }
 
       const res = await fetch(`/api/profiles/${id}/suspend`, {
         method: 'PATCH',
@@ -258,15 +220,23 @@
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        showMessage(data.error || 'Failed to suspend profile.', 'error');
+
+        showMessage(
+          data.error || 'Failed to suspend profile.',
+          'error'
+        );
+
         return;
       }
 
       alert('User profile suspended successfully.');
+
       loadProfiles();
+
     }
 
     loadProfiles();
+
   </script>
 </body>
 </html>
