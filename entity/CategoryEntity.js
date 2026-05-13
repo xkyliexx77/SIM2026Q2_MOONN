@@ -5,16 +5,13 @@ class CategoryEntity {
     return new Promise((resolve, reject) => {
       db.run(
         `
-        INSERT INTO categories (name)
-        VALUES (?)
+        INSERT INTO categories (name, description)
+        VALUES (?, ?)
         `,
-        [data.name],
+        [data.name, data.description],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            id: this.lastID
-          });
+          resolve({ id: this.lastID });
         }
       );
     });
@@ -37,21 +34,35 @@ class CategoryEntity {
     });
   }
 
+  static viewOne(id) {
+    return new Promise((resolve, reject) => {
+      db.get(
+        `
+        SELECT *
+        FROM categories
+        WHERE id = ?
+        `,
+        [id],
+        (err, row) => {
+          if (err) return reject(err);
+          resolve(row);
+        }
+      );
+    });
+  }
+
   static update(id, data) {
     return new Promise((resolve, reject) => {
       db.run(
         `
         UPDATE categories
-        SET name = ?
+        SET name = ?, description = ?
         WHERE id = ?
         `,
-        [data.name, id],
+        [data.name, data.description, id],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            changes: this.changes
-          });
+          resolve({ changes: this.changes });
         }
       );
     });
@@ -67,10 +78,7 @@ class CategoryEntity {
         [id],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            changes: this.changes
-          });
+          resolve({ changes: this.changes });
         }
       );
     });
@@ -83,6 +91,7 @@ class CategoryEntity {
         SELECT *
         FROM categories
         WHERE name LIKE ?
+        ORDER BY id DESC
         `,
         [`%${search}%`],
         (err, rows) => {

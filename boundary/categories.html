@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
-<body class="fundraisers-body">
+<body class="fundraisers-body fundraisers-manager">
   <div class="fundraisers-container">
 
     <div class="fundraisers-header">
@@ -16,13 +16,8 @@
       </div>
 
       <div style="display:flex; gap:12px;">
-        <a href="create-category.html" class="admin-btn">
-          Create Category
-        </a>
-
-        <a href="dashboard.html" class="fundraisers-back-btn">
-          Back to Dashboard
-        </a>
+        <a href="create-category.html" class="admin-btn">Create Category</a>
+        <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
       </div>
     </div>
 
@@ -88,7 +83,9 @@
       const search = document.getElementById('search-input').value.trim();
       const query = new URLSearchParams();
 
-      if (search) query.append('search', search);
+      if (search) {
+        query.append('search', search);
+      }
 
       const url = search
         ? `/api/categories/search?${query.toString()}`
@@ -122,6 +119,7 @@
             <div>
               <h3>${escapeText(category.name)}</h3>
               <p>Category ID: ${category.id}</p>
+              <p>${escapeText(category.description || 'No description')}</p>
             </div>
 
             <span class="fundraisers-category-badge">
@@ -134,17 +132,22 @@
               <span>Category Name</span>
               <strong>${escapeText(category.name)}</strong>
             </div>
+
+            <div>
+              <span>Description</span>
+              <strong>${escapeText(category.description || 'No description')}</strong>
+            </div>
           </div>
 
           <div class="fundraisers-actions">
             <button
               class="fundraisers-view-btn"
-              onclick="editCategory(${category.id}, '${escapeText(category.name)}')">
+              onclick="editCategory(${category.id})">
               Edit
             </button>
 
             <button
-              class="fundraisers-fav-btn"
+              class="fundraisers-delete-btn"
               onclick="deleteCategory(${category.id})">
               Delete
             </button>
@@ -155,36 +158,8 @@
       });
     }
 
-    async function editCategory(id, oldName) {
-      const name = prompt('Enter new category name:', oldName);
-
-      if (name === null) return;
-
-      if (!name.trim()) {
-        showMessage('Category name is required.', 'error');
-        return;
-      }
-
-      const res = await fetch(`/api/categories/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          name: name.trim()
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        showMessage(data.error || 'Unable to update category.', 'error');
-        return;
-      }
-
-      alert('Category updated successfully.');
-      loadCategories();
+    function editCategory(id) {
+      window.location.href = `edit-category.html?id=${id}`;
     }
 
     async function deleteCategory(id) {

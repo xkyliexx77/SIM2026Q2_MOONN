@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Category</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="fundraisers-body fundraisers-manager">
+  <div class="fundraisers-container">
+
+    <div class="fundraisers-header">
+      <div>
+        <h1>Edit Category</h1>
+        <p>Update category name and description.</p>
+      </div>
+
+      <a href="categories.html" class="fundraisers-back-btn">
+        Back
+      </a>
+    </div>
+
+    <div class="fundraisers-filter-card">
+      <h2>Category Details</h2>
+
+      <p id="flash-message" class="flash"></p>
+
+      <form id="editCategoryForm">
+        <label>Category Name</label>
+        <input type="text" id="category-name" placeholder="Enter category name">
+
+        <label>Category Description</label>
+        <textarea id="category-description" placeholder="Enter category description"></textarea>
+
+        <div class="fundraisers-actions">
+          <button type="submit" class="admin-btn">
+            Update Category
+          </button>
+
+          <button type="button" class="fundraisers-clear-btn" onclick="window.location.href='categories.html'">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const categoryId = params.get('id');
+
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user) {
+      window.location.href = 'login.html';
+    }
+
+    if (user && !String(user.role || '').toLowerCase().includes('manager')) {
+      alert('Only platform manager can access this page.');
+      window.location.href = 'dashboard.html';
+    }
+
+    function showMessage(text, type = 'success') {
+      const msg = document.getElementById('flash-message');
+      msg.textContent = text;
+      msg.className = `flash ${type}`;
+      msg.style.display = 'block';
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 3000);
+    }
+
+    async function loadCategory() {
+      if (!categoryId) {
+        showMessage('Category ID is missing.', 'error');
+        return;
+      }
+
+      const res = await fetch(`/api/categories/${categoryId}`, {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Unable to load category.', 'error');
+        return;
+      }
+
+      document.getElementById('category-name').value = data.name || '';
+      document.getElementById('category-description').value = data.description || '';
+    }
+
+    document.getElementById('editCategoryForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('category-name').value.trim();
+      const description = document.getElementById('category-description').value.trim();
+
+      if (!name) {
+        showMessage('Category name is required.', 'error');
+        return;
+      }
+
+      const res = await fetch(`/api/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          name,
+          description
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        showMessage(data.error || 'Unable to update category.', 'error');
+        return;
+      }
+
+      alert('Category updated successfully.');
+      window.location.href = 'categories.html';
+    });
+
+    loadCategory();
+  </script>
+</body>
+</html>

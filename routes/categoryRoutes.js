@@ -2,16 +2,30 @@ const express = require('express');
 const router = express.Router();
 
 const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
+const CategoryEntity = require('../entity/CategoryEntity');
 
-const CreateCategoryController = require('../controller/CreateCategoryController');
-const ViewCategoryController = require('../controller/ViewCategoryController');
-const UpdateCategoryController = require('../controller/UpdateCategoryController');
-const DeleteCategoryController = require('../controller/DeleteCategoryController');
-const SearchCategoryController = require('../controller/SearchCategoryController');
+router.post('/', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
+  try {
+    const { name, description } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Category name is required' });
+    }
+
+    const result = await CategoryEntity.create({
+      name: name.trim(),
+      description: description || ''
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to create category' });
+  }
+});
 
 router.get('/', async (req, res) => {
   try {
-    const result = await ViewCategoryController.viewAll();
+    const result = await CategoryEntity.viewAll();
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Unable to load categories' });
@@ -20,49 +34,52 @@ router.get('/', async (req, res) => {
 
 router.get('/search', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const result = await SearchCategoryController.search(req.query.search);
+    const result = await CategoryEntity.search(req.query.search || '');
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Unable to search categories' });
   }
 });
 
-router.post('/', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
+router.get('/:id', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const { name } = req.body;
+    const result = await CategoryEntity.viewOne(req.params.id);
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: 'Category name is required' });
+    if (!result) {
+      return res.status(404).json({ error: 'Category not found' });
     }
 
-    const result = await CreateCategoryController.create(req.body);
-    res.status(201).json(result);
+    res.json(result);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Unable to load category' });
   }
 });
 
 router.put('/:id', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, description } = req.body;
 
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Category name is required' });
     }
 
-    const result = await UpdateCategoryController.update(req.params.id, req.body);
+    const result = await CategoryEntity.update(req.params.id, {
+      name: name.trim(),
+      description: description || ''
+    });
+
     res.json(result);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Unable to update category' });
   }
 });
 
 router.delete('/:id', authMiddleware, roleMiddleware(['manager']), async (req, res) => {
   try {
-    const result = await DeleteCategoryController.delete(req.params.id);
+    const result = await CategoryEntity.delete(req.params.id);
     res.json(result);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Unable to delete category' });
   }
 });
 
