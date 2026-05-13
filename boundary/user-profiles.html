@@ -12,7 +12,7 @@
     <div class="fundraisers-header">
       <div>
         <h1>User Profile Management</h1>
-        <p>Create, search, update, suspend and activate user profiles.</p>
+        <p>Create, search, update and suspend user profiles.</p>
       </div>
 
       <a href="dashboard.html" class="fundraisers-back-btn">Back to Dashboard</a>
@@ -25,17 +25,12 @@
       <div class="fundraisers-filters">
         <div>
           <label>Profile Name</label>
-          <input type="text" id="profile-name" placeholder="Example: Donee Profile">
+          <input type="text" id="profile-name" placeholder="Example: Premium Donor Profile">
         </div>
 
         <div>
-          <label>Role Name</label>
-            <select id="profile-role">
-            <option value="donee">Donee</option>
-            <option value="fundraiser">Fundraiser</option>
-            <option value="manager">Platform Manager</option>
-            <option value="admin">User Admin</option>
-            </select>        
+          <label>Profile Description</label>
+          <input type="text" id="profile-description" placeholder="Example: Profile for users who donate to campaigns">
         </div>
 
         <button class="fundraisers-search-btn" onclick="createProfile()">Create</button>
@@ -48,7 +43,7 @@
       <div class="fundraisers-filters">
         <div>
           <label>Search</label>
-          <input type="text" id="search-input" placeholder="Search profile name, role or status">
+          <input type="text" id="search-input" placeholder="Search profile name or description">
         </div>
 
         <button class="fundraisers-search-btn" onclick="loadProfiles()">Search</button>
@@ -86,6 +81,15 @@
       }, 3000);
     }
 
+    function escapeText(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function clearSearch() {
       document.getElementById('search-input').value = '';
       loadProfiles();
@@ -93,15 +97,10 @@
 
     async function createProfile() {
       const profileName = document.getElementById('profile-name').value.trim();
-      const role = document.getElementById('profile-role').value.trim();
+      const profileDescription = document.getElementById('profile-description').value.trim();
 
       if (!profileName) {
         showMessage('Profile name is required.', 'error');
-        return;
-      }
-
-      if (!role) {
-        showMessage('Role name is required.', 'error');
         return;
       }
 
@@ -113,7 +112,7 @@
         },
         body: JSON.stringify({
           profile_name: profileName,
-          role: role
+          profile_description: profileDescription
         })
       });
 
@@ -125,8 +124,10 @@
       }
 
       alert('User profile created successfully.');
+
       document.getElementById('profile-name').value = '';
-      document.getElementById('profile-role').value = '';
+      document.getElementById('profile-description').value = '';
+
       loadProfiles();
     }
 
@@ -156,8 +157,8 @@
       }
 
       data.forEach(profile => {
-        const safeName = String(profile.profile_name || '').replace(/'/g, "\\'");
-        const safeRole = String(profile.role || '').replace(/'/g, "\\'");
+        const safeName = escapeText(profile.profile_name);
+        const safeDescription = escapeText(profile.profile_description || 'No description');
 
         const div = document.createElement('div');
         div.className = 'fundraisers-item-card';
@@ -165,45 +166,61 @@
         div.innerHTML = `
           <div class="fundraisers-item-top">
             <div>
-              <h3>${profile.profile_name}</h3>
+              <h3>${safeName}</h3>
               <p>Profile ID: ${profile.id}</p>
             </div>
 
             <span class="fundraisers-category-badge">
-              ${profile.role}
+              ${escapeText(profile.status || 'active')}
             </span>
           </div>
 
           <div class="fundraisers-info-grid">
             <div>
+              <span>Description</span>
+              <strong>${safeDescription}</strong>
+            </div>
+
+            <div>
               <span>Status</span>
-              <strong>${profile.status}</strong>
+              <strong>${escapeText(profile.status || 'active')}</strong>
             </div>
           </div>
 
           <div class="fundraisers-actions">
-            <button class="fundraisers-view-btn" onclick="editProfile(${profile.id}, '${safeName}', '${safeRole}')">
+            <button class="fundraisers-view-btn" onclick="editProfile(${profile.id})">
               Edit
             </button>
 
-            ${
-              profile.status === 'suspended'
-                ? `<button class="fundraisers-donate-btn" onclick="activateProfile(${profile.id})">Activate</button>`
-                : `<button class="fundraisers-fav-btn" onclick="suspendProfile(${profile.id})">Suspend</button>`
-            }
+            <button class="fundraisers-fav-btn" onclick="suspendProfile(${profile.id})">
+              Suspend
+            </button>
           </div>
         `;
+
+        div.dataset.profileName = profile.profile_name || '';
+        div.dataset.profileDescription = profile.profile_description || '';
 
         list.appendChild(div);
       });
     }
 
-    async function editProfile(id, oldName, oldRole) {
+    async function editProfile(id) {
+      const card = event.target.closest('.fundraisers-item-card');
+
+      const oldName = card.dataset.profileName;
+      const oldDescription = card.dataset.profileDescription;
+
       const profileName = prompt('Enter new profile name:', oldName);
       if (profileName === null) return;
 
-      const role = prompt('Enter role name:', oldRole);
-      if (role === null) return;
+      if (!profileName.trim()) {
+        showMessage('Profile name is required.', 'error');
+        return;
+      }
+
+      const profileDescription = prompt('Enter new profile description:', oldDescription);
+      if (profileDescription === null) return;
 
       const res = await fetch(`/api/profiles/${id}`, {
         method: 'PUT',
@@ -212,8 +229,8 @@
           'Authorization': 'Bearer ' + token
         },
         body: JSON.stringify({
-          profile_name: profileName,
-          role: role
+          profile_name: profileName.trim(),
+          profile_description: profileDescription.trim()
         })
       });
 
@@ -246,27 +263,6 @@
       }
 
       alert('User profile suspended successfully.');
-      loadProfiles();
-    }
-
-    async function activateProfile(id) {
-      if (!confirm('Are you sure you want to activate this user profile?')) return;
-
-      const res = await fetch(`/api/profiles/${id}/activate`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': 'Bearer ' + token
-        }
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        showMessage(data.error || 'Failed to activate profile.', 'error');
-        return;
-      }
-
-      alert('User profile activated successfully.');
       loadProfiles();
     }
 

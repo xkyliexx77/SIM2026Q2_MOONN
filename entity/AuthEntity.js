@@ -1,6 +1,24 @@
 const db = require('../database/db');
 
 class AuthEntity {
+  static findUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+      db.get(
+        `
+        SELECT *
+        FROM users
+        WHERE email = ?
+        AND status = 'active'
+        `,
+        [email],
+        (err, row) => {
+          if (err) return reject(err);
+          resolve(row);
+        }
+      );
+    });
+  }
+
   static register(data) {
     return new Promise((resolve, reject) => {
       db.run(
@@ -18,28 +36,8 @@ class AuthEntity {
           if (err) return reject(err);
 
           resolve({
-            id: this.lastID,
-            message: 'User registered successfully'
+            id: this.lastID
           });
-        }
-      );
-    });
-  }
-
-  static login(email, password) {
-    return new Promise((resolve, reject) => {
-      db.get(
-        `
-        SELECT *
-        FROM users
-        WHERE email = ?
-        AND password = ?
-        AND status = 'active'
-        `,
-        [email, password],
-        (err, row) => {
-          if (err) return reject(err);
-          resolve(row);
         }
       );
     });

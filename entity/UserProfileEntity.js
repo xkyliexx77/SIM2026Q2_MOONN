@@ -5,10 +5,13 @@ class UserProfileEntity {
     return new Promise((resolve, reject) => {
       db.run(
         `
-        INSERT INTO user_profiles (profile_name, status)
-        VALUES (?, 'active')
+        INSERT INTO user_profiles (profile_name, profile_description, status)
+        VALUES (?, ?, 'active')
         `,
-        [data.profile_name],
+        [
+          data.profile_name,
+          data.profile_description
+        ],
         function (err) {
           if (err) return reject(err);
 
@@ -42,10 +45,14 @@ class UserProfileEntity {
       db.run(
         `
         UPDATE user_profiles
-        SET profile_name = ?
+        SET profile_name = ?, profile_description = ?
         WHERE id = ?
         `,
-        [data.profile_name, id],
+        [
+          data.profile_name,
+          data.profile_description,
+          id
+        ],
         function (err) {
           if (err) return reject(err);
 
@@ -84,9 +91,13 @@ class UserProfileEntity {
         SELECT *
         FROM user_profiles
         WHERE profile_name LIKE ?
+        OR profile_description LIKE ?
         ORDER BY id DESC
         `,
-        [`%${search}%`],
+        [
+          `%${search}%`,
+          `%${search}%`
+        ],
         (err, rows) => {
           if (err) return reject(err);
           resolve(rows);

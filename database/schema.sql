@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS user_profiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     profile_name TEXT NOT NULL UNIQUE,
+    profile_description TEXT,
     status TEXT DEFAULT 'active' CHECK(status IN ('active', 'suspended'))
 );
 
