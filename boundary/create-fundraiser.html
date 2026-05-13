@@ -8,103 +8,224 @@
 </head>
 
 <body class="create-fundraiser-body">
+
   <div class="create-fundraiser-container">
 
     <div class="create-fundraiser-header">
+
       <div>
         <h1>Create Fundraiser</h1>
-        <p>Start a new campaign and track its progress under your account.</p>
+
+        <p>
+          Start a new campaign and track its
+          progress under your account.
+        </p>
       </div>
 
-      <a href="dashboard.html" class="create-fundraiser-back-btn">Back to Dashboard</a>
+      <a
+        href="dashboard.html"
+        class="create-fundraiser-back-btn">
+        Back to Dashboard
+      </a>
+
     </div>
 
     <div class="create-fundraiser-card">
+
       <h2>Fundraiser Details</h2>
+
       <p class="create-fundraiser-subtext">
-        Please enter clear details so donors understand your campaign.
+        Please enter clear details so donors
+        understand your campaign.
       </p>
 
-      <p id="create-fundraiser-flash" class="flash"></p>
+      <p
+        id="create-fundraiser-flash"
+        class="flash">
+      </p>
 
       <form id="create-fundraiser-form">
+
         <label>Fundraiser Title</label>
-        <input type="text" id="create-fundraiser-title" placeholder="Example: Help Families in Need" required>
+
+        <input
+          type="text"
+          id="create-fundraiser-title"
+          placeholder="Example: Help Families in Need"
+          required
+        >
 
         <label>Description</label>
-        <textarea id="create-fundraiser-description" placeholder="Explain the purpose of this fundraiser..." required></textarea>
+
+        <textarea
+          id="create-fundraiser-description"
+          placeholder="Explain the purpose of this fundraiser..."
+          required>
+        </textarea>
 
         <label>Target Amount</label>
-        <input type="number" id="create-fundraiser-target-amount" placeholder="Example: 1000" min="1" required>
+
+        <input
+          type="number"
+          id="create-fundraiser-target-amount"
+          placeholder="Example: 1000"
+          min="1"
+          required
+        >
 
         <label>Category</label>
-        <select id="create-fundraiser-category-id" required></select>
 
-        <button type="submit" id="create-fundraiser-submit-btn" class="create-fundraiser-submit-btn">
+        <select
+          id="create-fundraiser-category-id"
+          required>
+        </select>
+
+        <button
+          type="submit"
+          id="create-fundraiser-submit-btn"
+          class="create-fundraiser-submit-btn">
           Create Fundraiser
         </button>
+
       </form>
+
     </div>
 
   </div>
 
   <script>
-    const form = document.getElementById('create-fundraiser-form');
-    const categorySelect = document.getElementById('create-fundraiser-category-id');
-    const submitBtn = document.getElementById('create-fundraiser-submit-btn');
+
+    const form =
+      document.getElementById(
+        'create-fundraiser-form'
+      );
+
+    const categorySelect =
+      document.getElementById(
+        'create-fundraiser-category-id'
+      );
+
+    const submitBtn =
+      document.getElementById(
+        'create-fundraiser-submit-btn'
+      );
 
     function showMessage(text, type = 'success') {
-      const msg = document.getElementById('create-fundraiser-flash');
+
+      const msg =
+        document.getElementById(
+          'create-fundraiser-flash'
+        );
+
       msg.textContent = text;
+
       msg.className = `flash ${type}`;
+
       msg.style.display = 'block';
 
       setTimeout(() => {
         msg.style.display = 'none';
       }, 3500);
+
     }
 
     async function loadCategories() {
-      try {
-        const response = await fetch('/api/categories');
-        const categories = await response.json();
 
-        categorySelect.innerHTML = '<option value="">Select Category</option>';
+      try {
+
+        const response =
+          await fetch('/api/categories');
+
+        const categories =
+          await response.json();
+
+        categorySelect.innerHTML =
+          '<option value="">Select Category</option>';
 
         categories.forEach(category => {
-          const option = document.createElement('option');
+
+          const option =
+            document.createElement('option');
+
           option.value = category.id;
-          option.textContent = category.name;
+
+          option.textContent =
+            category.name;
+
           categorySelect.appendChild(option);
+
         });
-      } catch (error) {
-        showMessage('Unable to load categories.', 'error');
+
       }
+
+      catch (error) {
+
+        showMessage(
+          'Unable to load categories.',
+          'error'
+        );
+
+      }
+
     }
 
     form.addEventListener('submit', async function (e) {
+
       e.preventDefault();
 
-      const token = localStorage.getItem('token');
+      const token =
+        localStorage.getItem('token');
 
       if (!token) {
+
         window.location.href = 'login.html';
+
         return;
+
       }
 
-      const title = document.getElementById('create-fundraiser-title').value.trim();
-      const description = document.getElementById('create-fundraiser-description').value.trim();
-      const targetAmount = Number(document.getElementById('create-fundraiser-target-amount').value);
-      const categoryId = document.getElementById('create-fundraiser-category-id').value;
+      const title =
+        document.getElementById(
+          'create-fundraiser-title'
+        ).value.trim();
+
+      const description =
+        document.getElementById(
+          'create-fundraiser-description'
+        ).value.trim();
+
+      const targetAmount =
+        Number(
+          document.getElementById(
+            'create-fundraiser-target-amount'
+          ).value
+        );
+
+      const categoryId =
+        document.getElementById(
+          'create-fundraiser-category-id'
+        ).value;
 
       if (!title || !description || !categoryId) {
-        showMessage('Please fill in all fields.', 'error');
+
+        showMessage(
+          'Please fill in all fields.',
+          'error'
+        );
+
         return;
+
       }
 
       if (targetAmount <= 0) {
-        showMessage('Target amount must be more than 0.', 'error');
+
+        showMessage(
+          'Target amount must be more than 0.',
+          'error'
+        );
+
         return;
+
       }
 
       const fundraiserData = {
@@ -115,39 +236,79 @@
       };
 
       try {
+
         submitBtn.disabled = true;
+
         submitBtn.textContent = 'Creating...';
 
-        const response = await fetch('/api/fundraisers', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify(fundraiserData)
-        });
+        const response =
+          await fetch('/api/fundraisers', {
 
-        const data = await response.json();
+            method: 'POST',
+
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+
+            body: JSON.stringify(fundraiserData)
+
+          });
+
+        const data =
+          await response.json();
 
         if (response.ok) {
-          showMessage('Fundraiser created successfully. Redirecting...', 'success');
+
+          /*
+            SUCCESS CONFIRMATION
+          */
+
+          alert(
+            'Fundraising activity created successfully.'
+          );
+
           form.reset();
 
-          setTimeout(() => {
-            window.location.href = 'my-fundraisers.html';
-          }, 1000);
-        } else {
-          showMessage(data.error || 'Failed to create fundraiser.', 'error');
+          window.location.href =
+            'my-fundraisers.html';
+
         }
-      } catch (error) {
-        showMessage('Something went wrong. Please try again.', 'error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Create Fundraiser';
+
+        else {
+
+          showMessage(
+            data.error || 'Failed to create fundraiser.',
+            'error'
+          );
+
+        }
+
       }
+
+      catch (error) {
+
+        showMessage(
+          'Something went wrong. Please try again.',
+          'error'
+        );
+
+      }
+
+      finally {
+
+        submitBtn.disabled = false;
+
+        submitBtn.textContent =
+          'Create Fundraiser';
+
+      }
+
     });
 
     loadCategories();
+
   </script>
+
 </body>
 </html>
