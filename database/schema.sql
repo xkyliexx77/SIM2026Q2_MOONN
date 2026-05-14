@@ -5,6 +5,16 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     status TEXT DEFAULT 'active'
     CHECK(status IN ('active', 'suspended'))
 );
+INSERT OR IGNORE INTO user_profiles (
+    profile_name,
+    profile_description,
+    status
+)
+VALUES
+('manager', 'Manager role', 'active'),
+('fundraiser', 'Fundraiser role', 'active'),
+('donee', 'Donee role', 'active');
+
 
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
