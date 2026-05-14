@@ -307,6 +307,7 @@ hr {
 
 .dashboard-role-banner {
   background: linear-gradient(135deg, #2d3436, #6c5ce7);
+  color: white;
   padding: 32px;
   border-radius: 22px;
   display: flex;
@@ -316,33 +317,23 @@ hr {
   box-shadow: 0 14px 35px rgba(45, 52, 54, 0.18);
 }
 
-.dashboard-manager .dashboard-role-banner {
-  background: linear-gradient(135deg, #2d3436, #6c5ce7);
-}
-
-.dashboard-fundraiser .dashboard-role-banner {
-  background: linear-gradient(135deg, #273c75, #00a8ff);
-}
-
-.dashboard-donee .dashboard-role-banner {
-  background: linear-gradient(135deg, #006266, #00b894);
+.dashboard-role-label,
+.dashboard-role-banner h1,
+.dashboard-role-banner p {
+  color: white;
 }
 
 .dashboard-role-label {
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  opacity: 0.85;
+  opacity: 0.9;
   margin-bottom: 8px;
 }
 
 .dashboard-role-banner h1 {
   font-size: 32px;
   margin-bottom: 6px;
-}
-
-.dashboard-role-banner p {
-  margin-bottom: 0;
 }
 
 .dashboard-logout-btn {
@@ -364,6 +355,7 @@ hr {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 22px;
+  align-items: stretch;
 }
 
 .dashboard-profile-panel,
@@ -375,6 +367,12 @@ hr {
   border: 1px solid #eeeeff;
 }
 
+.dashboard-profile-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
 .dashboard-profile-panel h2,
 .dashboard-action-panel h2 {
   color: #2d3436;
@@ -382,32 +380,26 @@ hr {
 }
 
 .dashboard-avatar {
-  width: 78px;
-  height: 78px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
   color: white;
-  font-size: 34px;
+  font-size: 32px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 18px;
-}
-
-.dashboard-manager .dashboard-avatar {
   background: linear-gradient(135deg, #6c5ce7, #a29bfe);
 }
 
-.dashboard-fundraiser .dashboard-avatar {
-  background: linear-gradient(135deg, #0984e3, #74b9ff);
-}
-
-.dashboard-donee .dashboard-avatar {
-  background: linear-gradient(135deg, #00b894, #55efc4);
-}
-
 .dashboard-profile-panel p {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  color: #2d3436;
+  line-height: 1.5;
+}
+
+.dashboard-profile-panel strong {
   color: #2d3436;
 }
 
@@ -427,6 +419,8 @@ hr {
   border-radius: 15px;
   text-decoration: none;
   transition: all 0.25s ease;
+  background: #f5f2ff;
+  border: 1px solid #ded6ff;
 }
 
 .dashboard-action-card span {
@@ -440,43 +434,19 @@ hr {
   color: #636e72;
 }
 
-.dashboard-manager .dashboard-action-card {
-  background: #f5f2ff;
-  border: 1px solid #ded6ff;
-}
-
-.dashboard-fundraiser .dashboard-action-card {
-  background: #f1f8ff;
-  border: 1px solid #cce8ff;
-}
-
-.dashboard-donee .dashboard-action-card {
-  background: #effffb;
-  border: 1px solid #c8f7ec;
-}
-
 .dashboard-action-card:hover {
   transform: translateY(-3px);
   text-decoration: none;
   box-shadow: 0 10px 20px rgba(45, 52, 54, 0.12);
-}
-
-.dashboard-manager .dashboard-action-card:hover {
   background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-}
-
-.dashboard-fundraiser .dashboard-action-card:hover {
-  background: linear-gradient(135deg, #0984e3, #74b9ff);
-}
-
-.dashboard-donee .dashboard-action-card:hover {
-  background: linear-gradient(135deg, #00b894, #55efc4);
 }
 
 .dashboard-action-card:hover span,
 .dashboard-action-card:hover small {
   color: white;
 }
+
+
 
 /* FUNDRAISERS COMMON */
 
@@ -522,6 +492,18 @@ hr {
 .fundraisers-header p {
   margin-bottom: 0;
   color: #f0efff;
+}
+
+.fundraisers-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.fundraisers-header-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fundraisers-back-btn {

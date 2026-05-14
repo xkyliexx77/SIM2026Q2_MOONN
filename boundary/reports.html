@@ -241,8 +241,13 @@
       window.location.href = 'login.html';
     }
 
-    if (user && user.role !== 'manager') {
-      alert('Only platform managers can access reports.');
+    const userRole =
+      String(user?.role || '')
+        .toLowerCase()
+        .trim();
+
+    if (userRole !== 'manager') {
+      alert('Only managers can access reports.');
       window.location.href = 'dashboard.html';
     }
 

@@ -26,7 +26,13 @@ function authMiddleware(req, res, next) {
 
 function roleMiddleware(allowedRoles) {
   return function (req, res, next) {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
+    const userRole = String(req.user?.role || '').toLowerCase().trim();
+
+    const rolesAllowed = allowedRoles.map(role =>
+      String(role).toLowerCase().trim()
+    );
+
+    if (!userRole || !rolesAllowed.includes(userRole)) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
