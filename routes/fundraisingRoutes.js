@@ -10,12 +10,21 @@ const DeleteFundraisingActivityController = require('../controller/DeleteFundrai
 const SearchFundraisingActivityController = require('../controller/SearchFundraisingActivityController');
 const CompleteFundraisingActivityController = require('../controller/CompleteFundraisingActivityController');
 
-router.get('/', async (req, res) => {
+router.get('/search', async (req, res) => {
   try {
-    const result = await SearchFundraisingActivityController.search(req.query);
+    const searchText = req.query.search || '';
+    const categoryId = req.query.category || '';
+
+    const result = await SearchFundraisingActivityController.searchFundraisingActivities(
+        searchText,
+        categoryId
+      );
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: 'Unable to load fundraising activities' });
+    res.status(500).json({
+      error:
+        'Unable to search fundraising activities'
+    });
   }
 });
 

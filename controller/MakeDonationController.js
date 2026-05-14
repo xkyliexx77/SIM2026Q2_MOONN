@@ -1,9 +1,18 @@
 const DonationEntity = require('../entity/DonationEntity');
 
 class MakeDonationController {
-  static async donate(doneeId, fundraiserId, amount) {
-    return await DonationEntity.donate(doneeId, fundraiserId, amount);
+
+  static async makeDonation(
+    doneeId,
+    fundraiserId,
+    amount
+  ) {
+
+    return await DonationEntity.makeDonation(
+      doneeId,
+      fundraiserId,
+      amount
+    );
   }
 }
-
 module.exports = MakeDonationController;

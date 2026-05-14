@@ -1,9 +1,19 @@
-const FundraisingActivityEntity = require('../entity/FundraisingEntity');
+const FundraisingEntity = require('../entity/FundraisingEntity');
 
 class SearchFundraisingActivityController {
-  static async search(query) {
-    return await FundraisingActivityEntity.search(query || {});
+
+  static async searchFundraisingActivities(
+    searchText,
+    categoryId
+  ) {
+
+    return await FundraisingEntity.searchFundraisingActivities(
+      searchText,
+      categoryId
+    );
+
   }
+
 }
 
 module.exports = SearchFundraisingActivityController;
