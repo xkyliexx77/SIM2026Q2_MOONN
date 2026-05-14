@@ -866,6 +866,9 @@ hr {
 
 .create-fundraiser-card textarea {
   min-height: 140px;
+  padding: 14px;
+  text-indent: 0;
+  line-height: 1.5;  
 }
 
 .create-fundraiser-card input:focus,
