@@ -1,8 +1,12 @@
 const UserProfileEntity = require('../entity/UserProfileEntity');
 
 class UpdateUserProfileController {
-  static async update(id, data) {
-    return await UserProfileEntity.update(id, data);
+  static async update(id, profile_name, profile_description) {
+    return await UserProfileEntity.update(
+      id,
+      profile_name,
+      profile_description
+    );
   }
 }
 

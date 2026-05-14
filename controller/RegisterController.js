@@ -1,8 +1,8 @@
 const AuthEntity = require('../entity/AuthEntity');
 
 class RegisterController {
-  static async register(data) {
-    return await AuthEntity.register(data);
+  static async register(name, email, password, role) {
+    return await AuthEntity.register(name, email, password, role);
   }
 }
 

@@ -19,25 +19,17 @@ class AuthEntity {
     });
   }
 
-  static register(data) {
+  static register(name, email, password, role) {
     return new Promise((resolve, reject) => {
       db.run(
         `
         INSERT INTO users (name, email, password, role, status)
         VALUES (?, ?, ?, ?, 'active')
         `,
-        [
-          data.name,
-          data.email,
-          data.password,
-          data.role
-        ],
+        [name, email, password, role],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            id: this.lastID
-          });
+          resolve({ id: this.lastID });
         }
       );
     });

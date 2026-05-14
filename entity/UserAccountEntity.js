@@ -1,29 +1,22 @@
 const db = require('../database/db');
 
 class UserAccountEntity {
-  static create(data) {
+  static create(name, email, password, role) {
     return new Promise((resolve, reject) => {
       db.run(
         `
         INSERT INTO users (name, email, password, role, status)
         VALUES (?, ?, ?, ?, 'active')
         `,
-        [
-          data.name,
-          data.email,
-          data.password,
-          data.role
-        ],
+        [name, email, password, role],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            id: this.lastID
-          });
+          resolve({ id: this.lastID });
         }
       );
     });
   }
+
   static viewOne(id) {
     return new Promise((resolve, reject) => {
       db.get(
@@ -58,7 +51,7 @@ class UserAccountEntity {
     });
   }
 
-  static update(id, data) {
+  static update(id, name, email, role) {
     return new Promise((resolve, reject) => {
       db.run(
         `
@@ -66,18 +59,10 @@ class UserAccountEntity {
         SET name = ?, email = ?, role = ?
         WHERE id = ?
         `,
-        [
-          data.name,
-          data.email,
-          data.role,
-          id
-        ],
+        [name, email, role, id],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            changes: this.changes
-          });
+          resolve({ changes: this.changes });
         }
       );
     });
@@ -94,10 +79,7 @@ class UserAccountEntity {
         [id],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            changes: this.changes
-          });
+          resolve({ changes: this.changes });
         }
       );
     });
@@ -114,11 +96,7 @@ class UserAccountEntity {
         OR role LIKE ?
         ORDER BY id DESC
         `,
-        [
-          `%${search}%`,
-          `%${search}%`,
-          `%${search}%`
-        ],
+        [`%${search}%`, `%${search}%`, `%${search}%`],
         (err, rows) => {
           if (err) return reject(err);
           resolve(rows);

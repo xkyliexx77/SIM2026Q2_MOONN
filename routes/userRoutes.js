@@ -8,7 +8,6 @@ const UserAccountEntity = require('../entity/UserAccountEntity');
 const CreateUserAccountController = require('../controller/CreateUserAccountController');
 const ViewUserAccountController = require('../controller/ViewUserAccountController');
 const UpdateUserAccountController = require('../controller/UpdateUserAccountController');
-const SuspendUserAccountController = require('../controller/SuspendUserAccountController');
 const SearchUserAccountController = require('../controller/SearchUserAccountController');
 
 router.get('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
@@ -33,23 +32,18 @@ router.post('/', authMiddleware, roleMiddleware(['admin']), async (req, res) => 
   try {
     const { name, email, password, role } = req.body;
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: 'Name is required' });
-    }
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
+    if (!email || !email.trim()) return res.status(400).json({ error: 'Email is required' });
+    if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    if (!role) return res.status(400).json({ error: 'Role is required' });
 
-    if (!email || !email.trim()) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
+    const result = await CreateUserAccountController.create(
+      name,
+      email,
+      password,
+      role
+    );
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-
-    if (!role) {
-      return res.status(400).json({ error: 'Role is required' });
-    }
-
-    const result = await CreateUserAccountController.create(req.body);
     res.status(201).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -74,19 +68,17 @@ router.put('/:id', authMiddleware, roleMiddleware(['admin']), async (req, res) =
   try {
     const { name, email, role } = req.body;
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: 'Name is required' });
-    }
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Name is required' });
+    if (!email || !email.trim()) return res.status(400).json({ error: 'Email is required' });
+    if (!role) return res.status(400).json({ error: 'Role is required' });
 
-    if (!email || !email.trim()) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
+    const result = await UpdateUserAccountController.update(
+      req.params.id,
+      name,
+      email,
+      role
+    );
 
-    if (!role) {
-      return res.status(400).json({ error: 'Role is required' });
-    }
-
-    const result = await UpdateUserAccountController.update(req.params.id, req.body);
     res.json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });

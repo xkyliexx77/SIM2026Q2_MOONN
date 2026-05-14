@@ -1,8 +1,8 @@
 const UserAccountEntity = require('../entity/UserAccountEntity');
 
 class UpdateUserAccountController {
-  static async update(id, data) {
-    return await UserAccountEntity.update(id, data);
+  static async update(id, name, email, role) {
+    return await UserAccountEntity.update(id, name, email, role);
   }
 }
 

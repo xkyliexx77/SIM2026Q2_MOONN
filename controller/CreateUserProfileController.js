@@ -1,8 +1,8 @@
 const UserProfileEntity = require('../entity/UserProfileEntity');
 
 class CreateUserProfileController {
-  static async create(data) {
-    return await UserProfileEntity.create(data);
+  static async create(profile_name, profile_description) {
+    return await UserProfileEntity.create(profile_name, profile_description);
   }
 }
 

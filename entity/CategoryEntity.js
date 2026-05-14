@@ -1,14 +1,14 @@
 const db = require('../database/db');
 
 class CategoryEntity {
-  static create(data) {
+  static create(name, description) {
     return new Promise((resolve, reject) => {
       db.run(
         `
         INSERT INTO categories (name, description)
         VALUES (?, ?)
         `,
-        [data.name, data.description],
+        [name, description],
         function (err) {
           if (err) return reject(err);
           resolve({ id: this.lastID });
@@ -51,7 +51,7 @@ class CategoryEntity {
     });
   }
 
-  static update(id, data) {
+  static update(id, name, description) {
     return new Promise((resolve, reject) => {
       db.run(
         `
@@ -59,7 +59,7 @@ class CategoryEntity {
         SET name = ?, description = ?
         WHERE id = ?
         `,
-        [data.name, data.description, id],
+        [name, description, id],
         function (err) {
           if (err) return reject(err);
           resolve({ changes: this.changes });

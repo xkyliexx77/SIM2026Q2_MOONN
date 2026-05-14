@@ -1,7 +1,7 @@
 const db = require('../database/db');
 
 class FundraisingEntity {
-  static create(data, fundraiserId) {
+  static create(title, description, target_amount, category_id, fundraiserId) {
     return new Promise((resolve, reject) => {
       db.run(
         `
@@ -19,19 +19,10 @@ class FundraisingEntity {
         )
         VALUES (?, ?, ?, 0, ?, ?, 'active', 0, 0)
         `,
-        [
-          data.title,
-          data.description,
-          data.target_amount,
-          data.category_id,
-          fundraiserId
-        ],
+        [title, description, target_amount, category_id, fundraiserId],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            id: this.lastID
-          });
+          resolve({ id: this.lastID });
         }
       );
     });
@@ -104,7 +95,7 @@ class FundraisingEntity {
     });
   }
 
-  static update(id, userId, data) {
+  static update(id, userId, title, description, target_amount, category_id) {
     return new Promise((resolve, reject) => {
       db.run(
         `
@@ -118,20 +109,10 @@ class FundraisingEntity {
         AND fundraiser_id = ?
         AND status != 'completed'
         `,
-        [
-          data.title,
-          data.description,
-          data.target_amount,
-          data.category_id,
-          id,
-          userId
-        ],
+        [title, description, target_amount, category_id, id, userId],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            changes: this.changes
-          });
+          resolve({ changes: this.changes });
         }
       );
     });
@@ -149,10 +130,7 @@ class FundraisingEntity {
         [id, userId],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            changes: this.changes
-          });
+          resolve({ changes: this.changes });
         }
       );
     });
@@ -170,10 +148,7 @@ class FundraisingEntity {
         [id, userId],
         function (err) {
           if (err) return reject(err);
-
-          resolve({
-            changes: this.changes
-          });
+          resolve({ changes: this.changes });
         }
       );
     });

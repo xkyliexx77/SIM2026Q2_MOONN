@@ -1,24 +1,17 @@
 const bcrypt = require('bcrypt');
-
-const UserAccountEntity =
-  require('../entity/UserAccountEntity');
+const UserAccountEntity = require('../entity/UserAccountEntity');
 
 class CreateUserAccountController {
+  static async create(name, email, password, role) {
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  static async create(data) {
-
-    const hashedPassword =
-      await bcrypt.hash(data.password, 10);
-
-    return await UserAccountEntity.create({
-      name: data.name,
-      email: data.email,
-      password: hashedPassword,
-      role: data.role
-    });
-
+    return await UserAccountEntity.create(
+      name,
+      email,
+      hashedPassword,
+      role
+    );
   }
-
 }
 
 module.exports = CreateUserAccountController;
