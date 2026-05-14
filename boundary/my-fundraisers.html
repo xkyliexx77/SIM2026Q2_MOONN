@@ -57,28 +57,30 @@
 
     <!-- TOP -->
     <div class="fundraisers-filter-card">
-
       <h2>Top Performing Campaigns</h2>
 
       <div class="fundraisers-info-grid">
-
-        <div>
-          <span>Most Viewed</span>
-          <strong id="topViews">-</strong>
+        <div onclick="toggleTopDetail('topViewsDetail')" style="cursor:pointer;">
+          <p>Most Viewed ↓ </p>
+          <p id="topViewsDetail" style="display:none; margin-top:10px;">
+            <strong id="topViews">-</strong>
+          </p>
         </div>
 
-        <div>
-          <span>Most Favourited</span>
-          <strong id="topFavourites">-</strong>
+        <div onclick="toggleTopDetail('topFavouritesDetail')" style="cursor:pointer;">
+          <p>Most Favourited ↓ </p>
+          <p id="topFavouritesDetail" style="display:none; margin-top:10px;">
+            <strong id="topFavourites">-</strong>
+          </p>
         </div>
 
-        <div>
-          <span>Highest Raised</span>
-          <strong id="topRaised">-</strong>
+        <div onclick="toggleTopDetail('topRaisedDetail')" style="cursor:pointer;">
+          <p>Highest Raised ↓ </p>
+          <p id="topRaisedDetail" style="display:none; margin-top:10px;">
+            <strong id="topRaised">-</strong>
+          </p>
         </div>
-
       </div>
-
     </div>
 
     <!-- FILTER -->
@@ -201,6 +203,11 @@
 
       document.getElementById('topRaised').textContent =
         `${r.title} ($${r.current_amount})`;
+    }
+
+    function toggleTopDetail(id) {
+      const box = document.getElementById(id);
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
     }
 
     async function loadMyFundraisers() {
