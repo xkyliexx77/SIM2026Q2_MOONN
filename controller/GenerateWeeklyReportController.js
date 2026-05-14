@@ -1,7 +1,7 @@
 const ReportEntity = require('../entity/ReportEntity');
 
 class GenerateWeeklyReportController {
-  static async generate() {
+  static async generateWeeklyReport() {
     return await ReportEntity.weekly();
   }
 }
