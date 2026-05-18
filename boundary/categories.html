@@ -230,6 +230,32 @@
         div.className =
           'fundraisers-item-card';
 
+        // FIXED CATEGORY NAME
+        const categoryName =
+          typeof category.name === 'object'
+            ? (
+                category.name.name ||
+                category.name.category_name ||
+                'No category name'
+              )
+            : (
+                category.name ||
+                category.category_name ||
+                'No category name'
+              );
+
+        // FIXED DESCRIPTION
+        const categoryDescription =
+          typeof category.description === 'object'
+            ? (
+                category.description.description ||
+                'No description'
+              )
+            : (
+                category.description ||
+                'No description'
+              );
+
         div.innerHTML = `
 
           <div class="fundraisers-item-top">
@@ -237,7 +263,7 @@
             <div>
 
               <h3>
-                ${escapeText(category.name)}
+                ${escapeText(categoryName)}
               </h3>
 
               <p>
@@ -246,10 +272,7 @@
               </p>
 
               <p>
-                ${escapeText(
-                  category.description ||
-                  'No description'
-                )}
+                ${escapeText(categoryDescription)}
               </p>
 
             </div>
@@ -269,7 +292,7 @@
               </span>
 
               <strong>
-                ${escapeText(category.name)}
+                ${escapeText(categoryName)}
               </strong>
 
             </div>
@@ -281,10 +304,7 @@
               </span>
 
               <strong>
-                ${escapeText(
-                  category.description ||
-                  'No description'
-                )}
+                ${escapeText(categoryDescription)}
               </strong>
 
             </div>

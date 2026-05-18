@@ -1,8 +1,11 @@
 const db = require('../database/db');
 
 class CategoryEntity {
-  static create(name, description) {
+  static create(category) {
     return new Promise((resolve, reject) => {
+      const name = category.name;
+      const description = category.description || '';
+
       db.run(
         `
         INSERT INTO categories (name, description)
@@ -11,7 +14,12 @@ class CategoryEntity {
         [name, description],
         function (err) {
           if (err) return reject(err);
-          resolve({ id: this.lastID });
+
+          resolve({
+            id: this.lastID,
+            name,
+            description
+          });
         }
       );
     });
@@ -51,8 +59,11 @@ class CategoryEntity {
     });
   }
 
-  static update(id, name, description) {
+  static update(id, category) {
     return new Promise((resolve, reject) => {
+      const name = category.name;
+      const description = category.description || '';
+
       db.run(
         `
         UPDATE categories
@@ -62,7 +73,13 @@ class CategoryEntity {
         [name, description, id],
         function (err) {
           if (err) return reject(err);
-          resolve({ changes: this.changes });
+
+          resolve({
+            changes: this.changes,
+            id,
+            name,
+            description
+          });
         }
       );
     });

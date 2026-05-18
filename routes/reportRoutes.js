@@ -31,7 +31,7 @@ router.get(
     try {
 
       const result =
-        await ReportEntity.summary();
+        await ReportEntity.getSummaryReport();
 
       res.json(result);
 
