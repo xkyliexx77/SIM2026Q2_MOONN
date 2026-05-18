@@ -11,27 +11,40 @@
   <div class="fundraisers-container">
 
     <div class="fundraisers-header">
+
       <div>
         <h1>Browse Fundraising Activities</h1>
         <p>Explore and support fundraising activities.</p>
       </div>
 
-      <a href="dashboard.html" class="donation-back-btn">
+      <a
+        href="dashboard.html"
+        class="donation-back-btn"
+      >
         Back to Dashboard
       </a>
+
     </div>
 
     <div class="fundraisers-filter-card">
+
       <h2>Search & Filter</h2>
 
       <div class="fundraisers-filters">
+
         <div>
           <label>Search</label>
-          <input type="text" id="searchInput" placeholder="Search fundraiser title">
+
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search fundraiser title"
+          >
         </div>
 
         <div>
           <label>Category</label>
+
           <select id="categoryFilter">
             <option value="">All Categories</option>
           </select>
@@ -39,6 +52,7 @@
 
         <div>
           <label>Status</label>
+
           <select id="statusFilter">
             <option value="">All</option>
             <option value="active">Active</option>
@@ -48,6 +62,7 @@
 
         <div>
           <label>Sort</label>
+
           <select id="sortFilter">
             <option value="latest">Latest</option>
             <option value="mostViews">Most Views</option>
@@ -55,115 +70,249 @@
           </select>
         </div>
 
-        <button class="fundraisers-search-btn" onclick="loadFundraisers()">
+        <button
+          class="fundraisers-search-btn"
+          onclick="loadFundraisers()"
+        >
           Search
         </button>
 
-        <button class="fundraisers-clear-btn" onclick="clearFilters()">
+        <button
+          class="fundraisers-clear-btn"
+          onclick="clearFilters()"
+        >
           Clear
         </button>
+
       </div>
+
     </div>
 
     <div>
-      <h2 style="margin-bottom:20px;">All Fundraising Activities</h2>
-      <div id="fundraiser-list" class="fundraisers-list"></div>
+
+      <h2 style="margin-bottom:20px;">
+        All Fundraising Activities
+      </h2>
+
+      <div
+        id="fundraiser-list"
+        class="fundraisers-list"
+      ></div>
+
     </div>
 
   </div>
 
   <script>
-    const list = document.getElementById('fundraiser-list');
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
+
+    const list =
+      document.getElementById(
+        'fundraiser-list'
+      );
+
+    const token =
+      localStorage.getItem('token');
+
+    const user =
+      JSON.parse(
+        localStorage.getItem('user')
+      );
 
     if (!user || !token) {
-      window.location.href = 'login.html';
+
+      window.location.href =
+        'login.html';
+
     }
 
-    async function loadCategories() {
-      const res = await fetch('/api/categories');
-      const data = await res.json();
 
-      const categoryFilter = document.getElementById('categoryFilter');
-      categoryFilter.innerHTML = `<option value="">All Categories</option>`;
+
+    async function loadCategories() {
+
+      const res =
+        await fetch('/api/categories');
+
+      const data =
+        await res.json();
+
+      const categoryFilter =
+        document.getElementById(
+          'categoryFilter'
+        );
+
+      categoryFilter.innerHTML =
+        `<option value="">All Categories</option>`;
 
       data.forEach(category => {
+
         categoryFilter.innerHTML += `
           <option value="${category.id}">
             ${category.name}
           </option>
         `;
+
       });
+
     }
+
+
 
     function clearFilters() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('categoryFilter').value = '';
-      document.getElementById('statusFilter').value = '';
-      document.getElementById('sortFilter').value = 'latest';
+
+      document.getElementById(
+        'searchInput'
+      ).value = '';
+
+      document.getElementById(
+        'categoryFilter'
+      ).value = '';
+
+      document.getElementById(
+        'statusFilter'
+      ).value = '';
+
+      document.getElementById(
+        'sortFilter'
+      ).value = 'latest';
 
       loadFundraisers();
+
     }
 
-    async function loadFundraisers() {
-      const res = await fetch('/api/fundraisers');
-      let data = await res.json();
 
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const category = document.getElementById('categoryFilter').value;
-      const status = document.getElementById('statusFilter').value;
-      const sort = document.getElementById('sortFilter').value;
+
+    async function loadFundraisers() {
+
+      const search =
+        document.getElementById(
+          'searchInput'
+        ).value.trim();
+
+      const category =
+        document.getElementById(
+          'categoryFilter'
+        ).value;
+
+      const status =
+        document.getElementById(
+          'statusFilter'
+        ).value;
+
+      const sort =
+        document.getElementById(
+          'sortFilter'
+        ).value;
+
+      const query =
+        new URLSearchParams();
 
       if (search) {
-        data = data.filter(f =>
-          f.title.toLowerCase().includes(search)
+
+        query.append(
+          'search',
+          search
         );
+
       }
 
       if (category) {
-        data = data.filter(f =>
-          String(f.category_id) === category
+
+        query.append(
+          'category',
+          category
         );
+
+      }
+
+      const res =
+        await fetch(
+          `/api/fundraisers/search?${query.toString()}`
+        );
+
+      let data =
+        await res.json();
+
+      if (!Array.isArray(data)) {
+        data = [];
       }
 
       if (status) {
+
         data = data.filter(f =>
-          f.status === status
+          String(f.status || '')
+            .toLowerCase() ===
+          status.toLowerCase()
         );
+
       }
 
       if (sort === 'mostViews') {
-        data.sort((a, b) => b.views - a.views);
-      } else if (sort === 'mostRaised') {
-        data.sort((a, b) => b.current_amount - a.current_amount);
-      } else {
-        data.sort((a, b) => b.id - a.id);
+
+        data.sort((a, b) =>
+          Number(b.views || 0) -
+          Number(a.views || 0)
+        );
+
+      }
+
+      else if (sort === 'mostRaised') {
+
+        data.sort((a, b) =>
+          Number(b.current_amount || 0) -
+          Number(a.current_amount || 0)
+        );
+
+      }
+
+      else {
+
+        data.sort((a, b) =>
+          Number(b.id || 0) -
+          Number(a.id || 0)
+        );
+
       }
 
       list.innerHTML = '';
 
       if (!data.length) {
+
         list.innerHTML = `
           <div class="fundraisers-empty-card">
             <p>No fundraisers found.</p>
           </div>
         `;
+
         return;
+
       }
 
       data.forEach(item => {
-        const div = createFundraiserCard(item);
+
+        const div =
+          createFundraiserCard(item);
+
         list.appendChild(div);
+
       });
+
     }
 
+
+
     function createFundraiserCard(item) {
-      const div = document.createElement('div');
-      div.className = 'fundraisers-item-card';
+
+      const div =
+        document.createElement('div');
+
+      div.className =
+        'fundraisers-item-card';
 
       div.innerHTML = `
-        <h3>${item.title}</h3>
+
+        <h3>
+          ${item.title}
+        </h3>
 
         <p>
           ${(item.description || '').substring(0, 100)}...
@@ -187,6 +336,7 @@
         </p>
 
         <div class="fundraisers-actions">
+
           <button
             class="fundraisers-view-btn"
             onclick="window.location.href='fundraiser-detail.html?id=${item.id}'"
@@ -194,54 +344,91 @@
             View Campaign Details
           </button>
 
-          ${item.status !== 'completed' ? `
+          ${String(item.status).toLowerCase() !== 'completed' ? `
+
             <button
               class="fundraisers-fav-btn"
               onclick="favourite(${item.id})"
             >
               ♡ Favourite
             </button>
+
           ` : ''}
+
         </div>
+
       `;
 
       return div;
+
     }
 
-    async function favourite(id) {
-      const res = await fetch('/api/favourites', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          fundraiser_id: id
-        })
-      });
 
-      const data = await res.json();
+
+    async function favourite(id) {
+
+      const res =
+        await fetch('/api/favourites', {
+
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+
+          body: JSON.stringify({
+            fundraiser_id: id
+          })
+
+        });
+
+      const data =
+        await res.json();
 
       if (!res.ok || data.error) {
-        alert(data.error || 'Failed to favourite.');
+
+        alert(
+          data.error ||
+          'Failed to favourite.'
+        );
+
         return;
+
       }
 
       if (data.alreadyExists) {
-        alert('This fundraiser is already in your favourites.');
-      } else {
-        alert('Fundraiser added to favourites.');
+
+        alert(
+          'This fundraiser is already in your favourites.'
+        );
+
+      }
+
+      else {
+
+        alert(
+          'Fundraiser added to favourites.'
+        );
+
       }
 
       loadFundraisers();
+
     }
 
+
+
     async function init() {
+
       await loadCategories();
+
       await loadFundraisers();
+
     }
 
     init();
+
   </script>
 
 </body>

@@ -1,6 +1,7 @@
 const db = require('../database/db');
 
 class FundraisingEntity {
+
   static create(title, description, target_amount, category_id, fundraiserId) {
     return new Promise((resolve, reject) => {
       db.run(
@@ -22,7 +23,10 @@ class FundraisingEntity {
         [title, description, target_amount, category_id, fundraiserId],
         function (err) {
           if (err) return reject(err);
-          resolve({ id: this.lastID });
+
+          resolve({
+            id: this.lastID
+          });
         }
       );
     });
@@ -107,30 +111,53 @@ class FundraisingEntity {
           category_id = ?
         WHERE id = ?
         AND fundraiser_id = ?
-        AND status != 'completed'
+        AND LOWER(status) != 'completed'
         `,
         [title, description, target_amount, category_id, id, userId],
         function (err) {
           if (err) return reject(err);
-          resolve({ changes: this.changes });
+
+          if (this.changes === 0) {
+            return reject(
+              new Error(
+                'Unable to update fundraiser. It may be completed or does not belong to you.'
+              )
+            );
+          }
+
+          resolve({
+            message: 'Fundraiser updated successfully.',
+            changes: this.changes
+          });
         }
       );
     });
   }
 
-  static delete(id, userId) {
+  static delete(id) {
     return new Promise((resolve, reject) => {
       db.run(
         `
         DELETE FROM fundraisers
         WHERE id = ?
-        AND fundraiser_id = ?
-        AND status != 'completed'
+        AND LOWER(status) != 'completed'
         `,
-        [id, userId],
+        [id],
         function (err) {
           if (err) return reject(err);
-          resolve({ changes: this.changes });
+
+          if (this.changes === 0) {
+            return reject(
+              new Error(
+                'Unable to delete fundraiser. It may already be completed.'
+              )
+            );
+          }
+
+          resolve({
+            message: 'Fundraiser deleted successfully.',
+            changes: this.changes
+          });
         }
       );
     });
@@ -148,17 +175,25 @@ class FundraisingEntity {
         [id, userId],
         function (err) {
           if (err) return reject(err);
-          resolve({ changes: this.changes });
+
+          if (this.changes === 0) {
+            return reject(
+              new Error(
+                'Unable to complete fundraiser. It may not belong to you.'
+              )
+            );
+          }
+
+          resolve({
+            message: 'Fundraiser completed successfully.',
+            changes: this.changes
+          });
         }
       );
     });
   }
 
-  static searchFundraisingActivities(
-    searchText,
-    categoryId
-  ) {
-
+  static searchFundraisingActivities(searchText, categoryId) {
     return new Promise((resolve, reject) => {
 
       let sql = `
@@ -169,41 +204,23 @@ class FundraisingEntity {
           COUNT(DISTINCT d.id) AS donation_count,
           COUNT(DISTINCT fav.id) AS favourite_count
         FROM fundraisers f
-        LEFT JOIN categories c
-          ON f.category_id = c.id
-        LEFT JOIN users u
-          ON f.fundraiser_id = u.id
-        LEFT JOIN donations d
-          ON d.fundraiser_id = f.id
-        LEFT JOIN favourites fav
-          ON fav.fundraiser_id = f.id
-        WHERE f.status = 'active'
+        LEFT JOIN categories c ON f.category_id = c.id
+        LEFT JOIN users u ON f.fundraiser_id = u.id
+        LEFT JOIN donations d ON d.fundraiser_id = f.id
+        LEFT JOIN favourites fav ON fav.fundraiser_id = f.id
+        WHERE LOWER(f.status) != 'completed'
       `;
 
       const params = [];
 
       if (searchText) {
-
-        sql += `
-          AND f.title LIKE ?
-        `;
-
-        params.push(
-          `%${searchText}%`
-        );
-
+        sql += ` AND f.title LIKE ? `;
+        params.push(`%${searchText}%`);
       }
 
       if (categoryId) {
-
-        sql += `
-          AND f.category_id = ?
-        `;
-
-        params.push(
-          categoryId
-        );
-
+        sql += ` AND f.category_id = ? `;
+        params.push(categoryId);
       }
 
       sql += `
@@ -211,22 +228,12 @@ class FundraisingEntity {
         ORDER BY f.id DESC
       `;
 
-      db.all(
-        sql,
-        params,
-        (err, rows) => {
+      db.all(sql, params, (err, rows) => {
+        if (err) return reject(err);
 
-          if (err) {
-            return reject(err);
-          }
-
-          resolve(rows);
-
-        }
-      );
-
+        resolve(rows);
+      });
     });
-
   }
 }
 

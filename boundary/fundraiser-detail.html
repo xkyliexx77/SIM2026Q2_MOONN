@@ -15,7 +15,7 @@
         <p>View full campaign details and performance.</p>
       </div>
 
-      <a href="my-fundraisers.html" class="create-fundraiser-back-btn">Back</a>
+      <a href="dashboard.html" class="create-fundraiser-back-btn">Back</a>
     </div>
 
     <div id="detailBox" class="fundraisers-item-card"></div>
@@ -40,39 +40,33 @@
   </div>
 
   <script>
-
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
 
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
 
-    if (!user) {
+    if (!user || !token) {
       window.location.href = 'login.html';
     }
 
-    const isDonee = user && user.role === 'donee';
+    const userRole = String(user.role || '').toLowerCase();
+    const isDonee = userRole.includes('donee');
 
     function calcProgress(raised, target) {
-
       const r = Number(raised || 0);
       const t = Number(target || 0);
 
-      if (t === 0) {
-        return 0;
-      }
+      if (t === 0) return 0;
 
       const percentage = (r / t) * 100;
 
-      if (percentage > 100) {
-        return 100;
-      }
+      if (percentage > 100) return 100;
 
       return percentage.toFixed(2);
     }
 
     function showNotFound(message) {
-
       document.getElementById('detailBox').innerHTML = `
         <div class="fundraisers-empty-card">
           <p>${message}</p>
@@ -81,14 +75,12 @@
     }
 
     async function loadDetails() {
-
       if (!id || id === 'undefined' || id === 'null') {
         showNotFound('Fundraiser ID is missing. Please return and try again.');
         return;
       }
 
       try {
-
         const res = await fetch(`/api/fundraisers/${id}`);
         const item = await res.json();
 
@@ -99,12 +91,10 @@
 
         const progress = calcProgress(item.current_amount, item.target_amount);
         const status = item.status || 'active';
-        const isCompleted = status.toLowerCase() === 'completed';
+        const isCompleted = String(status).toLowerCase() === 'completed';
 
         document.getElementById('detailBox').innerHTML = `
-
           <div class="fundraisers-item-top">
-
             <div>
               <h3>${item.title || 'No Title'}</h3>
               <p>${item.description || 'No description provided.'}</p>
@@ -113,13 +103,11 @@
             <span class="fundraisers-category-badge">
               ${item.category_name || 'No Category'}
             </span>
-
           </div>
 
           <hr>
 
           <div class="fundraisers-info-grid">
-
             <div>
               <span>Target</span>
               <strong>$${item.target_amount || 0}</strong>
@@ -136,7 +124,6 @@
             </div>
 
             ${!isDonee ? `
-
               <div>
                 <span>Views</span>
                 <strong>${item.views || 0}</strong>
@@ -151,9 +138,7 @@
                 <span>Donations</span>
                 <strong>${item.donation_count || 0}</strong>
               </div>
-
             ` : ''}
-
           </div>
 
           <p class="fundraisers-created-by">
@@ -162,11 +147,8 @@
           </p>
 
           ${isDonee ? `
-
             <div class="fundraisers-actions" style="margin-top:20px;">
-
               ${!isCompleted ? `
-
                 <button
                   class="fundraisers-donate-btn"
                   onclick="openDonateModal(${item.id})">
@@ -178,24 +160,18 @@
                   onclick="favourite(${item.id})">
                   ♡ Favourite
                 </button>
-
               ` : `
-
                 <button
                   class="fundraisers-complete-btn"
                   disabled
                   style="opacity:0.7;cursor:not-allowed;">
                   Campaign Completed
                 </button>
-
               `}
-
             </div>
-
           ` : ''}
 
           <div style="margin-top:20px;">
-
             <p>
               <strong>Progress:</strong>
               ${progress}%
@@ -207,7 +183,6 @@
               border-radius:20px;
               overflow:hidden;
             ">
-
               <div style="
                 width:${progress}%;
                 background:linear-gradient(90deg,#2ecc71,#27ae60);
@@ -218,21 +193,16 @@
               ">
                 ${progress}%
               </div>
-
             </div>
-
           </div>
         `;
 
       } catch (error) {
-
         showNotFound('Unable to load fundraiser details.');
-
       }
     }
 
     function openDonateModal(id) {
-
       if (!isDonee) {
         alert('Only donees can donate.');
         return;
@@ -240,19 +210,15 @@
 
       document.getElementById('donate-fundraiser-id').value = id;
       document.getElementById('donate-amount').value = '';
-
       document.getElementById('donate-modal-overlay').style.display = 'flex';
     }
 
     function closeDonateModal() {
-
       document.getElementById('donate-modal-overlay').style.display = 'none';
     }
 
     async function submitDonation() {
-
       const fundraiserId = document.getElementById('donate-fundraiser-id').value;
-
       const amount = document.getElementById('donate-amount').value;
 
       if (!isDonee) {
@@ -266,7 +232,6 @@
       }
 
       try {
-
         const res = await fetch('/api/donations', {
           method: 'POST',
           headers: {
@@ -287,27 +252,21 @@
         }
 
         alert('You have donated successfully.');
-
         closeDonateModal();
-
         loadDetails();
 
       } catch (error) {
-
         alert('Something went wrong.');
-
       }
     }
 
     async function favourite(id) {
-
       if (!isDonee) {
         alert('Only donees can favourite campaigns.');
         return;
       }
 
       try {
-
         const res = await fetch('/api/favourites', {
           method: 'POST',
           headers: {
@@ -321,31 +280,25 @@
 
         const data = await res.json();
 
-        if (res.ok) {
-
-          if (data.alreadyExists) {
-            alert('This fundraiser is already in your favourites.');
-          } else {
-            alert('Fundraiser added to favourites.');
-          }
-
-          loadDetails();
-
-        } else {
-
+        if (!res.ok || data.error) {
           alert(data.error || 'Unable to add favourite.');
-
+          return;
         }
 
+        if (data.alreadyExists) {
+          alert('This fundraiser is already in your favourites.');
+        } else {
+          alert('Fundraiser added to favourites.');
+        }
+
+        loadDetails();
+
       } catch (error) {
-
         alert('Something went wrong.');
-
       }
     }
 
     loadDetails();
-
   </script>
 </body>
 </html>

@@ -56,89 +56,183 @@
   </div>
 
   <script>
-    const list = document.getElementById('donation-list');
 
-    const user = JSON.parse(localStorage.getItem('user'));
-    const token = localStorage.getItem('token');
+    const list =
+      document.getElementById('donation-list');
+
+    const user =
+      JSON.parse(localStorage.getItem('user'));
+
+    const token =
+      localStorage.getItem('token');
 
     if (!user || !token) {
+
       window.location.href = 'login.html';
+
     }
 
-    if (user && user.role !== 'donee') {
-      alert('Only donees can access donation history.');
-      window.location.href = 'dashboard.html';
+    /*
+    |--------------------------------------------------------------------------
+    | FIXED ROLE CHECK
+    |--------------------------------------------------------------------------
+    */
+
+    const userRole =
+      String(user.role || '')
+        .toLowerCase()
+        .trim();
+
+    if (!userRole.includes('donee')) {
+
+      alert(
+        'Only doneees can access donation history.'
+      );
+
+      window.location.href =
+        'dashboard.html';
+
     }
+
+
 
     async function loadCategories() {
-      const res = await fetch('/api/categories');
-      const categories = await res.json();
 
-      const select = document.getElementById('category-filter');
+      const res =
+        await fetch('/api/categories');
+
+      const categories =
+        await res.json();
+
+      const select =
+        document.getElementById(
+          'category-filter'
+        );
 
       select.innerHTML = `
-        <option value="">All Categories</option>
+        <option value="">
+          All Categories
+        </option>
       `;
 
       categories.forEach(c => {
-        const option = document.createElement('option');
-        option.value = c.id;
-        option.textContent = c.name;
+
+        const option =
+          document.createElement('option');
+
+        option.value =
+          c.id;
+
+        option.textContent =
+          c.name;
+
         select.appendChild(option);
+
       });
+
     }
+
+
 
     function clearFilters() {
-      document.getElementById('category-filter').value = '';
-      document.getElementById('date-from').value = '';
-      document.getElementById('date-to').value = '';
+
+      document.getElementById(
+        'category-filter'
+      ).value = '';
+
+      document.getElementById(
+        'date-from'
+      ).value = '';
+
+      document.getElementById(
+        'date-to'
+      ).value = '';
 
       loadDonations();
+
     }
+
+
 
     async function loadDonations() {
 
       const category =
-        document.getElementById('category-filter').value;
+        document.getElementById(
+          'category-filter'
+        ).value;
 
       const dateFrom =
-        document.getElementById('date-from').value;
+        document.getElementById(
+          'date-from'
+        ).value;
 
       const dateTo =
-        document.getElementById('date-to').value;
+        document.getElementById(
+          'date-to'
+        ).value;
 
-      const query = new URLSearchParams();
+      const query =
+        new URLSearchParams();
 
-      if (category) query.append('category', category);
-      if (dateFrom) query.append('dateFrom', dateFrom);
-      if (dateTo) query.append('dateTo', dateTo);
+      if (category) {
+        query.append(
+          'category',
+          category
+        );
+      }
 
-      const res = await fetch(
-        `/api/donations/mine?${query.toString()}`,
-        {
-          headers: {
-            'Authorization': 'Bearer ' + token
+      if (dateFrom) {
+        query.append(
+          'dateFrom',
+          dateFrom
+        );
+      }
+
+      if (dateTo) {
+        query.append(
+          'dateTo',
+          dateTo
+        );
+      }
+
+      const res =
+        await fetch(
+          `/api/donations/mine?${query.toString()}`,
+          {
+            headers: {
+              'Authorization':
+                'Bearer ' + token
+            }
           }
-        }
-      );
+        );
 
-      const data = await res.json();
+      const data =
+        await res.json();
 
       list.innerHTML = '';
 
-      if (!Array.isArray(data) || !data.length) {
+      if (
+        !Array.isArray(data) ||
+        !data.length
+      ) {
 
         list.innerHTML = `
           <div class="donation-empty-card">
-            <h3>No donations found</h3>
+
+            <h3>
+              No donations found
+            </h3>
+
             <p>
               You have not made any donations
               for the selected filter.
             </p>
+
           </div>
         `;
 
         return;
+
       }
 
       data.forEach(item => {
@@ -146,20 +240,34 @@
         const progress =
           item.target_amount > 0
             ? Math.min(
-                (item.current_amount / item.target_amount) * 100,
+                (
+                  item.current_amount /
+                  item.target_amount
+                ) * 100,
                 100
               ).toFixed(1)
             : 0;
 
-        const div = document.createElement('div');
-        div.className = 'donation-item-card';
+        const div =
+          document.createElement('div');
+
+        div.className =
+          'donation-item-card';
 
         div.innerHTML = `
+
           <div class="donation-item-top">
 
             <div>
-              <h3>${item.title}</h3>
-              <p>${item.category_name || 'No Category'}</p>
+
+              <h3>
+                ${item.title}
+              </h3>
+
+              <p>
+                ${item.category_name || 'No Category'}
+              </p>
+
             </div>
 
             <span class="donation-amount">
@@ -169,17 +277,34 @@
           </div>
 
           <div class="donation-info-row">
-            <span>Donation Date</span>
-            <strong>${item.donated_at}</strong>
+
+            <span>
+              Donation Date
+            </span>
+
+            <strong>
+              ${item.donated_at}
+            </strong>
+
           </div>
 
           <div class="donation-info-row">
-            <span>Campaign Status</span>
-            <strong>${item.status}</strong>
+
+            <span>
+              Campaign Status
+            </span>
+
+            <strong>
+              ${item.status}
+            </strong>
+
           </div>
 
           <div class="donation-info-row">
-            <span>Campaign Progress</span>
+
+            <span>
+              Campaign Progress
+            </span>
 
             <strong>
               $${item.current_amount}
@@ -187,26 +312,39 @@
               $${item.target_amount}
               (${progress}%)
             </strong>
+
           </div>
 
           <button
             class="donation-browse-btn"
-            onclick="window.location.href='fundraiser-detail.html?id=${item.fundraiser_id}'"
+            onclick="
+              window.location.href=
+              'fundraiser-detail.html?id=${item.fundraiser_id}'
+            "
           >
             View Campaign Details
           </button>
+
         `;
 
         list.appendChild(div);
+
       });
+
     }
 
+
+
     async function init() {
+
       await loadCategories();
+
       await loadDonations();
+
     }
 
     init();
+
   </script>
 </body>
 </html>
