@@ -1,16 +1,33 @@
-const FundraisingActivityEntity = require('../entity/FundraisingEntity');
+const FundraisingActivityEntity =
+  require('../entity/FundraisingEntity');
 
 class UpdateFundraisingActivityController {
-  static async update(id, fundraiserId, title, description, target_amount, category_id) {
+
+  static async update(
+    fundraiserId,
+    userId,
+    fundraiserData
+  ) {
+
+    const {
+      title,
+      description,
+      target_amount,
+      category_id
+    } = fundraiserData;
+
     return await FundraisingActivityEntity.update(
-      id,
       fundraiserId,
+      userId,
       title,
       description,
       target_amount,
       category_id
     );
+
   }
+
 }
 
-module.exports = UpdateFundraisingActivityController;
+module.exports =
+  UpdateFundraisingActivityController;

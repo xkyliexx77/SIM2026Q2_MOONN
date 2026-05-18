@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>My Fundraisers</title>
   <link rel="stylesheet" href="css/styles.css">
-
 </head>
 
 <body class="fundraisers-body">
@@ -24,7 +23,6 @@
 
     </div>
 
-    <!-- ANALYTICS -->
     <div class="fundraisers-filter-card">
 
       <h2>My Analytics Summary</h2>
@@ -55,7 +53,6 @@
 
     </div>
 
-    <!-- TOP -->
     <div class="fundraisers-filter-card">
       <h2>Top Performing Campaigns</h2>
 
@@ -83,7 +80,6 @@
       </div>
     </div>
 
-    <!-- FILTER -->
     <div class="fundraisers-filter-card">
 
       <h2>Search & Filter</h2>
@@ -92,17 +88,11 @@
 
         <div>
           <label>Search</label>
-
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Search title"
-          >
+          <input type="text" id="searchInput" placeholder="Search title">
         </div>
 
         <div>
           <label>Status</label>
-
           <select id="statusFilter">
             <option value="">All</option>
             <option value="active">Active</option>
@@ -112,7 +102,6 @@
 
         <div>
           <label>Sort</label>
-
           <select id="sortFilter">
             <option value="latest">Latest</option>
             <option value="mostViews">Most Views</option>
@@ -123,18 +112,11 @@
 
         <div class="search-buttons">
 
-          <button
-            class="fundraiser-submit-btn"
-            onclick="loadMyFundraisers()"
-          >
+          <button class="fundraiser-submit-btn" onclick="loadMyFundraisers()">
             Search
           </button>
 
-          <button
-            class="clear-btn"
-            type="button"
-            onclick="clearSearch()"
-          >
+          <button class="clear-btn" type="button" onclick="clearSearch()">
             Clear
           </button>
 
@@ -157,62 +139,64 @@
     }
 
     function clearSearch() {
-
       document.getElementById('searchInput').value = '';
-
       document.getElementById('statusFilter').value = '';
-
       document.getElementById('sortFilter').value = 'latest';
 
       loadMyFundraisers();
     }
 
     function updateSummary(data) {
-
       document.getElementById('totalCampaigns').textContent =
         data.length;
 
       document.getElementById('totalViews').textContent =
-        data.reduce((s, i) => s + (i.views || 0), 0);
+        data.reduce((s, i) => s + Number(i.views || 0), 0);
 
       document.getElementById('totalFavourites').textContent =
-        data.reduce((s, i) => s + (i.favourite_count || 0), 0);
+        data.reduce((s, i) => s + Number(i.favourite_count || 0), 0);
 
       document.getElementById('totalRaised').textContent =
-        '$' + data.reduce((s, i) => s + (i.current_amount || 0), 0);
+        '$' + data.reduce((s, i) => s + Number(i.current_amount || 0), 0);
     }
 
     function updateTop(data) {
+      if (!data.length) {
+        document.getElementById('topViews').textContent = '-';
+        document.getElementById('topFavourites').textContent = '-';
+        document.getElementById('topRaised').textContent = '-';
+        return;
+      }
 
-      if (!data.length) return;
-
-      const v =
-        [...data].sort((a,b)=>b.views-a.views)[0];
-
-      const f =
-        [...data].sort((a,b)=>b.favourite_count-a.favourite_count)[0];
-
-      const r =
-        [...data].sort((a,b)=>b.current_amount-a.current_amount)[0];
+      const v = [...data].sort((a, b) => Number(b.views || 0) - Number(a.views || 0))[0];
+      const f = [...data].sort((a, b) => Number(b.favourite_count || 0) - Number(a.favourite_count || 0))[0];
+      const r = [...data].sort((a, b) => Number(b.current_amount || 0) - Number(a.current_amount || 0))[0];
 
       document.getElementById('topViews').textContent =
-        `${v.title} (${v.views})`;
+        `${v.title} (${v.views || 0})`;
 
       document.getElementById('topFavourites').textContent =
-        `${f.title} (${f.favourite_count})`;
+        `${f.title} (${f.favourite_count || 0})`;
 
       document.getElementById('topRaised').textContent =
-        `${r.title} ($${r.current_amount})`;
+        `${r.title} ($${r.current_amount || 0})`;
     }
 
     function toggleTopDetail(id) {
       const box = document.getElementById(id);
-      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      box.style.display =
+        box.style.display === 'none'
+          ? 'block'
+          : 'none';
     }
 
     async function loadMyFundraisers() {
-
       const token = getToken();
+
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
 
       const res = await fetch('/api/fundraisers/mine/list', {
         headers: {
@@ -222,62 +206,58 @@
 
       let data = await res.json();
 
+      if (!res.ok || data.error) {
+        alert(data.error || 'Unable to load fundraisers.');
+        return;
+      }
+
       updateSummary(data);
       updateTop(data);
 
-      const search =
-        document.getElementById('searchInput')
-        .value;
-
-      const status =
-        document.getElementById('statusFilter')
-        .value;
-
-      const sort =
-        document.getElementById('sortFilter')
-        .value;
+      const search = document.getElementById('searchInput').value.trim();
+      const status = document.getElementById('statusFilter').value;
+      const sort = document.getElementById('sortFilter').value;
 
       if (search) {
         data = data.filter(f =>
-          f.title.toLowerCase().includes(search.toLowerCase())
+          String(f.title || '').toLowerCase().includes(search.toLowerCase())
         );
       }
 
       if (status) {
-        data = data.filter(f => f.status === status);
+        data = data.filter(f =>
+          String(f.status || '').toLowerCase() === status
+        );
       }
 
       if (sort === 'mostViews') {
-        data.sort((a,b)=>b.views-a.views);
+        data.sort((a, b) => Number(b.views || 0) - Number(a.views || 0));
       }
 
       else if (sort === 'mostFavourites') {
-        data.sort((a,b)=>b.favourite_count-a.favourite_count);
+        data.sort((a, b) => Number(b.favourite_count || 0) - Number(a.favourite_count || 0));
       }
 
       else if (sort === 'mostRaised') {
-        data.sort((a,b)=>b.current_amount-a.current_amount);
+        data.sort((a, b) => Number(b.current_amount || 0) - Number(a.current_amount || 0));
       }
 
       else {
-        data.sort((a,b)=>b.id-a.id);
+        data.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
       }
 
       list.innerHTML = '';
 
       if (!data.length) {
-
         list.innerHTML = `
           <div class="fundraisers-empty-card">
             <p>No fundraisers found.</p>
           </div>
         `;
-
         return;
       }
 
       data.forEach(item => {
-
         const div = document.createElement('div');
 
         div.className = 'fundraisers-item-card';
@@ -291,7 +271,7 @@
           <h3>${item.title}</h3>
 
           <p>
-            ${(item.description || '').substring(0,80)}...
+            ${(item.description || '').substring(0, 80)}...
           </p>
 
           <p>
@@ -318,7 +298,7 @@
               View Details
             </button>
 
-            ${item.status !== 'completed' ? `
+            ${String(item.status).toLowerCase() !== 'completed' ? `
               <button
                 class="fundraisers-edit-btn"
                 onclick="event.stopPropagation(); window.location.href='edit-fundraiser.html?id=${item.id}'"
@@ -349,41 +329,53 @@
     }
 
     async function deleteFundraiser(id) {
-
       const token = getToken();
 
       if (!confirm('Are you sure you want to delete this fundraiser?')) {
         return;
       }
 
-      await fetch(`/api/fundraisers/${id}`, {
+      const res = await fetch(`/api/fundraisers/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': 'Bearer ' + token
         }
       });
 
-      alert('Fundraiser deleted successfully.');
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        alert(data.error || 'Unable to delete fundraiser.');
+        return;
+      }
+
+      alert(data.message || 'Fundraiser deleted successfully.');
 
       loadMyFundraisers();
     }
 
     async function completeFundraiser(id) {
-
       const token = getToken();
 
       if (!confirm('Mark this fundraiser as completed?')) {
         return;
       }
 
-      await fetch(`/api/fundraisers/${id}/complete`, {
+      const res = await fetch(`/api/fundraisers/${id}/complete`, {
         method: 'PATCH',
         headers: {
           'Authorization': 'Bearer ' + token
         }
       });
 
-      alert('Fundraiser completed successfully.');
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        alert(data.error || 'Unable to complete fundraiser.');
+        return;
+      }
+
+      alert(data.message || 'Fundraiser completed successfully.');
 
       loadMyFundraisers();
     }
