@@ -1,14 +1,8 @@
 const FavouriteEntity = require('../entity/FavouriteEntity');
 
 class RemoveFavouriteController {
-  static async removeFavourite(
-    doneeId,
-    fundraiserId
-  ) {
-    return await FavouriteEntity.removeFavourite(
-      doneeId,
-      fundraiserId
-    );
+  static async remove(doneeId, fundraiserId) {
+    return await FavouriteEntity.remove(doneeId, fundraiserId);
   }
 }
 
