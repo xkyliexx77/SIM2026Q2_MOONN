@@ -34,10 +34,9 @@ class DonationEntity {
     });
   }
 
-  static view(userId) {
+  static view(userId, filters = {}) {
     return new Promise((resolve, reject) => {
-      db.all(
-        `
+      let sql = `
         SELECT
           d.id,
           d.amount,
@@ -53,21 +52,37 @@ class DonationEntity {
         LEFT JOIN fundraisers f ON d.fundraiser_id = f.id
         LEFT JOIN categories c ON f.category_id = c.id
         WHERE d.user_id = ?
-        ORDER BY d.id DESC
-        `,
-        [userId],
-        (err, rows) => {
-          if (err) return reject(err);
-          resolve(rows);
-        }
-      );
+      `;
+
+      const params = [userId];
+
+      if (filters.category) {
+        sql += ` AND f.category_id = ?`;
+        params.push(filters.category);
+      }
+
+      if (filters.dateFrom) {
+        sql += ` AND DATE(d.donated_at) >= DATE(?)`;
+        params.push(filters.dateFrom);
+      }
+
+      if (filters.dateTo) {
+        sql += ` AND DATE(d.donated_at) <= DATE(?)`;
+        params.push(filters.dateTo);
+      }
+
+      sql += ` ORDER BY d.id DESC`;
+
+      db.all(sql, params, (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
     });
   }
 
-  static viewCompleted(userId) {
+  static viewCompleted(userId, filters = {}) {
     return new Promise((resolve, reject) => {
-      db.all(
-        `
+      let sql = `
         SELECT
           d.id,
           d.amount,
@@ -83,15 +98,32 @@ class DonationEntity {
         LEFT JOIN fundraisers f ON d.fundraiser_id = f.id
         LEFT JOIN categories c ON f.category_id = c.id
         WHERE d.user_id = ?
-        AND f.status = 'completed'
-        ORDER BY d.id DESC
-        `,
-        [userId],
-        (err, rows) => {
-          if (err) return reject(err);
-          resolve(rows);
-        }
-      );
+        AND LOWER(f.status) = 'completed'
+      `;
+
+      const params = [userId];
+
+      if (filters.category) {
+        sql += ` AND f.category_id = ?`;
+        params.push(filters.category);
+      }
+
+      if (filters.dateFrom) {
+        sql += ` AND DATE(d.donated_at) >= DATE(?)`;
+        params.push(filters.dateFrom);
+      }
+
+      if (filters.dateTo) {
+        sql += ` AND DATE(d.donated_at) <= DATE(?)`;
+        params.push(filters.dateTo);
+      }
+
+      sql += ` ORDER BY d.id DESC`;
+
+      db.all(sql, params, (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
     });
   }
 }

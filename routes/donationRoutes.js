@@ -28,7 +28,13 @@ router.post('/', authMiddleware, roleMiddleware(['donee']), async (req, res) => 
 
 router.get('/mine', authMiddleware, roleMiddleware(['donee']), async (req, res) => {
   try {
-    const result = await ViewDonationHistoryController.view(req.user.id);
+    const filters = {
+      category: req.query.category || '',
+      dateFrom: req.query.dateFrom || '',
+      dateTo: req.query.dateTo || ''
+    };
+
+    const result = await ViewDonationHistoryController.view(req.user.id, filters);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Unable to load donation history' });
@@ -37,7 +43,13 @@ router.get('/mine', authMiddleware, roleMiddleware(['donee']), async (req, res) 
 
 router.get('/completed-history', authMiddleware, roleMiddleware(['donee']), async (req, res) => {
   try {
-    const result = await ViewCompletedDonationHistoryController.view(req.user.id);
+    const filters = {
+      category: req.query.category || '',
+      dateFrom: req.query.dateFrom || '',
+      dateTo: req.query.dateTo || ''
+    };
+
+    const result = await ViewCompletedDonationHistoryController.view(req.user.id, filters);
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: 'Unable to load completed donation history' });
